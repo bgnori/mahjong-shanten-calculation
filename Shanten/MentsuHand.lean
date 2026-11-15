@@ -331,6 +331,21 @@ lemma taatsuCompletionTiles_count_le_of_sublist
       have htail := ih tile
       omega
 
+lemma taatsuCompletionTiles_of_perm
+    {taatsus taatsus' : List Taatsu}
+    (hperm : List.Perm taatsus taatsus') :
+    taatsuCompletionTiles taatsus =
+      taatsuCompletionTiles taatsus' := by
+  induction hperm with
+  | nil =>
+      rfl
+  | cons taatsu hperm ih =>
+      simp [taatsuCompletionTiles, ih]
+  | swap taatsu taatsu' taatsus =>
+      simp [taatsuCompletionTiles, add_comm, add_left_comm, add_assoc]
+  | trans hperm hperm' ih ih' =>
+      exact ih.trans ih'
+
 lemma pairTiles_card (tile : Tile) :
     (pairTiles tile).card = 2 := by
   simp [pairTiles]
