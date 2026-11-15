@@ -2417,6 +2417,28 @@ lemma applyMentsuHandChoice.skip_state_matches
     choiceTiles, choiceUsesMeld, choiceUsesTaatsu, hused, hmelds,
     htaatsu]
 
+lemma applyMentsuHandChoice.exists_skip_state_matches_of_reachable
+    (hand : Hand) (fuel : Nat) (state : MentsuHandSearchState)
+    (choices : List MentsuHandChoice)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hmatches : MentsuHandChoiceStateMatches state choices) :
+    ∃ hvalid : ValidMentsuHandChoice hand state .skip,
+      MentsuHandChoiceStateMatches
+        (applyMentsuHandChoice hand state .skip hvalid) choices := by
+  let hvalid : ValidMentsuHandChoice hand state .skip := by
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · simpa [choiceTiles] using
+        reachableWithinWithCopyLimit_used_subset
+          hand fuel state hreachable
+    · simpa [choiceUsesMeld] using
+        reachableWithinWithCopyLimit_melds_le_four
+          hand fuel state hreachable
+    · simpa [choiceUsesTaatsu] using
+        reachableWithinWithCopyLimit_taatsu_le_four
+          hand fuel state hreachable
+    · simp [choiceUsesPair]
+  exact ⟨hvalid, applyMentsuHandChoice.skip_state_matches hvalid hmatches⟩
+
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
     (hvalid : ValidMentsuHandChoice hand state (.pair tile))

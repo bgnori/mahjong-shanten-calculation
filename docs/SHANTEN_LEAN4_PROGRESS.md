@@ -93,6 +93,9 @@
 - `skip` 遷移が分解選択列を延長せずに
   `MentsuHandChoiceStateMatches` を保持することを証明した
   (`applyMentsuHandChoice.skip_state_matches`)。
+- 制約付き到達済み状態から `skip` 選択の妥当性を構成し、その後も
+  `MentsuHandChoiceStateMatches` を保持する補題を追加した
+  (`exists_skip_state_matches_of_reachable`)。
 - 状態に選択を適用した結果を、分解接頭辞の向きに合わせた
   `choices ++ [choice]` 形式で表す補題を追加した
   (`applyMentsuHandChoice.state_matches_append_single`)。
@@ -164,6 +167,7 @@
 | 2026-11-15 | `applyMentsuHandChoice.state_matches_cons` | 1回の選択遷移に対する状態不変条件の保存を証明。 |
 | 2026-11-15 | `applyMentsuHandChoice_skip_fields` | タイル順探索の `skip` 遷移がブロック状態を保持することを証明。 |
 | 2026-11-15 | `applyMentsuHandChoice.skip_state_matches` | `skip` 後も同じ分解接頭辞との状態対応を保持することを証明。 |
+| 2026-11-15 | `exists_skip_state_matches_of_reachable` | 到達済み状態での `skip` 妥当性と状態不変条件を接続。 |
 | 2026-11-15 | `applyMentsuHandChoice.state_matches_append_single` | 状態不変条件を接頭辞の末尾追加形式へ変換。 |
 | 2026-11-15 | `valid_next_choice_of_state_matches` | パッケージ化した状態不変条件を選択妥当性へ接続。 |
 | 2026-11-15 | `AppliesMentsuHandChoicesForward`, `state_matches_from_initial` | 接頭辞を左から右へ処理する前向き選択列関係を追加。 |
