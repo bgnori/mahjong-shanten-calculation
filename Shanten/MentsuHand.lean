@@ -3014,6 +3014,37 @@ lemma MentsuHandBlockDecomposition.insert_blockChoice_from_prefix
       hprefix hreachable hmatches hhistory hpairEmpty hfacts.1 htile
   exact ⟨before, after, tile, final, hpath, hfinal, hmatchesFinal⟩
 
+lemma MentsuHandBlockDecomposition.insert_pair_from_initial
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
+    ∃ before after tile final,
+      reachableOnTilesFromWithCopyLimit hand
+        (before ++ tile :: after) initialMentsuHandState final ∧
+        reachableWithinWithCopyLimit hand
+          (before.length + 1 + after.length) final ∧
+        MentsuHandChoiceStateMatches final
+          [.pair decomposition.pair] := by
+  let suffix :=
+    decomposition.melds.map MentsuHandChoice.meld ++
+      decomposition.taatsus.map MentsuHandChoice.taatsu
+  have hprefix :
+      decomposition.blockChoices =
+        [] ++ MentsuHandChoice.pair decomposition.pair :: suffix := by
+    rfl
+  obtain ⟨before, after, tile, final, hpath, hfinal, hmatches⟩ :=
+    decomposition.insert_blockChoice_from_prefix
+      0 initialMentsuHandState [] suffix
+      (.pair decomposition.pair)
+      (by simp [MentsuHandBlockDecomposition.blockChoices])
+      hprefix
+      (by rfl)
+      (by
+        simp [MentsuHandChoiceStateMatches, initialMentsuHandState,
+          mentsuHandChoiceTiles, mentsuHandChoiceMeldCount,
+          mentsuHandChoiceTaatsuCount])
+      (by rfl)
+      (by intro h; rfl)
+  exact ⟨before, after, tile, final, hpath, by simpa using hfinal, hmatches⟩
+
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
     (hvalid : ValidMentsuHandChoice hand state (.pair tile))

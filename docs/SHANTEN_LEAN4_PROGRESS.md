@@ -160,6 +160,8 @@
   `exists_tile_order_split_of_blockChoice` を追加した。
 - 分解ブロック選択を指定するだけで上記の分割と状態不変条件付き挿入を呼び出せる
   `MentsuHandBlockDecomposition.insert_blockChoice_from_prefix` を追加した。
+- 初期状態から分解の雀頭選択をタイル順探索へ挿入する基底補題
+  (`insert_pair_from_initial`) を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
