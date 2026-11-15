@@ -2217,6 +2217,22 @@ inductive AppliesMentsuHandChoiceBatch (hand : Hand) (tile : Tile) :
         (choices ++ [choice])
         (applyMentsuHandChoice hand middle choice hvalid)
 
+/-- A tile-order scan whose step may apply a batch of choices at one tile. -/
+inductive AppliesMentsuHandTileBatchScan (hand : Hand) :
+    List Tile → MentsuHandSearchState → List MentsuHandChoice →
+      MentsuHandSearchState → Prop
+  | nil (state : MentsuHandSearchState) :
+      AppliesMentsuHandTileBatchScan hand [] state [] state
+  | step (tile : Tile) (tiles : List Tile)
+      (state middle final : MentsuHandSearchState)
+      (batchChoices choices : List MentsuHandChoice)
+      (hbatch :
+        AppliesMentsuHandChoiceBatch hand tile state batchChoices middle)
+      (htail :
+        AppliesMentsuHandTileBatchScan hand tiles middle choices final) :
+      AppliesMentsuHandTileBatchScan hand (tile :: tiles) state
+        (batchChoices ++ choices) final
+
 lemma AppliesMentsuHandTileScan.to_reachable
     {hand : Hand} {tiles : List Tile}
     {state final : MentsuHandSearchState}
@@ -2820,6 +2836,25 @@ lemma AppliesMentsuHandChoiceBatch.state_matches_append
       have hfinal :=
         applyMentsuHandChoice.state_matches_append_single
           choice hvalid hstate
+      simpa [List.append_assoc] using hfinal
+
+lemma AppliesMentsuHandTileBatchScan.state_matches_append
+    {hand : Hand}
+    {tiles : List Tile}
+    {state final : MentsuHandSearchState}
+    {pre choices : List MentsuHandChoice}
+    (hscan :
+      AppliesMentsuHandTileBatchScan hand tiles state choices final)
+    (hmatches : MentsuHandChoiceStateMatches state pre) :
+    MentsuHandChoiceStateMatches final (pre ++ choices) := by
+  induction hscan generalizing pre with
+  | nil =>
+      simpa using hmatches
+  | @step tile tiles start middle final batchChoices choices hbatch htail ih =>
+      have hmiddle :=
+        AppliesMentsuHandChoiceBatch.state_matches_append
+          hbatch hmatches
+      have hfinal := ih hmiddle
       simpa [List.append_assoc] using hfinal
 
 lemma applyMentsuHandChoice.taatsuHistory_reverse_append_single
