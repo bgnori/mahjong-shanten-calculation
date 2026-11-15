@@ -2258,6 +2258,21 @@ def MentsuHandChoiceStateMatches
     state.melds = mentsuHandChoiceMeldCount choices ∧
     state.taatsu = mentsuHandChoiceTaatsuCount choices
 
+inductive AppliesMentsuHandChoicesForward (hand : Hand) :
+    MentsuHandSearchState → List MentsuHandChoice →
+      MentsuHandSearchState → Prop
+  | nil (state : MentsuHandSearchState) :
+      AppliesMentsuHandChoicesForward hand state [] state
+  | snoc (state middle : MentsuHandSearchState)
+      (choices : List MentsuHandChoice) (choice : MentsuHandChoice)
+      (hpath :
+        AppliesMentsuHandChoicesForward hand state choices middle)
+      (hchoice : choice ∈ allMentsuHandChoices)
+      (hvalid : ValidMentsuHandChoice hand middle choice) :
+      AppliesMentsuHandChoicesForward hand state
+        (choices ++ [choice])
+        (applyMentsuHandChoice hand middle choice hvalid)
+
 lemma AppliesMentsuHandChoices.state_matches_from_initial
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
@@ -2312,6 +2327,22 @@ lemma applyMentsuHandChoice.state_matches_append_single
       mentsuHandChoiceMeldCount_append,
       mentsuHandChoiceTaatsuCount_append, Nat.add_comm,
       Nat.add_left_comm, Nat.add_assoc] <;> ac_rfl
+
+lemma AppliesMentsuHandChoicesForward.state_matches_from_initial
+    {hand : Hand} {final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoicesForward hand initialMentsuHandState
+        choices final) :
+    MentsuHandChoiceStateMatches final choices := by
+  induction hpath with
+  | nil =>
+      simp [MentsuHandChoiceStateMatches, initialMentsuHandState,
+        mentsuHandChoiceTiles, mentsuHandChoiceMeldCount,
+        mentsuHandChoiceTaatsuCount]
+  | @snoc state middle choices hpath hchoice hvalid ih =>
+      exact applyMentsuHandChoice.state_matches_append_single
+        _ hvalid ih
 
 lemma applyMentsuHandChoice_skip_fields
     (hand : Hand) (state : MentsuHandSearchState)
