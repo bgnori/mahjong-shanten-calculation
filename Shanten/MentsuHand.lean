@@ -239,6 +239,39 @@ def mentsuHandChoicesWithoutTile
       else
       choice :: mentsuHandChoicesWithoutTile tile choices
 
+lemma mentsuHandChoicesWithoutTile_mem
+    {tile : Tile} {choices : List MentsuHandChoice}
+    {choice : MentsuHandChoice}
+    (hmem : choice ∈ mentsuHandChoicesWithoutTile tile choices) :
+    choice ∈ choices := by
+  induction choices with
+  | nil =>
+      simp [mentsuHandChoicesWithoutTile] at hmem
+  | cons head choices ih =>
+      by_cases hrep :
+          mentsuHandChoiceRepresentative head = some tile
+      · simp [mentsuHandChoicesWithoutTile, hrep] at hmem
+        exact List.mem_cons_of_mem head (ih hmem)
+      · simp [mentsuHandChoicesWithoutTile, hrep] at hmem
+        rcases hmem with rfl | hmem
+        · simp
+        · exact List.mem_cons_of_mem head (ih hmem)
+
+def mentsuHandChoicesGroupedByTiles :
+    List Tile → List MentsuHandChoice → List MentsuHandChoice
+  | [], _ => []
+  | tile :: tiles, choices =>
+      mentsuHandChoicesForTile tile choices ++
+        mentsuHandChoicesGroupedByTiles tiles
+          (mentsuHandChoicesWithoutTile tile choices)
+
+def mentsuHandChoicesWithoutTileForTiles :
+    List Tile → List MentsuHandChoice → List MentsuHandChoice
+  | [], choices => choices
+  | tile :: tiles, choices =>
+      mentsuHandChoicesWithoutTileForTiles tiles
+        (mentsuHandChoicesWithoutTile tile choices)
+
 lemma list_perm_rotate
     {α : Type} (choice : α) (pre suffix : List α) :
     List.Perm (pre ++ choice :: suffix)
@@ -269,6 +302,64 @@ lemma mentsuHandChoicesForTile_partition
         (mentsuHandChoicesForTile tile choices)
         (mentsuHandChoicesWithoutTile tile choices)).trans
           (List.Perm.cons choice ih)
+
+lemma mentsuHandChoicesWithoutTile_representative_ne
+    {tile : Tile} {choices : List MentsuHandChoice}
+    {choice : MentsuHandChoice}
+    (hmem : choice ∈ mentsuHandChoicesWithoutTile tile choices) :
+    mentsuHandChoiceRepresentative choice ≠ some tile := by
+  induction choices with
+  | nil =>
+      simp [mentsuHandChoicesWithoutTile] at hmem
+  | cons head choices ih =>
+      by_cases hrep :
+          mentsuHandChoiceRepresentative head = some tile
+      · simp [mentsuHandChoicesWithoutTile, hrep] at hmem
+        exact ih hmem
+      · simp [mentsuHandChoicesWithoutTile, hrep] at hmem
+        rcases hmem with rfl | hmem
+        · exact hrep
+        · exact ih hmem
+
+lemma mentsuHandChoicesGroupedByTiles_perm_append
+    {tiles : List Tile} {choices : List MentsuHandChoice}
+    (hrep :
+      ∀ choice, choice ∈ choices →
+        ∃ tile, tile ∈ tiles ∧
+          mentsuHandChoiceRepresentative choice = some tile) :
+    List.Perm
+      (mentsuHandChoicesGroupedByTiles tiles choices ++
+        mentsuHandChoicesWithoutTileForTiles tiles choices)
+      choices := by
+  induction tiles generalizing choices with
+  | nil =>
+      simp [mentsuHandChoicesGroupedByTiles,
+        mentsuHandChoicesWithoutTileForTiles]
+  | cons tile tiles ih =>
+      have htail :
+          ∀ choice, choice ∈
+              mentsuHandChoicesWithoutTile tile choices →
+            ∃ nextTile, nextTile ∈ tiles ∧
+              mentsuHandChoiceRepresentative choice = some nextTile := by
+        intro choice hchoice
+        obtain ⟨choiceTile, hchoiceTile, hchoiceRep⟩ :=
+          hrep choice
+            (mentsuHandChoicesWithoutTile_mem hchoice)
+        simp only [List.mem_cons] at hchoiceTile
+        rcases hchoiceTile with rfl | hchoiceTile
+        · exact False.elim
+            (mentsuHandChoicesWithoutTile_representative_ne hchoice
+              hchoiceRep)
+        · exact ⟨_, hchoiceTile, hchoiceRep⟩
+      have hpartition :=
+        mentsuHandChoicesForTile_partition tile choices
+      have hgrouped :=
+        ih htail
+      simpa [mentsuHandChoicesGroupedByTiles,
+        mentsuHandChoicesWithoutTileForTiles, List.append_assoc] using
+        ((List.Perm.append_left
+            (mentsuHandChoicesForTile tile choices) hgrouped).trans
+          hpartition)
 
 lemma list_sublist_append_single_of_sublist
     {pre : List α} {choice : α} {suffix target : List α}
