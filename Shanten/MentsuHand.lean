@@ -2923,6 +2923,20 @@ lemma AppliesMentsuHandChoiceBatch.state_matches_append
           choice hvalid hstate
       simpa [List.append_assoc] using hfinal
 
+lemma AppliesMentsuHandChoiceBatch.state_matches_from_initial
+    {hand : Hand} {tile : Tile}
+    {state : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hbatch :
+      AppliesMentsuHandChoiceBatch hand tile
+        initialMentsuHandState choices state) :
+    MentsuHandChoiceStateMatches state choices :=
+  hbatch.state_matches_append (pre := [])
+    (by
+      simp [MentsuHandChoiceStateMatches, initialMentsuHandState,
+        mentsuHandChoiceTiles, mentsuHandChoiceMeldCount,
+        mentsuHandChoiceTaatsuCount])
+
 lemma AppliesMentsuHandTileBatchScan.state_matches_append
     {hand : Hand}
     {tiles : List Tile}
@@ -2978,6 +2992,18 @@ lemma AppliesMentsuHandChoiceBatch.taatsuHistory_reverse_append
         applyMentsuHandChoice.taatsuHistory_reverse_append_single
           choice hvalid hstate
       simpa [List.append_assoc] using hfinal
+
+lemma AppliesMentsuHandChoiceBatch.taatsuHistory_reverse_from_initial
+    {hand : Hand} {tile : Tile}
+    {state : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hbatch :
+      AppliesMentsuHandChoiceBatch hand tile
+        initialMentsuHandState choices state) :
+    state.taatsuHistory.reverse =
+      mentsuHandChoiceTaatsus choices :=
+  hbatch.taatsuHistory_reverse_append (pre := []) (by
+    simp [initialMentsuHandState, mentsuHandChoiceTaatsus])
 
 lemma AppliesMentsuHandTileBatchScan.taatsuHistory_reverse_append
     {hand : Hand}
