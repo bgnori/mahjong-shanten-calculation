@@ -186,6 +186,10 @@
   (`AppliesMentsuHandTileScan.append`) を追加した。
 - 既に処理済みの一回走査区間へ、分解接頭辞の次のブロック選択を連結する
   (`MentsuHandBlockDecomposition.append_choice_scan_from_prefix`) 補題を追加した。
+- タイル順に選択した結果、分解の選択列と順序が異なる場合に備え、
+  `List.Perm` による選択列の順序変更が `used`・面子数・搭子数の
+  `MentsuHandChoiceStateMatches` を保持する補題
+  (`mentsuHandChoiceStateMatches_of_perm`) を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
@@ -267,6 +271,7 @@
 | 2026-11-15 | `insert_blockChoice_scan_from_prefix`, `insert_pair_scan_from_initial` | 分解ブロック選択の一回走査版と、雀頭選択の初期状態基底を追加。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.append` | 一回走査区間を一般化して連結し、選択列も連結する補題を追加。 |
 | 2026-11-15 | `append_choice_scan_from_prefix` | 処理済み選択列の走査へ、次の分解ブロック選択を連結する補題を追加。 |
+| 2026-11-15 | `mentsuHandChoiceStateMatches_of_perm` | 選択列の順序変更に対する状態カウンタ不変性を追加。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 

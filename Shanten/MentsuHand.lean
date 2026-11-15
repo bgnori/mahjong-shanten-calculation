@@ -2445,6 +2445,64 @@ def MentsuHandChoiceStateMatches
     state.melds = mentsuHandChoiceMeldCount choices ∧
     state.taatsu = mentsuHandChoiceTaatsuCount choices
 
+lemma mentsuHandChoiceStateMatches_of_perm
+    {state : MentsuHandSearchState}
+    {choices choices' : List MentsuHandChoice}
+    (hperm : List.Perm choices choices')
+    (hmatches : MentsuHandChoiceStateMatches state choices) :
+    MentsuHandChoiceStateMatches state choices' := by
+  have permTiles :
+      ∀ {xs ys : List MentsuHandChoice},
+        List.Perm xs ys →
+          mentsuHandChoiceTiles xs = mentsuHandChoiceTiles ys := by
+    intro xs ys h
+    induction h with
+    | nil =>
+        rfl
+    | cons choice h ih =>
+        simp [mentsuHandChoiceTiles, ih]
+    | swap choice choice' choices =>
+        simp [mentsuHandChoiceTiles, add_comm, add_left_comm, add_assoc]
+    | trans h h' ih ih' =>
+        exact ih.trans ih'
+  have permMelds :
+      ∀ {xs ys : List MentsuHandChoice},
+        List.Perm xs ys →
+          mentsuHandChoiceMeldCount xs =
+            mentsuHandChoiceMeldCount ys := by
+    intro xs ys h
+    induction h with
+    | nil =>
+        rfl
+    | cons choice h ih =>
+        simp [mentsuHandChoiceMeldCount, ih]
+    | swap choice choice' choices =>
+        simp [mentsuHandChoiceMeldCount, Nat.add_comm,
+          Nat.add_left_comm, Nat.add_assoc]
+    | trans h h' ih ih' =>
+        exact ih.trans ih'
+  have permTaatsus :
+      ∀ {xs ys : List MentsuHandChoice},
+        List.Perm xs ys →
+          mentsuHandChoiceTaatsuCount xs =
+            mentsuHandChoiceTaatsuCount ys := by
+    intro xs ys h
+    induction h with
+    | nil =>
+        rfl
+    | cons choice h ih =>
+        simp [mentsuHandChoiceTaatsuCount, ih]
+    | swap choice choice' choices =>
+        simp [mentsuHandChoiceTaatsuCount, Nat.add_comm,
+          Nat.add_left_comm, Nat.add_assoc]
+    | trans h h' ih ih' =>
+        exact ih.trans ih'
+  have htiles := permTiles hperm
+  have hmelds := permMelds hperm
+  have htaatsus := permTaatsus hperm
+  exact ⟨hmatches.1.trans htiles, hmatches.2.1.trans hmelds,
+    hmatches.2.2.trans htaatsus⟩
+
 inductive AppliesMentsuHandChoicesForward (hand : Hand) :
     MentsuHandSearchState → List MentsuHandChoice →
       MentsuHandSearchState → Prop
