@@ -2267,6 +2267,20 @@ lemma AppliesMentsuHandChoices.state_matches_from_initial
   ⟨hpath.used_eq_from_initial, hpath.melds_eq_from_initial,
     hpath.taatsu_eq_from_initial⟩
 
+lemma MentsuHandBlockDecomposition.valid_next_choice_of_state_matches
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices :
+      decomposition.blockChoices = pre ++ choice :: suffix)
+    (hmatches : MentsuHandChoiceStateMatches state pre)
+    (hpairEmpty :
+      pre = [] → state.pair.isNone) :
+    ValidMentsuHandChoice hand state choice :=
+  decomposition.valid_next_choice_of_count_prefix_of_pair
+    pre suffix choice state hchoices hmatches.1 hmatches.2.1
+    hmatches.2.2 hpairEmpty
+
 lemma applyMentsuHandChoice.state_matches_cons
     {hand : Hand} {state : MentsuHandSearchState}
     {choices : List MentsuHandChoice} (choice : MentsuHandChoice)
