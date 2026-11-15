@@ -158,6 +158,8 @@
 - 分解ブロック選択から、探索候補所属・非 `skip`・代表牌を含む
   `mentsuHandTileOrder` の分割を一括取得する
   `exists_tile_order_split_of_blockChoice` を追加した。
+- 分解ブロック選択を指定するだけで上記の分割と状態不変条件付き挿入を呼び出せる
+  `MentsuHandBlockDecomposition.insert_blockChoice_from_prefix` を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
