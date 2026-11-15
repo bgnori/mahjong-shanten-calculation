@@ -1470,6 +1470,38 @@ lemma mentsuHandChoiceTiles_of_perm
   | trans hperm hperm' ih ih' =>
       exact ih.trans ih'
 
+lemma mentsuHandChoiceMeldCount_of_perm
+    {choices choices' : List MentsuHandChoice}
+    (hperm : List.Perm choices choices') :
+    mentsuHandChoiceMeldCount choices =
+      mentsuHandChoiceMeldCount choices' := by
+  induction hperm with
+  | nil =>
+      rfl
+  | cons choice hperm ih =>
+      simp [mentsuHandChoiceMeldCount, ih]
+  | swap choice choice' choices =>
+      simp [mentsuHandChoiceMeldCount, Nat.add_comm,
+        Nat.add_left_comm, Nat.add_assoc]
+  | trans hperm hperm' ih ih' =>
+      exact ih.trans ih'
+
+lemma mentsuHandChoiceTaatsuCount_of_perm
+    {choices choices' : List MentsuHandChoice}
+    (hperm : List.Perm choices choices') :
+    mentsuHandChoiceTaatsuCount choices =
+      mentsuHandChoiceTaatsuCount choices' := by
+  induction hperm with
+  | nil =>
+      rfl
+  | cons choice hperm ih =>
+      simp [mentsuHandChoiceTaatsuCount, ih]
+  | swap choice choice' choices =>
+      simp [mentsuHandChoiceTaatsuCount, Nat.add_comm,
+        Nat.add_left_comm, Nat.add_assoc]
+  | trans hperm hperm' ih ih' =>
+      exact ih.trans ih'
+
 def MentsuHandBlockDecomposition.blockChoices
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     List MentsuHandChoice :=
