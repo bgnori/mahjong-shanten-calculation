@@ -1455,6 +1455,21 @@ lemma mentsuHandChoiceTiles_append
   | cons choice left ih =>
       simp [mentsuHandChoiceTiles, ih, Multiset.add_assoc]
 
+lemma mentsuHandChoiceTiles_of_perm
+    {choices choices' : List MentsuHandChoice}
+    (hperm : List.Perm choices choices') :
+    mentsuHandChoiceTiles choices =
+      mentsuHandChoiceTiles choices' := by
+  induction hperm with
+  | nil =>
+      rfl
+  | cons choice hperm ih =>
+      simp [mentsuHandChoiceTiles, ih]
+  | swap choice choice' choices =>
+      simp [mentsuHandChoiceTiles, add_comm, add_left_comm, add_assoc]
+  | trans hperm hperm' ih ih' =>
+      exact ih.trans ih'
+
 def MentsuHandBlockDecomposition.blockChoices
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     List MentsuHandChoice :=
