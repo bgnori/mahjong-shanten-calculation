@@ -278,6 +278,11 @@
    `mentsuHandChoiceTaatsuCount_of_perm`) として公開した。
 - 既存の `mentsuHandChoiceStateMatches_of_perm` を上記の公開補題から構成する形へ
  整理し、牌種順への並べ替え後も状態一致を直接再利用できるようにした。
+- 各選択へ代表牌を割り当てる
+ `mentsuHandChoiceRepresentative` を定義し、`skip` 以外の代表牌が必ず
+ `choiceTiles` に含まれることを
+ (`mentsuHandChoiceRepresentative_mem`) として証明した。これは選択列を
+ 牌種ごとに分割する際の重複割当を避けるために用いる。
 
 関連する主な補題:
 
@@ -365,6 +370,7 @@
 | 2026-11-15 | `completion_respects_of_perm` | 選択列の並べ替え後も使用牌・搭子補完のコピー制限を保持。 |
 | 2026-11-15 | `mentsuHandChoiceMeldCount_of_perm`, `mentsuHandChoiceTaatsuCount_of_perm` | 並べ替え後の状態カウンタ不変性を追加。 |
 | 2026-11-15 | `mentsuHandChoiceStateMatches_of_perm` の整理 | 公開した順序不変性補題を状態一致の証明へ接続。 |
+| 2026-11-15 | `mentsuHandChoiceRepresentative`, `mentsuHandChoiceRepresentative_mem` | 各非 `skip` 選択の代表牌割当と、選択牌への所属を追加。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |

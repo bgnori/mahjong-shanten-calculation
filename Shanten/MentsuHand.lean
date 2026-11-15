@@ -142,6 +142,48 @@ def choiceTiles : MentsuHandChoice → Multiset Tile
   | .taatsu taatsu => taatsuTiles taatsu
   | .meld meld => meldTiles meld
 
+def mentsuHandChoiceRepresentative : MentsuHandChoice → Option Tile
+  | .skip => none
+  | .pair tile => some tile
+  | .taatsu (.pair tile) => some tile
+  | .taatsu (.sequence suit start) =>
+      some (Tile.suited suit ⟨start.val, by omega⟩)
+  | .meld (.triplet tile) => some tile
+  | .meld (.sequence suit start) =>
+      some (Tile.suited suit ⟨start.val, by omega⟩)
+
+lemma mentsuHandChoiceRepresentative_mem
+    {choice : MentsuHandChoice} {tile : Tile}
+    (hrep : mentsuHandChoiceRepresentative choice = some tile) :
+    tile ∈ choiceTiles choice := by
+  cases choice with
+  | skip =>
+      simp [mentsuHandChoiceRepresentative] at hrep
+  | pair pairTile =>
+      simp [mentsuHandChoiceRepresentative] at hrep
+      subst tile
+      simp [choiceTiles, pairTiles]
+  | taatsu taatsu =>
+      cases taatsu with
+      | pair pairTile =>
+          simp [mentsuHandChoiceRepresentative] at hrep
+          subst tile
+          simp [choiceTiles, taatsuTiles, pairTiles]
+      | sequence suit start =>
+          simp [mentsuHandChoiceRepresentative] at hrep
+          subst tile
+          simp [choiceTiles, taatsuTiles]
+  | meld meld =>
+      cases meld with
+      | triplet meldTile =>
+          simp [mentsuHandChoiceRepresentative] at hrep
+          subst tile
+          simp [choiceTiles, meldTiles]
+      | sequence suit start =>
+          simp [mentsuHandChoiceRepresentative] at hrep
+          subst tile
+          simp [choiceTiles, meldTiles]
+
 def choiceUsesMeld : MentsuHandChoice → Bool
   | .meld _ => true
   | _ => false
