@@ -13,7 +13,9 @@
 面子手については、牌姿を構成するブロック探索と、探索結果から
 `Complete .mentsuHand` および `IsShapeShanten` を導く補題まで実装済みである。
 一方、タイル順に進む制約付きブロック探索が任意の有効な分解を列挙することは、
-まだ完了していない。
+まだ完了していない。既存の一回走査関係は各牌種で高々一つのブロックしか選べないため、
+同じ牌種を共有するブロックを持つ分解を表せない。このため、完全性の中間表現を
+「同一牌種で複数ブロックを連続適用できるバッチ走査」へ変更している。
 
 ## 計画に対する進捗
 
@@ -162,10 +164,15 @@
   `MentsuHandBlockDecomposition.insert_blockChoice_from_prefix` を追加した。
 - 初期状態から分解の雀頭選択をタイル順探索へ挿入する基底補題
   (`insert_pair_from_initial`) を追加した。
-- タイル列を一度だけ左から右へ走査し、各タイルで `skip` または有効な選択を行う
+- タイル列を一度だけ左から右へ走査し、各タイルで `skip` または高々一つの有効な選択を行う
   `AppliesMentsuHandTileScan` を導入し、既存の
   `reachableOnTilesFromWithCopyLimit` へ変換する
-  (`AppliesMentsuHandTileScan.to_reachable`) 補題を追加した。
+  (`AppliesMentsuHandTileScan.to_reachable`) 補題を追加した。ただし、この関係は
+  同一牌種を共有する複数ブロックを表せないため、完全性の最終関係には採用しない。
+- 同一牌種で複数ブロックを連続適用する中間関係
+  `AppliesMentsuHandChoiceBatch` を追加した。これにより、牌種走査を進める前に
+  同一タイル位置で選択列を末尾追加できる形を用意した。今後はこの関係の状態不変量と、
+  バッチ走査を制約付き到達性へ接続する定理を実装する。
 - 一回走査関係の `skip`・`choose` 帰納に対して、選択列接頭辞と探索状態の
   `MentsuHandChoiceStateMatches` を最後まで保持する
   (`AppliesMentsuHandTileScan.state_matches_append`,
@@ -219,11 +226,13 @@
 
 1. **制約付きブロック探索の完全性 (`searchResult_complete`)**
    - `MentsuHandBlockDecomposition` の任意の有効な分解が、
-     `MentsuHandBlockSearchOnTileOrderWithCopyLimit` のいずれかの枝で生成されること。
+     同一牌種で複数選択を許すバッチ走査のいずれかの枝で生成されること。
    - 各ブロックの代表牌を `mentsuHandTileOrder` に挿入する際の、接頭辞状態の
      `ValidMentsuHandChoice` のうち、牌カウントと完成後コピー制限は完了。
    - 呼び出し側から探索状態の面子数・搭子数・雀頭状態を供給して妥当な選択を構成する補題は完了。
-   - それらの状態不変条件を、分解選択列の接頭辞から自動的に構成することが残っている。
+   - バッチ走査の状態不変条件を、分解選択列の接頭辞から自動的に構成することが残っている。
+   - その後、既存の一選択走査・`reachableOnTilesFromWithCopyLimit` と同値な探索関係へ
+     接続できるかを確認する（単純な同値が成立しない場合は探索定義自体を更新する）。
 2. **探索結果とターゲットDPの接続**
    - 制約付きブロック探索からターゲット距離集合への健全性接続は完了。
    - 残りは、タイル順探索の完全性を示して逆方向の包含を得ること。
@@ -290,6 +299,7 @@
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
+| 2026-11-15 | `AppliesMentsuHandChoiceBatch` | 同一牌種を共有する複数ブロックを、牌種走査を進めずに連続適用する完全性用の中間関係を追加。既存の一選択走査だけでは表せない分解を明示化。 |
 
 ## 検証状況
 

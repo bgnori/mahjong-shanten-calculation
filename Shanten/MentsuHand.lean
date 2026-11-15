@@ -25,7 +25,8 @@ mentsuHandTargetMinimumSearch hand = some value
 4. 完成目標と、目標までの不足距離を定義する。
 5. 不足距離が、完成形に到達するために必要な交換回数と一致することを示す。
 6. 面子・ターツ・雀頭による部分的な面子手分解を表現する。
-7. 1 種類 4 枚制限を加え、妥当なブロック分解が制約付き牌走査で実現できることを示す。
+7. 1 種類 4 枚制限を加え、妥当なブロック分解を制約付き牌走査へ
+   埋め込むための前提（同一牌種で複数ブロックを処理できる走査）を整備する。
 8. 有限 DP が何を表しているかを定理化する。
 9. 目標距離を最小化し、その最小値を形シャンテン数に結び付ける。
 10. 制約付きブロック探索から、シャンテン数の証人を取り出して仕上げる。
@@ -1964,9 +1965,12 @@ lemma MentsuHandBlockDecomposition.completion_respects_of_prefix
 /-
 ## 6. 牌の枚数制限付き走査
 
-通常の遷移系に、同一牌は 4 枚までという制約を加えます。この章の主結果は、
-妥当なブロック分解を状態の不変量を保ったまま固定牌順の走査へ
-組み込めることです。
+通常の遷移系に、同一牌は 4 枚までという制約を加えます。
+`AppliesMentsuHandTileScan` は牌種列を左から右へ進み、各牌種で高々一つの
+ブロックを選ぶ関係です。この関係だけでは、同じ牌種を共有する複数ブロックを
+持つ有効な分解（例えば雀頭 1、面子 123、搭子 12）を表現できません。
+したがって、完全性の証明はこの関係へ直接接続するのではなく、同一牌種の
+位置で複数選択を連続して適用できるバッチ走査を経由して構成します。
 -/
 
 def ValidMentsuHandChoiceWithCopyLimit
@@ -2185,6 +2189,33 @@ inductive AppliesMentsuHandTileScan (hand : Hand) :
           choices final) :
       AppliesMentsuHandTileScan hand (tile :: tiles) state
         (choice :: choices) final
+
+/-- Several blocks may be applied at one tile position before the scan advances.
+
+The relation is intentionally separate from `AppliesMentsuHandTileScan`: the latter
+models the existing one-choice-per-tile search, while this batch relation is the
+correct intermediate representation for completeness when block representatives
+overlap. The list is built by appending the newly applied choice, so it remains
+compatible with the prefix invariants used below.
+-/
+inductive AppliesMentsuHandChoiceBatch (hand : Hand) (tile : Tile) :
+    MentsuHandSearchState → List MentsuHandChoice →
+      MentsuHandSearchState → Prop
+  | nil (state : MentsuHandSearchState) :
+      AppliesMentsuHandChoiceBatch hand tile state [] state
+  | cons (state middle final : MentsuHandSearchState)
+      (choices : List MentsuHandChoice) (choice : MentsuHandChoice)
+      (htail :
+        AppliesMentsuHandChoiceBatch hand tile state choices middle)
+      (hchoice : choice ∈ allMentsuHandChoices)
+      (htile : tile ∈ choiceTiles choice)
+      (hvalid : ValidMentsuHandChoice hand middle choice)
+      (hcopy :
+        CompletionRespectsCopyLimit
+          (applyMentsuHandChoice hand middle choice hvalid)) :
+      AppliesMentsuHandChoiceBatch hand tile state
+        (choices ++ [choice])
+        (applyMentsuHandChoice hand middle choice hvalid)
 
 lemma AppliesMentsuHandTileScan.to_reachable
     {hand : Hand} {tiles : List Tile}
