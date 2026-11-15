@@ -2281,6 +2281,19 @@ lemma AppliesMentsuHandTileBatchScan.append
               batchChoices' (choices' ++ choicesAfter) hbatch
               (ih htail' htail))
 
+lemma AppliesMentsuHandTileBatchScan.single
+    {hand : Hand} {tile : Tile}
+    {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hbatch :
+      AppliesMentsuHandChoiceBatch hand tile state choices final) :
+    AppliesMentsuHandTileBatchScan hand [tile] state choices final :=
+  by
+    convert
+      (AppliesMentsuHandTileBatchScan.step
+        tile [] state final final choices [] hbatch (.nil final))
+        using 1 <;> simp
+
 lemma AppliesMentsuHandTileScan.to_reachable
     {hand : Hand} {tiles : List Tile}
     {state final : MentsuHandSearchState}
