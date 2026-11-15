@@ -225,6 +225,26 @@ lemma mentsuHandChoicesForTile_representative
       · simp [mentsuHandChoicesForTile, hrep] at hmem
         exact ih hmem
 
+lemma list_sublist_append_single_of_sublist
+    {pre : List α} {choice : α} {suffix target : List α}
+    (hsub : List.Sublist (pre ++ choice :: suffix) target) :
+    List.Sublist (pre ++ [choice]) target := by
+  have nil_sublist : ∀ values : List α, List.Sublist [] values := by
+    intro values
+    induction values with
+    | nil =>
+        exact .slnil
+    | cons head values ih =>
+        exact .cons head ih
+  have hchoice :
+      List.Sublist [choice] (choice :: suffix) :=
+    .cons_cons choice (nil_sublist suffix)
+  have hsource :
+      List.Sublist (pre ++ [choice])
+        (pre ++ choice :: suffix) :=
+    List.Sublist.append (List.Sublist.refl pre) hchoice
+  exact hsource.trans hsub
+
 def choiceUsesMeld : MentsuHandChoice → Bool
   | .meld _ => true
   | _ => false
@@ -3031,6 +3051,23 @@ lemma mentsuHandChoiceStateMatches_of_perm
   have htaatsus := mentsuHandChoiceTaatsuCount_of_perm hperm
   exact ⟨hmatches.1.trans htiles, hmatches.2.1.trans hmelds,
     hmatches.2.2.trans htaatsus⟩
+
+lemma MentsuHandBlockDecomposition.valid_next_choice_of_sublist_append
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (suffix : List MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hsub :
+      List.Sublist (pre ++ choice :: suffix)
+        decomposition.blockChoices)
+    (hmatches : MentsuHandChoiceStateMatches state pre)
+    (hpair :
+      state.pair.isNone ∨ choiceUsesPair choice = false) :
+    ValidMentsuHandChoice hand state choice :=
+  decomposition.valid_next_choice_of_sublist
+    pre choice state
+    (list_sublist_append_single_of_sublist hsub)
+    hmatches.1 hmatches.2.1 hmatches.2.2 hpair
 
 inductive AppliesMentsuHandChoicesForward (hand : Hand) :
     MentsuHandSearchState → List MentsuHandChoice →

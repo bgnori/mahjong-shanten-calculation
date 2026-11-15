@@ -305,6 +305,10 @@
  `blockChoices` 部分列性を満たすならコピー制限を満たすことを
  (`MentsuHandBlockDecomposition.completion_respects_of_forward_group`)
  として接続した。
+- `pre ++ choice :: suffix` の部分列性から `pre ++ [choice]` を抽出する
+ (`list_sublist_append_single_of_sublist`) 補題と、それを利用して次の選択の
+ `ValidMentsuHandChoice` を構成する
+ (`MentsuHandBlockDecomposition.valid_next_choice_of_sublist_append`) 補題を追加した。
 
 関連する主な補題:
 
@@ -399,6 +403,7 @@
 | 2026-11-15 | `AppliesMentsuHandChoicesForwardWithCopyLimit.append` | 牌種別のコピー制限付き前向き経路を連結。 |
 | 2026-11-15 | `ForwardWithCopyLimit.state_matches_append`, `ForwardWithCopyLimit.taatsuHistory_reverse_append` | 前向き経路の連結後に状態・搭子履歴対応を伝播。 |
 | 2026-11-15 | `completion_respects_of_forward_group` | 代表牌グループの前向き経路を分解のコピー制限へ接続。 |
+| 2026-11-15 | `list_sublist_append_single_of_sublist`, `valid_next_choice_of_sublist_append` | 選択列部分列から次選択の妥当性を構成。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
