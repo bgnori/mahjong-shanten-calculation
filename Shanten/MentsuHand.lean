@@ -2378,6 +2378,22 @@ lemma AppliesMentsuHandChoicesForward.state_matches_from_initial
       exact applyMentsuHandChoice.state_matches_append_single
         _ hvalid ih
 
+lemma AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_from_initial
+    {hand : Hand} {final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand
+        initialMentsuHandState choices final) :
+    MentsuHandChoiceStateMatches final choices := by
+  induction hpath with
+  | nil =>
+      simp [MentsuHandChoiceStateMatches, initialMentsuHandState,
+        mentsuHandChoiceTiles, mentsuHandChoiceMeldCount,
+        mentsuHandChoiceTaatsuCount]
+  | @snoc state middle choices hpath hchoice hvalid hcopy ih =>
+      exact applyMentsuHandChoice.state_matches_append_single
+        _ hvalid ih
+
 lemma applyMentsuHandChoice_skip_fields
     (hand : Hand) (state : MentsuHandSearchState)
     (hvalid : ValidMentsuHandChoice hand state .skip) :
