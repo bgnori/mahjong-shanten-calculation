@@ -2581,6 +2581,17 @@ lemma applyMentsuHandChoice.skip_state_matches
     choiceTiles, choiceUsesMeld, choiceUsesTaatsu, hused, hmelds,
     htaatsu]
 
+lemma applyMentsuHandChoice.skip_taatsuHistory_reverse
+    {hand : Hand} {state : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hvalid : ValidMentsuHandChoice hand state .skip)
+    (hhistory :
+     state.taatsuHistory.reverse =
+       mentsuHandChoiceTaatsus choices) :
+    (applyMentsuHandChoice hand state .skip hvalid).taatsuHistory.reverse =
+     mentsuHandChoiceTaatsus choices := by
+  simpa [applyMentsuHandChoice] using hhistory
+
 lemma applyMentsuHandChoice.exists_skip_state_matches_of_reachable
     (hand : Hand) (fuel : Nat) (state : MentsuHandSearchState)
     (choices : List MentsuHandChoice)
@@ -2637,6 +2648,55 @@ lemma reachableOnTilesFromWithCopyLimit_skips_state_matches
            simp only [List.length_cons]
            omega]
        exact hfinal
+
+lemma reachableOnTilesFromWithCopyLimit_skips_taatsuHistory
+    (hand : Hand) (tiles : List Tile) (fuel : Nat)
+    (state : MentsuHandSearchState) (choices : List MentsuHandChoice)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hhistory :
+      state.taatsuHistory.reverse =
+       mentsuHandChoiceTaatsus choices) :
+    ∃ final,
+      reachableOnTilesFromWithCopyLimit hand tiles state final ∧
+       reachableWithinWithCopyLimit hand (fuel + tiles.length) final ∧
+       final.taatsuHistory.reverse =
+         mentsuHandChoiceTaatsus choices := by
+  induction tiles generalizing fuel state with
+  | nil =>
+      exact ⟨state, rfl, by simpa using hreachable, hhistory⟩
+  | cons tile tiles ih =>
+      let hvalid : ValidMentsuHandChoice hand state .skip := by
+       refine ⟨?_, ?_, ?_, ?_⟩
+       · simpa [choiceTiles] using
+           reachableWithinWithCopyLimit_used_subset
+             hand fuel state hreachable
+       · simpa [choiceUsesMeld] using
+           reachableWithinWithCopyLimit_melds_le_four
+             hand fuel state hreachable
+       · simpa [choiceUsesTaatsu] using
+           reachableWithinWithCopyLimit_taatsu_le_four
+             hand fuel state hreachable
+       · simp [choiceUsesPair]
+      have hskip :=
+       nextMentsuHandStateAtWithCopyLimit_skip_of_reachable
+         hand tile fuel state hreachable
+      let next := applyMentsuHandChoice hand state .skip hvalid
+      have hreachableNext :
+         reachableWithinWithCopyLimit hand (fuel + 1) next := by
+       exact ⟨state, hreachable,
+         nextMentsuHandStateAtWithCopyLimit_toNextWithCopyLimit
+           hand tile state next (by simpa [next] using hskip)⟩
+      have hhistoryNext :
+         next.taatsuHistory.reverse =
+           mentsuHandChoiceTaatsus choices := by
+       simpa [next] using
+         applyMentsuHandChoice.skip_taatsuHistory_reverse hvalid hhistory
+      obtain ⟨final, hpath, hfinal, hhistoryFinal⟩ :=
+       ih (fuel + 1) next hreachableNext hhistoryNext
+      refine ⟨final, ⟨next, ?_, hpath⟩, ?_, hhistoryFinal⟩
+      · simpa [next] using hskip
+      · simpa [List.length_cons, Nat.add_assoc, Nat.add_comm,
+         Nat.add_left_comm] using hfinal
 
 lemma reachableOnTilesFromWithCopyLimit_skips_state_matches_pair
     (hand : Hand) (tiles : List Tile) (fuel : Nat)
