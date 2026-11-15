@@ -1466,6 +1466,96 @@ def mentsuHandChoiceTaatsus : List MentsuHandChoice → List Taatsu
   | _ :: choices =>
       mentsuHandChoiceTaatsus choices
 
+/-- Multiplicity-aware inclusion of choice columns.
+
+Unlike `List.Sublist`, this relation does not impose an order on the selected
+choices. It is the intermediate relation needed when a column is regrouped by
+tile kind: repeated equal choices remain repeated, so a plain set inclusion is
+not sufficient.
+-/
+def MentsuHandChoiceSubmultiset
+    (subset superset : List MentsuHandChoice) : Prop :=
+  (subset : Multiset MentsuHandChoice) ≤ superset
+
+lemma MentsuHandChoiceSubmultiset.refl
+    (choices : List MentsuHandChoice) :
+    MentsuHandChoiceSubmultiset choices choices :=
+  le_rfl
+
+lemma MentsuHandChoiceSubmultiset.trans
+    {left middle right : List MentsuHandChoice}
+    (hleft : MentsuHandChoiceSubmultiset left middle)
+    (hright : MentsuHandChoiceSubmultiset middle right) :
+    MentsuHandChoiceSubmultiset left right :=
+  le_trans hleft hright
+
+lemma MentsuHandChoiceSubmultiset.of_perm
+    {subset subset' superset : List MentsuHandChoice}
+    (hperm : subset.Perm subset')
+    (hsub : MentsuHandChoiceSubmultiset subset superset) :
+    MentsuHandChoiceSubmultiset subset' superset := by
+  have hsubset : (subset : Multiset MentsuHandChoice) =
+      (subset' : Multiset MentsuHandChoice) :=
+    Multiset.coe_eq_coe.mpr hperm
+  simpa [MentsuHandChoiceSubmultiset, hsubset] using hsub
+
+lemma MentsuHandChoiceSubmultiset.mem
+    {subset superset : List MentsuHandChoice}
+    (hsub : MentsuHandChoiceSubmultiset subset superset)
+    {choice : MentsuHandChoice}
+    (hchoice : choice ∈ subset) :
+    choice ∈ superset :=
+  Multiset.mem_of_le hsub hchoice
+
+lemma MentsuHandChoiceSubmultiset.of_sublist
+    {subset superset : List MentsuHandChoice}
+    (hsub : List.Sublist subset superset) :
+    MentsuHandChoiceSubmultiset subset superset := by
+  induction hsub with
+  | slnil =>
+      exact bot_le
+  | cons choice hsub ih =>
+      simp only [MentsuHandChoiceSubmultiset] at ih ⊢
+      exact ih.trans (Multiset.le_add_left
+        _ ({choice} : Multiset MentsuHandChoice))
+  | cons_cons choice hsub ih =>
+      simp only [MentsuHandChoiceSubmultiset] at ih ⊢
+      exact add_le_add
+        (show ({choice} : Multiset MentsuHandChoice) ≤ {choice} from le_rfl)
+        ih
+
+lemma mentsuHandChoicesForTile_submultiset
+    (tile : Tile) (choices : List MentsuHandChoice) :
+    MentsuHandChoiceSubmultiset
+      (mentsuHandChoicesForTile tile choices) choices :=
+  MentsuHandChoiceSubmultiset.of_sublist
+    (mentsuHandChoicesForTile_sublist tile choices)
+
+lemma MentsuHandChoiceSubmultiset.append_left
+    (left right : List MentsuHandChoice) :
+    MentsuHandChoiceSubmultiset left (left ++ right) := by
+  change (left : Multiset MentsuHandChoice) ≤
+    (left : Multiset MentsuHandChoice) + right
+  exact Multiset.le_add_right _ _
+
+lemma MentsuHandChoiceSubmultiset.append_right
+    (left right : List MentsuHandChoice) :
+    MentsuHandChoiceSubmultiset right (left ++ right) := by
+  change (right : Multiset MentsuHandChoice) ≤
+    (left : Multiset MentsuHandChoice) + right
+  exact Multiset.le_add_left _ _
+
+lemma MentsuHandChoiceSubmultiset.append
+    {left left' right right' : List MentsuHandChoice}
+    (hleft : MentsuHandChoiceSubmultiset left left')
+    (hright : MentsuHandChoiceSubmultiset right right') :
+    MentsuHandChoiceSubmultiset (left ++ right) (left' ++ right') := by
+  change (left ++ right : Multiset MentsuHandChoice) ≤
+    (left' ++ right' : Multiset MentsuHandChoice)
+  change (left : Multiset MentsuHandChoice) + right ≤
+    (left' : Multiset MentsuHandChoice) + right'
+  exact add_le_add hleft hright
+
 lemma mentsuHandChoiceTaatsus_of_perm
     {choices choices' : List MentsuHandChoice}
     (hperm : List.Perm choices choices') :
