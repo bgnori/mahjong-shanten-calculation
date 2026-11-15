@@ -3303,6 +3303,41 @@ lemma MentsuHandBlockDecomposition.insert_choice_from_prefix
   exact reachableOnTilesFromWithCopyLimit_append
     hand before (tile :: after) state middle final hbefore hchosen
 
+lemma MentsuHandBlockDecomposition.append_choice_scan_from_prefix
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (processed before after : List Tile) (tile : Tile)
+    (fuel : Nat) (state : MentsuHandSearchState)
+    (choices suffix : List MentsuHandChoice)
+    (choice : MentsuHandChoice)
+    (hscanPrefix :
+      AppliesMentsuHandTileScan hand processed
+        initialMentsuHandState choices state)
+    (hchoices :
+      decomposition.blockChoices = choices ++ choice :: suffix)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hmatches : MentsuHandChoiceStateMatches state choices)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus choices)
+    (hpairEmpty : choices = [] → state.pair = none)
+    (hchoice : choice ∈ decomposition.blockChoices)
+    (htile : tile ∈ choiceTiles choice) :
+    ∃ final,
+      AppliesMentsuHandTileScan hand
+        (processed ++ before ++ tile :: after)
+        initialMentsuHandState (choices ++ [choice]) final ∧
+      reachableWithinWithCopyLimit hand
+        ((fuel + before.length) + 1 + after.length) final ∧
+      MentsuHandChoiceStateMatches final (choices ++ [choice]) := by
+  obtain ⟨final, hchosen, hfinal, hmatchesFinal⟩ :=
+    decomposition.insert_choice_scan_from_prefix
+      before after tile fuel state choices suffix choice
+      hchoices hreachable hmatches hhistory hpairEmpty
+      (decomposition.blockChoices_mem_all choice hchoice) htile
+  refine ⟨final, ?_, hfinal, hmatchesFinal⟩
+  simpa [List.append_assoc] using
+    AppliesMentsuHandTileScan.append hscanPrefix hchosen
+
 lemma MentsuHandBlockDecomposition.insert_blockChoice_from_prefix
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
     (fuel : Nat) (state : MentsuHandSearchState)
