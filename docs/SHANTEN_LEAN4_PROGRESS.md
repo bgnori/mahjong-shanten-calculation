@@ -258,6 +258,10 @@
   状態不変量と搭子履歴の部分列関係からコピー制限を導出する
   (`MentsuHandBlockDecomposition.completion_respects_of_choice_batch`) 補題を追加した。
   これにより、バッチ走査の各区間でコピー制限を検証する基盤ができた。
+- さらに、既に処理済みの選択接頭辞を持つ状態へバッチを追加する一般形
+  (`MentsuHandBlockDecomposition.completion_respects_of_choice_batch_append`) を追加した。
+  これにより、牌種バッチを連結する帰納構成でも、連結後の選択列全体に対する
+  コピー制限を直接供給できる。
 
 関連する主な補題:
 
@@ -339,6 +343,7 @@
 | 2026-11-15 | `taatsuCompletionTiles_of_perm` | 搭子列の順序変更に対する補完牌 Multiset の不変性を追加。 |
 | 2026-11-15 | `completionRespectsCopyLimit_of_history_perm` | 搭子履歴の順序変更後もコピー制限を保持する補題を追加。 |
 | 2026-11-15 | `mentsuHandChoiceTaatsus_sublist_of_sublist`, `completion_respects_of_choice_batch` | 選択列部分列から搭子履歴部分列を導き、初期状態からのバッチ適用にコピー制限を接続。 |
+| 2026-11-15 | `completion_respects_of_choice_batch_append` | 処理済み接頭辞を持つ状態へのバッチ追加にコピー制限を接続。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |

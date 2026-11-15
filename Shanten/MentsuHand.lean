@@ -3165,6 +3165,29 @@ lemma MentsuHandBlockDecomposition.completion_respects_of_choice_batch
   rw [← decomposition.blockChoices_taatsus]
   exact mentsuHandChoiceTaatsus_sublist_of_sublist hsub
 
+lemma MentsuHandBlockDecomposition.completion_respects_of_choice_batch_append
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    {tile : Tile} {state final : MentsuHandSearchState}
+    {pre choices : List MentsuHandChoice}
+    (hbatch :
+      AppliesMentsuHandChoiceBatch hand tile state choices final)
+    (hmatches : MentsuHandChoiceStateMatches state pre)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus pre)
+    (hsub :
+      List.Sublist (pre ++ choices) decomposition.blockChoices) :
+    CompletionRespectsCopyLimit final := by
+  have hmatchesFinal :=
+    hbatch.state_matches_append hmatches
+  have hhistoryFinal :=
+    hbatch.taatsuHistory_reverse_append hhistory
+  apply decomposition.completion_respects_of_sublist
+    (pre ++ choices) final hsub hmatchesFinal.1
+  rw [hhistoryFinal]
+  rw [← decomposition.blockChoices_taatsus]
+  exact mentsuHandChoiceTaatsus_sublist_of_sublist hsub
+
 lemma AppliesMentsuHandTileBatchScan.taatsuHistory_reverse_append
     {hand : Hand}
     {tiles : List Tile}
