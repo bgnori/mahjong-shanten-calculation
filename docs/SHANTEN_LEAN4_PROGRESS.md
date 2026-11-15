@@ -296,6 +296,11 @@
 - コピー制限付き前向き選択列を選択列の連結に沿って結合する
  (`AppliesMentsuHandChoicesForwardWithCopyLimit.append`) 補題を追加した。
  これにより、牌種ごとに構成した前向き経路を全体の経路へ連結できる。
+- コピー制限付き前向き経路について、処理済み接頭辞からの状態一致と搭子履歴対応を
+ 連結後の選択列へ伝播する
+ (`AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_append`,
+  `AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_append`)
+ 補題を追加した。
 
 関連する主な補題:
 
@@ -388,6 +393,7 @@
 | 2026-11-15 | `mentsuHandChoicesForTile_representative` | 牌種別抽出列の各選択が指定牌種を代表することを証明。 |
 | 2026-11-15 | `of_forward_for_representative_tile` | 代表牌が一定の選択列を同一牌種バッチへ変換。 |
 | 2026-11-15 | `AppliesMentsuHandChoicesForwardWithCopyLimit.append` | 牌種別のコピー制限付き前向き経路を連結。 |
+| 2026-11-15 | `ForwardWithCopyLimit.state_matches_append`, `ForwardWithCopyLimit.taatsuHistory_reverse_append` | 前向き経路の連結後に状態・搭子履歴対応を伝播。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
