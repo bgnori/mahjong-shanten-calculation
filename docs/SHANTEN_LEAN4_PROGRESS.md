@@ -90,6 +90,9 @@
   (`applyMentsuHandChoice.state_matches_cons`)。
 - `skip` 遷移では `used`・`pair`・`melds`・`taatsu` がすべて保持されることを
   証明した (`applyMentsuHandChoice_skip_fields`)。
+- `skip` 遷移が分解選択列を延長せずに
+  `MentsuHandChoiceStateMatches` を保持することを証明した
+  (`applyMentsuHandChoice.skip_state_matches`)。
 
 関連する主な補題:
 
@@ -140,6 +143,7 @@
 | 2026-11-15 | `MentsuHandChoiceStateMatches`, `state_matches_from_initial` | 状態不変条件を一つの述語へパッケージ化。 |
 | 2026-11-15 | `applyMentsuHandChoice.state_matches_cons` | 1回の選択遷移に対する状態不変条件の保存を証明。 |
 | 2026-11-15 | `applyMentsuHandChoice_skip_fields` | タイル順探索の `skip` 遷移がブロック状態を保持することを証明。 |
+| 2026-11-15 | `applyMentsuHandChoice.skip_state_matches` | `skip` 後も同じ分解接頭辞との状態対応を保持することを証明。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 

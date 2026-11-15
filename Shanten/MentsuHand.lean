@@ -2277,6 +2277,18 @@ lemma applyMentsuHandChoice_skip_fields
   simp [applyMentsuHandChoice, choiceTiles, choiceUsesMeld,
     choiceUsesTaatsu]
 
+lemma applyMentsuHandChoice.skip_state_matches
+    {hand : Hand} {state : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hvalid : ValidMentsuHandChoice hand state .skip)
+    (hmatches : MentsuHandChoiceStateMatches state choices) :
+    MentsuHandChoiceStateMatches
+      (applyMentsuHandChoice hand state .skip hvalid) choices := by
+  rcases hmatches with ⟨hused, hmelds, htaatsu⟩
+  simp [MentsuHandChoiceStateMatches, applyMentsuHandChoice,
+    choiceTiles, choiceUsesMeld, choiceUsesTaatsu, hused, hmelds,
+    htaatsu]
+
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
     (hvalid : ValidMentsuHandChoice hand state (.pair tile))
