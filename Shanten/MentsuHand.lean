@@ -3527,6 +3527,25 @@ lemma AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_in
       exact applyMentsuHandChoice.taatsuHistory_reverse_append_single
         _ hvalid ih
 
+lemma MentsuHandBlockDecomposition.completion_respects_of_forward_group
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    {state : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoicesForwardWithCopyLimit
+        hand initialMentsuHandState choices state)
+    (hsub : List.Sublist choices decomposition.blockChoices) :
+    CompletionRespectsCopyLimit state := by
+  have hmatches :=
+    hpath.state_matches_from_initial
+  have hhistory :=
+    hpath.taatsuHistory_reverse_from_initial
+  apply decomposition.completion_respects_of_sublist
+    choices state hsub hmatches.1
+  rw [hhistory]
+  rw [← decomposition.blockChoices_taatsus]
+  exact mentsuHandChoiceTaatsus_sublist_of_sublist hsub
+
 lemma AppliesMentsuHandChoicesForwardWithCopyLimit.completion_respects_from_prefix
     {hand : Hand} {state : MentsuHandSearchState}
     {choices suffix : List MentsuHandChoice}
