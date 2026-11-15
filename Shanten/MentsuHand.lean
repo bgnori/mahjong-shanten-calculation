@@ -1289,6 +1289,25 @@ def mentsuHandChoiceTaatsus : List MentsuHandChoice → List Taatsu
   | _ :: choices =>
       mentsuHandChoiceTaatsus choices
 
+lemma mentsuHandChoiceTaatsus_of_perm
+    {choices choices' : List MentsuHandChoice}
+    (hperm : List.Perm choices choices') :
+    List.Perm (mentsuHandChoiceTaatsus choices)
+      (mentsuHandChoiceTaatsus choices') := by
+  induction hperm with
+  | nil =>
+      exact .nil
+  | cons choice hperm ih =>
+      cases choice <;>
+        simp only [mentsuHandChoiceTaatsus, List.Perm.cons, ih]
+  | swap choice choice' choices =>
+      cases choice <;> cases choice' <;>
+        simp only [mentsuHandChoiceTaatsus] <;>
+        try rfl
+      apply List.Perm.swap
+  | trans hperm hperm' ih ih' =>
+      exact ih.trans ih'
+
 lemma mentsuHandChoiceTaatsus_append
     (choices choices' : List MentsuHandChoice) :
     mentsuHandChoiceTaatsus (choices ++ choices') =
@@ -1801,6 +1820,16 @@ def completedTargetForState (state : MentsuHandSearchState) (pair : Tile) :
 def CompletionRespectsCopyLimit (state : MentsuHandSearchState) : Prop :=
   ∀ tile,
     (state.used + taatsuCompletionTiles state.taatsuHistory.reverse).count tile ≤ 4
+
+lemma completionRespectsCopyLimit_of_history_perm
+    (state : MentsuHandSearchState) (taatsus : List Taatsu)
+    (hperm : List.Perm state.taatsuHistory.reverse taatsus)
+    (hcopy : CompletionRespectsCopyLimit state) :
+    ∀ tile,
+      (state.used + taatsuCompletionTiles taatsus).count tile ≤ 4 := by
+  intro tile
+  rw [← taatsuCompletionTiles_of_perm hperm]
+  exact hcopy tile
 
 lemma MentsuHandBlockDecomposition.completion_respects_of_prefix
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
