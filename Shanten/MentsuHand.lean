@@ -3156,6 +3156,31 @@ lemma AppliesMentsuHandTileScan.append_skips
           exact .skip tile (tiles ++ rest) start middle' final hvalid'
             hnext' (ih htail' htail)
 
+lemma AppliesMentsuHandTileScan.append
+    {hand : Hand} {before rest : List Tile}
+    {start middle final : MentsuHandSearchState}
+    {choicesBefore choicesAfter : List MentsuHandChoice}
+    (hbefore :
+      AppliesMentsuHandTileScan hand before start choicesBefore middle)
+    (htail :
+      AppliesMentsuHandTileScan hand rest middle choicesAfter final) :
+    AppliesMentsuHandTileScan hand (before ++ rest) start
+      (choicesBefore ++ choicesAfter) final := by
+  induction before generalizing start middle choicesBefore with
+  | nil =>
+      cases hbefore
+      simpa using htail
+  | cons tile tiles ih =>
+      cases hbefore with
+      | skip =>
+          rename_i middle' hvalid' hnext' htail'
+          exact .skip tile (tiles ++ rest) start middle' final hvalid'
+            hnext' (ih htail' htail)
+      | choose =>
+          rename_i middle' choice hchoice' htile' hvalid' hcopy' htail'
+          exact .choose tile (tiles ++ rest) start middle' final choice
+            hchoice' htile' hvalid' hcopy' (ih htail' htail)
+
 lemma MentsuHandBlockDecomposition.insert_choice_scan_from_prefix
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
     (before after : List Tile) (tile : Tile)
