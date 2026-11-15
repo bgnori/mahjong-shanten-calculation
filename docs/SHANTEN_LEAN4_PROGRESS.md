@@ -46,6 +46,8 @@
 - 非 `skip` の面子・搭子・雀頭選択ごとに、`mentsuHandTileOrder` 上で
   選択を処理できる代表牌が存在することを証明した
   (`exists_tile_mem_mentsuHandTileOrder_of_choice`)。
+- 代表牌を `before ++ tile :: after` というタイル順の分割に変換する補題を追加した
+  (`exists_mentsuHandTileOrder_split_of_choice`)。
 
 関連する主な補題:
 
@@ -81,6 +83,7 @@
 | 2026-11-15 | `MentsuHand.lean` の既存補題を確認 | 全ターゲット列挙DPの最小値と `IsShapeShanten` の一致が既に証明済みであることを進捗へ反映。 |
 | 2026-11-15 | `validMentsuHandTargetDistance_mem_of_constrainedBlockSearch` | 制約付きブロック探索の結果を、仕様一致済みのターゲット距離集合へ接続。 |
 | 2026-11-15 | `exists_tile_mem_mentsuHandTileOrder_of_choice` | 各ブロック選択をタイル順探索へ挿入するための代表牌の存在を証明。 |
+| 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 
 ## 検証状況
 

@@ -600,6 +600,18 @@ lemma exists_tile_mem_mentsuHandTileOrder_of_choice
             tile_mem_mentsuHandTileOrder _, by
               simp [choiceTiles, meldTiles]⟩
 
+lemma exists_mentsuHandTileOrder_split_of_choice
+    (choice : MentsuHandChoice) (hchoice : choice ≠ .skip) :
+    ∃ before after tile,
+      mentsuHandTileOrder = before ++ tile :: after ∧
+        tile ∈ choiceTiles choice := by
+  obtain ⟨tile, htileOrder, htileChoice⟩ :=
+    exists_tile_mem_mentsuHandTileOrder_of_choice choice hchoice
+  obtain ⟨before, after, hsplit⟩ :=
+    (List.mem_iff_append.mp htileOrder)
+  refine ⟨before, after, tile, ?_, htileChoice⟩
+  exact hsplit
+
 /-- A mentsu-hand-form target before the fixed melds are added. -/
 def mentsuHandTarget (pair : Tile) (melds : List Meld) : Multiset Tile :=
   pairTiles pair + meldsTiles melds
