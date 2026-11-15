@@ -3,7 +3,7 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "runArgs": ["--cpus=2", "--memory=16g"],
+  "runArgs": ["--cpus=2", "--memory=6g"],
   "mounts": [
     "source=${localEnv:HOME}/.cache/mathlib,target=/home/vscode/.cache/mathlib,type=bind"
   ],
