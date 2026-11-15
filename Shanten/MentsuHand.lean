@@ -2802,6 +2802,26 @@ lemma applyMentsuHandChoice.state_matches_append_single
       mentsuHandChoiceTaatsuCount_append, Nat.add_comm,
       Nat.add_left_comm, Nat.add_assoc] <;> ac_rfl
 
+lemma AppliesMentsuHandChoiceBatch.state_matches_append
+    {hand : Hand} {tile : Tile}
+    {state final : MentsuHandSearchState}
+    {pre choices : List MentsuHandChoice}
+    (hbatch :
+      AppliesMentsuHandChoiceBatch hand tile state choices final)
+    (hmatches : MentsuHandChoiceStateMatches state pre) :
+    MentsuHandChoiceStateMatches final (pre ++ choices) := by
+  induction hbatch generalizing pre with
+  | nil =>
+      simpa using hmatches
+  | @cons state middle choices choice htail hchoice htile hvalid hcopy ih =>
+      have hstate :
+          MentsuHandChoiceStateMatches state (pre ++ choices) :=
+        ih hmatches
+      have hfinal :=
+        applyMentsuHandChoice.state_matches_append_single
+          choice hvalid hstate
+      simpa [List.append_assoc] using hfinal
+
 lemma applyMentsuHandChoice.taatsuHistory_reverse_append_single
     {hand : Hand} {state : MentsuHandSearchState}
     {choices : List MentsuHandChoice} (choice : MentsuHandChoice)
