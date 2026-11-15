@@ -321,6 +321,84 @@ lemma mentsuHandChoicesWithoutTile_representative_ne
         · exact hrep
         · exact ih hmem
 
+lemma mentsuHandChoicesWithoutTile_mem_of_mem_of_ne
+    {tile : Tile} {choices : List MentsuHandChoice}
+    {choice : MentsuHandChoice}
+    (hmem : choice ∈ choices)
+    (hne : mentsuHandChoiceRepresentative choice ≠ some tile) :
+    choice ∈ mentsuHandChoicesWithoutTile tile choices := by
+  induction choices with
+  | nil =>
+      simp at hmem
+  | cons head choices ih =>
+      by_cases hrep :
+          mentsuHandChoiceRepresentative head = some tile
+      · simp only [mentsuHandChoicesWithoutTile, hrep]
+        have hmem' : choice = head ∨ choice ∈ choices := by
+          simpa using hmem
+        rcases hmem' with hmem | hmem
+        · subst choice
+          exact (hne hrep).elim
+        · exact ih hmem
+      · simp only [mentsuHandChoicesWithoutTile, hrep]
+        have hmem' : choice = head ∨ choice ∈ choices := by
+          simpa using hmem
+        rcases hmem' with hmem | hmem
+        · subst choice
+          simp
+        · exact List.mem_cons_of_mem head (ih hmem)
+
+lemma mentsuHandChoicesWithoutTileForTiles_mem
+    {tiles : List Tile} {choices : List MentsuHandChoice}
+    {choice : MentsuHandChoice}
+    (hmem : choice ∈
+      mentsuHandChoicesWithoutTileForTiles tiles choices) :
+    choice ∈ choices := by
+  induction tiles generalizing choices with
+  | nil =>
+      exact hmem
+  | cons tile tiles ih =>
+      exact mentsuHandChoicesWithoutTile_mem (ih hmem)
+
+lemma mentsuHandChoicesWithoutTileForTiles_representative_ne
+    {tiles : List Tile} {choices : List MentsuHandChoice}
+    {choice : MentsuHandChoice}
+    (hmem : choice ∈
+      mentsuHandChoicesWithoutTileForTiles tiles choices) :
+    ∀ tile, tile ∈ tiles →
+      mentsuHandChoiceRepresentative choice ≠ some tile := by
+  induction tiles generalizing choices with
+  | nil =>
+      intro tile htile
+      simp at htile
+  | cons tile tiles ih =>
+      intro target htarget
+      have hmemImmediate :
+          choice ∈ mentsuHandChoicesWithoutTile tile choices :=
+        mentsuHandChoicesWithoutTileForTiles_mem hmem
+      simp only [List.mem_cons] at htarget
+      rcases htarget with rfl | htarget
+      · exact mentsuHandChoicesWithoutTile_representative_ne
+          hmemImmediate
+      · exact ih hmem target htarget
+
+lemma mentsuHandChoicesWithoutTileForTiles_eq_nil
+    {tiles : List Tile} {choices : List MentsuHandChoice}
+    (hrep :
+      ∀ choice, choice ∈ choices →
+        ∃ tile, tile ∈ tiles ∧
+          mentsuHandChoiceRepresentative choice = some tile) :
+    mentsuHandChoicesWithoutTileForTiles tiles choices = [] := by
+  by_contra hne
+  obtain ⟨choice, hchoice⟩ :=
+    List.exists_mem_of_ne_nil
+      (mentsuHandChoicesWithoutTileForTiles tiles choices) hne
+  obtain ⟨tile, htile, hchoiceTile⟩ :=
+    hrep choice
+      (mentsuHandChoicesWithoutTileForTiles_mem hchoice)
+  exact (mentsuHandChoicesWithoutTileForTiles_representative_ne hchoice
+    tile htile) hchoiceTile
+
 lemma mentsuHandChoicesGroupedByTiles_perm_append
     {tiles : List Tile} {choices : List MentsuHandChoice}
     (hrep :
@@ -360,6 +438,20 @@ lemma mentsuHandChoicesGroupedByTiles_perm_append
         ((List.Perm.append_left
             (mentsuHandChoicesForTile tile choices) hgrouped).trans
           hpartition)
+
+lemma mentsuHandChoicesGroupedByTiles_perm
+    {tiles : List Tile} {choices : List MentsuHandChoice}
+    (hrep :
+      ∀ choice, choice ∈ choices →
+        ∃ tile, tile ∈ tiles ∧
+          mentsuHandChoiceRepresentative choice = some tile) :
+    List.Perm
+      (mentsuHandChoicesGroupedByTiles tiles choices)
+      choices := by
+  have hperm :=
+    mentsuHandChoicesGroupedByTiles_perm_append hrep
+  rw [mentsuHandChoicesWithoutTileForTiles_eq_nil hrep] at hperm
+  simpa using hperm
 
 lemma list_sublist_append_single_of_sublist
     {pre : List α} {choice : α} {suffix target : List α}

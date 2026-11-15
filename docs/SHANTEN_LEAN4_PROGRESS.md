@@ -352,7 +352,9 @@
 与えられた牌種列に含まれる選択列について、グループ列と残余列の順列性を
 証明した。さらに、この順列性から使用牌・面子数・搭子数をまとめた
 `MentsuHandChoiceStateMatches` を、グループ列と残余列へ移送する補題を追加した。
-残余列が空になる条件と、各グループを実際のバッチ走査へ変換する部分は未完了である。
+全選択の代表牌が対象牌種列に含まれる場合の残余列の空性と、
+グループ列全体の `List.Perm` を証明した。各グループを実際のバッチ走査へ
+変換する部分は未完了である。
 ただし、これだけでは牌種順バッチ走査の完全性や雀頭状態の追跡はまだ解決しない。
 
 ### 次に必要な証明（レビュー後）
@@ -384,7 +386,7 @@
 
 | 日付 | 変更 | 意味 |
 |---|---|---|
-| 2026-11-15 | `MentsuHandChoiceSubmultiset`, `mentsuHandChoicesForTile_partition`, `mentsuHandChoicesGroupedByTiles_perm_append`, `mentsuHandChoiceStateMatches_of_groupedByTiles` | 牌種順の再グループ化に向け、順序を固定せず重複度を保持する選択列包含を導入。代表牌グループの反復分割と、グループ列・残余列の順列性、状態不変量の移送を証明。 |
+| 2026-11-15 | `MentsuHandChoiceSubmultiset`, `mentsuHandChoicesForTile_partition`, `mentsuHandChoicesGroupedByTiles_perm_append`, `mentsuHandChoicesGroupedByTiles_perm`, `mentsuHandChoiceStateMatches_of_groupedByTiles` | 牌種順の再グループ化に向け、順序を固定せず重複度を保持する選択列包含を導入。代表牌グループの反復分割、残余列の空性、グループ列の順列性、状態不変量の移送を証明。 |
 | 2026-11-15 | レビュー後の軌道修正 | 牌種順バッチ走査を正式な中間関係として扱い、条件付き分解の健全性と全13枚手の一般完全性を分離。順序依存・雀頭グループ・一般探索の未完了範囲を明記。 |
 | 2026-11-15 | `af52253` `proof: derive completion reachability from block decomposition` | ブロック分解から面子手完成形への到達性を導出する補題を追加。 |
 | 2026-11-15 | `acb37c9` `Reduce Lean build memory with focused mathlib imports` | Leanビルドのメモリ使用量を抑えるため import を整理。 |
