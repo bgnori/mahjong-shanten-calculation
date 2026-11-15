@@ -2770,6 +2770,30 @@ inductive AppliesMentsuHandChoicesForwardWithCopyLimit (hand : Hand) :
         (choices ++ [choice])
         (applyMentsuHandChoice hand middle choice hvalid)
 
+lemma AppliesMentsuHandChoiceBatch.of_forward
+    {hand : Hand} {tile : Tile}
+    {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand
+        state choices final)
+    (htile :
+      ∀ choice, choice ∈ choices → tile ∈ choiceTiles choice) :
+    AppliesMentsuHandChoiceBatch hand tile state choices final := by
+  induction hpath generalizing tile with
+  | nil =>
+      exact .nil _
+  | @snoc middle choices choice hpath hchoice hvalid hcopy ih =>
+      have htail :=
+        ih (fun candidate hcandidate =>
+          htile candidate (by
+            exact List.mem_append_left [choice] hcandidate))
+      have hchoiceTile :
+          tile ∈ choiceTiles choice :=
+        htile choice (by simp)
+      exact .cons _ _ (applyMentsuHandChoice hand middle choice hvalid)
+        choices choice htail hchoice hchoiceTile hvalid hcopy
+
 lemma reachableWithinWithCopyLimit_of_forward_choice_path
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}

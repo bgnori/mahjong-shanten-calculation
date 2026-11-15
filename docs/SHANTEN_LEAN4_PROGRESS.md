@@ -192,6 +192,8 @@
   `reachableWithinWithCopyLimit_of_tile_batch_scan` を追加した。
 - 同一牌種位置で構成した2つのバッチを選択列の連結として結合する
   `AppliesMentsuHandChoiceBatch.append` を追加した。
+- 前向きなコピー制限付き選択列について、すべての選択が同じ牌種を含むなら
+  `AppliesMentsuHandChoiceBatch.of_forward` により同一牌種バッチへ変換できることを証明した。
 - 一回走査関係の `skip`・`choose` 帰納に対して、選択列接頭辞と探索状態の
   `MentsuHandChoiceStateMatches` を最後まで保持する
   (`AppliesMentsuHandTileScan.state_matches_append`,
@@ -318,7 +320,7 @@
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
-| 2026-11-15 | `b5e3bf1`, `622fd10`, `d6547eb`, `5ea7f63`, `0638aad`, `4c4bc5a` / `AppliesMentsuHandChoiceBatch`, `AppliesMentsuHandTileBatchScan` | 同一牌種を共有する複数ブロックをバッチ処理する中間関係を追加し、状態不変量・搭子履歴対応・制約付き到達性・牌種走査全体の状態追跡・バッチ連結を証明。既存の一選択走査だけでは表せない分解を明示化。 |
+| 2026-11-15 | `b5e3bf1`, `622fd10`, `d6547eb`, `5ea7f63`, `0638aad`, `4c4bc5a`, `7ac5ac4` / `AppliesMentsuHandChoiceBatch`, `AppliesMentsuHandTileBatchScan` | 同一牌種を共有する複数ブロックをバッチ処理する中間関係を追加し、状態不変量・搭子履歴対応・制約付き到達性・牌種走査全体の状態追跡・バッチ連結・前向き選択列からのバッチ構成を証明。既存の一選択走査だけでは表せない分解を明示化。 |
 
 ## 検証状況
 
