@@ -2024,6 +2024,20 @@ lemma applyMentsuHandChoice_pair_eq_some
       some tile := by
   simp [applyMentsuHandChoice, hpair]
 
+lemma applyMentsuHandChoice_pair_eq_of_not_pair
+    (hand : Hand) (state : MentsuHandSearchState)
+    (choice : MentsuHandChoice)
+    (hvalid : ValidMentsuHandChoice hand state choice)
+    (pair : Tile) (hpair : state.pair = some pair)
+    (hchoice : choiceUsesPair choice = false) :
+    (applyMentsuHandChoice hand state choice hvalid).pair =
+      some pair := by
+  cases choice with
+  | skip | taatsu | meld =>
+      simp [applyMentsuHandChoice, hpair]
+  | pair tile =>
+      simp [choiceUsesPair] at hchoice
+
 lemma nextMentsuHandStateWithCopyLimit_toNext
     (hand : Hand) (state next : MentsuHandSearchState)
     (hnext : NextMentsuHandStateWithCopyLimit hand state next) :
