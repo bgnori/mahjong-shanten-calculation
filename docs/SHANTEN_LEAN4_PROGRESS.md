@@ -276,6 +276,8 @@
   `List.Perm` で不変であることを
   (`mentsuHandChoiceMeldCount_of_perm`,
    `mentsuHandChoiceTaatsuCount_of_perm`) として公開した。
+- 既存の `mentsuHandChoiceStateMatches_of_perm` を上記の公開補題から構成する形へ
+ 整理し、牌種順への並べ替え後も状態一致を直接再利用できるようにした。
 
 関連する主な補題:
 
@@ -362,6 +364,7 @@
 | 2026-11-15 | `mentsuHandChoiceTiles_of_perm` | 選択列の順序変更に対する使用牌 Multiset の不変性を追加。 |
 | 2026-11-15 | `completion_respects_of_perm` | 選択列の並べ替え後も使用牌・搭子補完のコピー制限を保持。 |
 | 2026-11-15 | `mentsuHandChoiceMeldCount_of_perm`, `mentsuHandChoiceTaatsuCount_of_perm` | 並べ替え後の状態カウンタ不変性を追加。 |
+| 2026-11-15 | `mentsuHandChoiceStateMatches_of_perm` の整理 | 公開した順序不変性補題を状態一致の証明へ接続。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
