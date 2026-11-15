@@ -3583,6 +3583,81 @@ lemma MentsuHandBlockDecomposition.completion_respects_of_forward_group
   rw [← decomposition.blockChoices_taatsus]
   exact mentsuHandChoiceTaatsus_sublist_of_sublist hsub
 
+lemma MentsuHandBlockDecomposition.forward_of_sublist
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre choices : List MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hsub :
+      List.Sublist (pre ++ choices) decomposition.blockChoices)
+    (hmatches : MentsuHandChoiceStateMatches state pre)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus pre)
+    (hpairEmpty : pre = [] → state.pair = none)
+    (hnotPair :
+      ∀ choice, choice ∈ choices →
+        choiceUsesPair choice = false) :
+    ∃ final,
+      AppliesMentsuHandChoicesForwardWithCopyLimit
+        hand state choices final ∧
+      MentsuHandChoiceStateMatches final (pre ++ choices) ∧
+      final.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus (pre ++ choices) := by
+  induction choices generalizing pre state with
+  | nil =>
+      refine ⟨state, .nil state, ?_, ?_⟩
+      · simpa using hmatches
+      · simpa using hhistory
+  | cons choice choices ih =>
+      have hsubHead :=
+        list_sublist_append_single_of_sublist hsub
+      have hpair :
+          state.pair.isNone ∨ choiceUsesPair choice = false := by
+        by_cases hpre : pre = []
+        · left
+          simpa [hpre] using hpairEmpty hpre
+        · right
+          exact hnotPair choice (by simp)
+      have hvalid :=
+        decomposition.valid_next_choice_of_sublist_append
+          pre choice choices state hsub hmatches hpair
+      let next := applyMentsuHandChoice hand state choice hvalid
+      have hmatchesNext :=
+        applyMentsuHandChoice.state_matches_append_single
+          choice hvalid hmatches
+      have hhistoryNext :=
+        applyMentsuHandChoice.taatsuHistory_reverse_append_single
+          choice hvalid hhistory
+      have hcopyNext : CompletionRespectsCopyLimit next := by
+        apply decomposition.completion_respects_of_sublist
+          (pre ++ [choice]) next hsubHead hmatchesNext.1
+        rw [hhistoryNext, ← decomposition.blockChoices_taatsus]
+        exact mentsuHandChoiceTaatsus_sublist_of_sublist hsubHead
+      have hsubTail :
+          List.Sublist ((pre ++ [choice]) ++ choices)
+            decomposition.blockChoices := by
+        simpa [List.append_assoc] using hsub
+      obtain ⟨final, htail, hmatchesFinal, hhistoryFinal⟩ :=
+        ih (pre := pre ++ [choice]) (state := next)
+          hsubTail hmatchesNext hhistoryNext
+          (by intro h; simp at h)
+          (by
+            intro candidate hcandidate
+            exact hnotPair candidate (by simp [hcandidate]))
+      have hhead :
+          AppliesMentsuHandChoicesForwardWithCopyLimit
+            hand state [choice] next :=
+        .snoc state state [] choice
+          (.nil state)
+          (decomposition.blockChoices_mem_all choice
+            (hsub.mem (by simp)))
+          hvalid hcopyNext
+      have hpath := hhead.append htail
+      refine ⟨final, ?_, ?_, ?_⟩
+      · simpa [List.append_assoc] using hpath
+      · simpa [List.append_assoc] using hmatchesFinal
+      · simpa [List.append_assoc] using hhistoryFinal
+
 lemma AppliesMentsuHandChoicesForwardWithCopyLimit.completion_respects_from_prefix
     {hand : Hand} {state : MentsuHandSearchState}
     {choices suffix : List MentsuHandChoice}
