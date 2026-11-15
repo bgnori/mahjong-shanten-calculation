@@ -2287,6 +2287,28 @@ lemma countDeficit_tiles_add_mono
   simp only [Pi.add_apply]
   omega
 
+lemma countDeficit_add_le_card_of_le
+    (current : TileCounts) (tiles extra : Multiset Tile)
+    (hbelow : ∀ tile, (countsOfTiles tiles) tile ≤ current tile) :
+    countDeficit current (countsOfTiles (tiles + extra)) ≤ extra.card := by
+  unfold countDeficit
+  calc
+    ∑ tile : Tile, (countsOfTiles (tiles + extra) tile - current tile) =
+        ∑ tile : Tile,
+          (countsOfTiles tiles tile + countsOfTiles extra tile -
+            current tile) := by
+      apply Finset.sum_congr rfl
+      intro tile _
+      rw [countsOfTiles_add]
+      rfl
+    _ ≤ ∑ tile : Tile, countsOfTiles extra tile := by
+      apply Finset.sum_le_sum
+      intro tile _
+      have htile := hbelow tile
+      omega
+    _ = extra.card := by
+      exact countsOfTiles_sum_eq_card extra
+
 /-- Extend a target state and add only the newly incurred deficit. -/
 def mentsuHandCostStateAdd (hand : Hand)
     (state : Multiset Tile × Nat) (extra : Multiset Tile) :
@@ -2808,6 +2830,112 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget
     pair melds hsum hvalid hmelds
   exact targetHand_hasTiles_countsOfTiles before
     (mentsuHandTarget pair melds)
+
+set_option maxHeartbeats 1000000 in
+lemma reachesCompletion_mentsuHand_of_blockDecomposition
+    (hand : Hand) (h13 : IsThirteenTileHand hand)
+    (decomposition : MentsuHandBlockDecomposition hand) :
+    ∃ distance : Nat, distance ≤ 4 ∧
+      ReachesCompletion Complete .mentsuHand hand distance := by
+  let melds :=
+    decomposition.melds ++
+      taatsuCompletionMelds decomposition.taatsus
+  have hmelds : melds.length + hand.fixedMelds = 4 := by
+    dsimp [melds]
+    exact decomposition.completedMeldCount
+  have htarget :
+      mentsuHandTarget decomposition.pair melds =
+        decomposition.completedTarget := by
+    rw [MentsuHandBlockDecomposition.completedTarget_eq]
+    rfl
+  have hsumTarget :
+      (∑ tile : Tile, (mentsuHandTarget decomposition.pair melds).count tile) =
+        (∑ tile : Tile, hand.counts tile) + 1 := by
+    calc
+      (∑ tile : Tile,
+          (mentsuHandTarget decomposition.pair melds).count tile) =
+          decomposition.completedTarget.card := by
+        change
+          (∑ tile : Tile,
+            countsOfTiles (mentsuHandTarget decomposition.pair melds) tile) =
+            decomposition.completedTarget.card
+        rw [htarget, countsOfTiles_sum_eq_card]
+      _ = 14 := by
+        have hbase :
+            (mentsuHandTargetWithTaatsu decomposition.pair
+              decomposition.melds decomposition.taatsus).card =
+              2 + 3 * decomposition.melds.length +
+                2 * decomposition.taatsus.length := by
+          have htaatsu :
+              (taatsuHistoryTiles decomposition.taatsus).card =
+                2 * decomposition.taatsus.length := by
+            induction decomposition.taatsus with
+            | nil =>
+                rfl
+            | cons taatsu taatsus ih =>
+                cases taatsu <;>
+                  simp [taatsuHistoryTiles, taatsuTiles, pairTiles, ih,
+                    Multiset.card_add] <;> omega
+          unfold mentsuHandTargetWithTaatsu mentsuHandTarget
+          rw [Multiset.card_add, Multiset.card_add, pairTiles_card,
+            meldsTiles_card, htaatsu]
+        have hextra :
+            (taatsuCompletionTiles decomposition.taatsus).card =
+              decomposition.taatsus.length :=
+          taatsuCompletionTiles_card decomposition.taatsus
+        have hblocks := decomposition.blocks
+        have hfixed := h13.1
+        have htargetCard : decomposition.completedTarget.card = 14 := by
+          change
+            (mentsuHandTargetWithTaatsu decomposition.pair
+              decomposition.melds decomposition.taatsus +
+              taatsuCompletionTiles decomposition.taatsus).card = 14
+          rw [Multiset.card_add, hbase,
+            taatsuCompletionTiles_card decomposition.taatsus]
+          omega
+        exact htargetCard
+      _ = (∑ tile : Tile, hand.counts tile) + 1 := by
+        have hcount := h13.2.1
+        rw [show (∑ tile : Tile, hand.counts tile) = tileCount hand from rfl]
+        omega
+  have hdistance :
+      mentsuHandTargetDistance hand decomposition.pair melds ≤ 4 := by
+    rw [mentsuHandTargetDistance_eq_countDeficit, htarget]
+    change countDeficit hand.counts
+      (countsOfTiles
+        (mentsuHandTargetWithTaatsu decomposition.pair
+          decomposition.melds decomposition.taatsus +
+          taatsuCompletionTiles decomposition.taatsus)) ≤ 4
+    have hbound := countDeficit_add_le_card_of_le
+      hand.counts
+      (mentsuHandTargetWithTaatsu decomposition.pair
+        decomposition.melds decomposition.taatsus)
+      (taatsuCompletionTiles decomposition.taatsus)
+      decomposition.targetWithinHand
+    have hblocks := decomposition.blocks
+    have hfixed := h13.1
+    calc
+      countDeficit hand.counts
+          (countsOfTiles
+            (mentsuHandTargetWithTaatsu decomposition.pair
+              decomposition.melds decomposition.taatsus +
+              taatsuCompletionTiles decomposition.taatsus)) ≤
+          (taatsuCompletionTiles decomposition.taatsus).card := hbound
+      _ = decomposition.taatsus.length :=
+        taatsuCompletionTiles_card decomposition.taatsus
+      _ ≤ 4 := by omega
+  have hreach :=
+    reachesCompletion_mentsuHand_of_one_more_target_tile
+      hand (countsOfTiles (mentsuHandTarget decomposition.pair melds))
+      decomposition.pair melds hsumTarget h13.2.2
+      (by
+        rw [htarget]
+        exact decomposition.validCounts_completedTarget)
+      hmelds
+      (targetHand_hasTiles_countsOfTiles hand
+        (mentsuHandTarget decomposition.pair melds))
+  rcases hreach with ⟨distance, hdistanceEq, hreach⟩
+  exact ⟨distance, by rw [hdistanceEq]; exact hdistance, hreach⟩
 
 lemma complete_mentsuHand_of_mentsuHandTarget_distance_zero
     (before : Hand) (pair : Tile) (melds : List Meld)
