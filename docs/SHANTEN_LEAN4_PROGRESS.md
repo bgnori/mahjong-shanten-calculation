@@ -113,6 +113,11 @@
 - コピー制限付き前向き選択列でも、初期状態から
   `MentsuHandChoiceStateMatches` が成立することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_from_initial`)。
+- 選択列の搭子部分を抽出する `mentsuHandChoiceTaatsus` と、選択列の末尾追加に
+  対応する `mentsuHandChoiceTaatsus_append` を追加した。
+- コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
+  搭子列と一致することを証明した
+  (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
 - 既存の制約付き到達状態に、妥当性とコピー制限を満たす選択を1つ追加して
   `reachableWithinWithCopyLimit` を得る補題を追加した
   (`reachableWithinWithCopyLimit_append_choice`)。
@@ -175,6 +180,7 @@
 | 2026-11-15 | `reachableWithinWithCopyLimit_of_forward_choice_path` | コピー制限付き前向き選択列を制約付き到達性へ変換。 |
 | 2026-11-15 | `AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_from_initial` | コピー制限付き選択列の状態不変条件を証明。 |
 | 2026-11-15 | `reachableWithinWithCopyLimit_append_choice` | 妥当な選択を制約付き到達性へ接続。 |
+| 2026-11-15 | `mentsuHandChoiceTaatsus`, `taatsuHistory_reverse_from_initial` | 選択列の搭子列と探索状態の `taatsuHistory` を対応付け。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 

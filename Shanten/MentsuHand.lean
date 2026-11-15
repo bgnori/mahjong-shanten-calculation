@@ -1245,6 +1245,23 @@ def mentsuHandChoiceTaatsuCount : List MentsuHandChoice → Nat
       (if choiceUsesTaatsu choice = true then 1 else 0) +
         mentsuHandChoiceTaatsuCount choices
 
+def mentsuHandChoiceTaatsus : List MentsuHandChoice → List Taatsu
+  | [] => []
+  | .taatsu taatsu :: choices =>
+      taatsu :: mentsuHandChoiceTaatsus choices
+  | _ :: choices =>
+      mentsuHandChoiceTaatsus choices
+
+lemma mentsuHandChoiceTaatsus_append
+    (choices choices' : List MentsuHandChoice) :
+    mentsuHandChoiceTaatsus (choices ++ choices') =
+      mentsuHandChoiceTaatsus choices ++ mentsuHandChoiceTaatsus choices' := by
+  induction choices with
+  | nil => rfl
+  | cons choice choices ih =>
+      cases choice <;>
+        simp only [List.cons_append, mentsuHandChoiceTaatsus, ih]
+
 lemma mentsuHandChoiceMeldCount_append
     (left right : List MentsuHandChoice) :
     mentsuHandChoiceMeldCount (left ++ right) =
@@ -2362,6 +2379,19 @@ lemma applyMentsuHandChoice.state_matches_append_single
       mentsuHandChoiceTaatsuCount_append, Nat.add_comm,
       Nat.add_left_comm, Nat.add_assoc] <;> ac_rfl
 
+lemma applyMentsuHandChoice.taatsuHistory_reverse_append_single
+    {hand : Hand} {state : MentsuHandSearchState}
+    {choices : List MentsuHandChoice} (choice : MentsuHandChoice)
+    (hvalid : ValidMentsuHandChoice hand state choice)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus choices) :
+    (applyMentsuHandChoice hand state choice hvalid).taatsuHistory.reverse =
+      mentsuHandChoiceTaatsus (choices ++ [choice]) := by
+  cases choice <;>
+    simp [applyMentsuHandChoice, mentsuHandChoiceTaatsus,
+      mentsuHandChoiceTaatsus_append, hhistory, List.reverse_append]
+
 lemma AppliesMentsuHandChoicesForward.state_matches_from_initial
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
@@ -2392,6 +2422,21 @@ lemma AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_from_initial
         mentsuHandChoiceTaatsuCount]
   | @snoc state middle choices hpath hchoice hvalid hcopy ih =>
       exact applyMentsuHandChoice.state_matches_append_single
+        _ hvalid ih
+
+lemma AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial
+    {hand : Hand} {final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand
+        initialMentsuHandState choices final) :
+    final.taatsuHistory.reverse =
+      mentsuHandChoiceTaatsus choices := by
+  induction hpath with
+  | nil =>
+      rfl
+  | @snoc state middle choices hpath hchoice hvalid hcopy ih =>
+      exact applyMentsuHandChoice.taatsuHistory_reverse_append_single
         _ hvalid ih
 
 lemma applyMentsuHandChoice_skip_fields
