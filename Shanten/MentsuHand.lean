@@ -3065,6 +3065,28 @@ inductive AppliesMentsuHandChoicesForwardWithCopyLimit (hand : Hand) :
         (choices ++ [choice])
         (applyMentsuHandChoice hand middle choice hvalid)
 
+lemma AppliesMentsuHandChoicesForwardWithCopyLimit.append
+    {hand : Hand}
+    {state middle final : MentsuHandSearchState}
+    {choicesBefore choicesAfter : List MentsuHandChoice}
+    (hbefore :
+      AppliesMentsuHandChoicesForwardWithCopyLimit
+        hand state choicesBefore middle)
+    (hafter :
+      AppliesMentsuHandChoicesForwardWithCopyLimit
+        hand middle choicesAfter final) :
+    AppliesMentsuHandChoicesForwardWithCopyLimit
+      hand state (choicesBefore ++ choicesAfter) final := by
+  induction hafter generalizing state choicesBefore with
+  | nil =>
+      simpa using hbefore
+  | @snoc middle choices choice hpath hchoice hvalid hcopy ih =>
+      have hmiddle :=
+        ih hbefore
+      rw [← List.append_assoc]
+      exact .snoc _ _ (choicesBefore ++ choices) choice
+        hmiddle hchoice hvalid hcopy
+
 lemma AppliesMentsuHandChoiceBatch.of_forward
     {hand : Hand} {tile : Tile}
     {state final : MentsuHandSearchState}

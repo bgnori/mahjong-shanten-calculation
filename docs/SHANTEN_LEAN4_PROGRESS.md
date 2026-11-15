@@ -293,6 +293,9 @@
  (`AppliesMentsuHandChoiceBatch.of_forward_for_representative_tile`) ラッパーを追加した。
 - 代表牌による抽出列の各要素が指定牌種を持つことを利用し、抽出列上の前向き
  選択列を同一牌種バッチへ変換する前提を明示する補題を追加した。
+- コピー制限付き前向き選択列を選択列の連結に沿って結合する
+ (`AppliesMentsuHandChoicesForwardWithCopyLimit.append`) 補題を追加した。
+ これにより、牌種ごとに構成した前向き経路を全体の経路へ連結できる。
 
 関連する主な補題:
 
@@ -384,6 +387,7 @@
 | 2026-11-15 | `mentsuHandChoicesForTile`, `mentsuHandChoicesForTile_sublist` | 代表牌による牌種別選択列の抽出と部分列性を追加。 |
 | 2026-11-15 | `mentsuHandChoicesForTile_representative` | 牌種別抽出列の各選択が指定牌種を代表することを証明。 |
 | 2026-11-15 | `of_forward_for_representative_tile` | 代表牌が一定の選択列を同一牌種バッチへ変換。 |
+| 2026-11-15 | `AppliesMentsuHandChoicesForwardWithCopyLimit.append` | 牌種別のコピー制限付き前向き経路を連結。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
