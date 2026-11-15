@@ -176,6 +176,10 @@
 - 代表牌を選択した直後に残りのタイル列を一度だけ `skip` 走査し、
   `AppliesMentsuHandTileScan` と接頭辞状態不変条件を接続する
   (`AppliesMentsuHandTileScan.choose_then_skips_state_matches`) 補題を追加した。
+- `skip` のみの走査と代表牌選択後の走査を連結し、任意の分解接頭辞から
+  代表牌を一度だけ選ぶ一回走査を構成する
+  (`AppliesMentsuHandTileScan.append_skips`,
+  `MentsuHandBlockDecomposition.insert_choice_scan_from_prefix`) 補題を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
@@ -253,6 +257,7 @@
 | 2026-11-15 | `AppliesMentsuHandTileScan.state_matches_append`, `state_matches_from_initial` | 一回走査関係の依存帰納を修正し、状態不変条件を初期状態から最終状態まで接続。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.skips_state_matches` | 到達済み状態からの全 `skip` 走査を一回走査関係へ持ち上げ、状態不変条件と雀頭保存を接続。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.choose_then_skips_state_matches` | 代表牌選択と後続 `skip` 走査を結合し、一回走査の選択分岐を構成。 |
+| 2026-11-15 | `AppliesMentsuHandTileScan.append_skips`, `insert_choice_scan_from_prefix` | 分解接頭辞の代表牌選択を前後の `skip` と連結し、一回走査へ持ち上げ。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 

@@ -2844,6 +2844,54 @@ lemma AppliesMentsuHandTileScan.skips_state_matches
           final.pair = next.pair := hpair
           _ = state.pair := by simp [next, applyMentsuHandChoice]
 
+lemma AppliesMentsuHandTileScan.skips_invariants
+    (hand : Hand) (tiles : List Tile) (fuel : Nat)
+    (state : MentsuHandSearchState) (choices : List MentsuHandChoice)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hmatches : MentsuHandChoiceStateMatches state choices)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus choices) :
+    ∃ final,
+      AppliesMentsuHandTileScan hand tiles state [] final ∧
+        reachableWithinWithCopyLimit hand (fuel + tiles.length) final ∧
+        MentsuHandChoiceStateMatches final choices ∧
+        final.pair = state.pair ∧
+        final.taatsuHistory.reverse =
+          mentsuHandChoiceTaatsus choices := by
+  induction tiles generalizing fuel state with
+  | nil =>
+      exact ⟨state, .nil state, by simpa using hreachable,
+        hmatches, rfl, hhistory⟩
+  | cons tile tiles ih =>
+      obtain ⟨hvalid, hmatchesNext⟩ :=
+        applyMentsuHandChoice.exists_skip_state_matches_of_reachable
+          hand fuel state choices hreachable hmatches
+      have hskip :=
+        nextMentsuHandStateAtWithCopyLimit_skip_of_reachable
+          hand tile fuel state hreachable
+      let next := applyMentsuHandChoice hand state .skip hvalid
+      have hreachableNext :
+          reachableWithinWithCopyLimit hand (fuel + 1) next := by
+        exact ⟨state, hreachable,
+          nextMentsuHandStateAtWithCopyLimit_toNextWithCopyLimit
+            hand tile state next (by simpa [next] using hskip)⟩
+      have hhistoryNext :
+          next.taatsuHistory.reverse =
+            mentsuHandChoiceTaatsus choices := by
+        simpa [next] using
+          applyMentsuHandChoice.skip_taatsuHistory_reverse hvalid hhistory
+      obtain ⟨final, hscan, hfinal, hmatchesFinal, hpair, hhistoryFinal⟩ :=
+        ih (fuel + 1) next hreachableNext hmatchesNext hhistoryNext
+      refine ⟨final, ?_, ?_, hmatchesFinal, ?_, hhistoryFinal⟩
+      · exact .skip tile tiles state next final hvalid
+          (by simpa [next] using hskip) hscan
+      · simpa [List.length_cons, Nat.add_assoc, Nat.add_comm,
+          Nat.add_left_comm] using hfinal
+      · calc
+          final.pair = next.pair := hpair
+          _ = state.pair := by simp [next, applyMentsuHandChoice]
+
 lemma AppliesMentsuHandTileScan.choose_then_skips_state_matches
     (hand : Hand) (tile : Tile) (after : List Tile)
     (fuel : Nat) (state middle : MentsuHandSearchState)
@@ -3087,6 +3135,87 @@ lemma reachableOnTilesFromWithCopyLimit_insert_choice_state_matches
   · exact reachableOnTilesFromWithCopyLimit_append
       hand before (tile :: after) state middle final hbefore hchosen
   · exact hfinal
+
+lemma AppliesMentsuHandTileScan.append_skips
+    {hand : Hand} {before rest : List Tile}
+    {start middle final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hbefore :
+      AppliesMentsuHandTileScan hand before start [] middle)
+    (htail :
+      AppliesMentsuHandTileScan hand rest middle choices final) :
+    AppliesMentsuHandTileScan hand (before ++ rest) start choices final := by
+  induction before generalizing start middle with
+  | nil =>
+      cases hbefore
+      exact htail
+  | cons tile tiles ih =>
+      cases hbefore with
+      | skip =>
+          rename_i middle' hvalid' hnext' htail'
+          exact .skip tile (tiles ++ rest) start middle' final hvalid'
+            hnext' (ih htail' htail)
+
+lemma MentsuHandBlockDecomposition.insert_choice_scan_from_prefix
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (before after : List Tile) (tile : Tile)
+    (fuel : Nat) (state : MentsuHandSearchState)
+    (choices suffix : List MentsuHandChoice)
+    (choice : MentsuHandChoice)
+    (hchoices :
+      decomposition.blockChoices = choices ++ choice :: suffix)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hmatches : MentsuHandChoiceStateMatches state choices)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus choices)
+    (hpairEmpty : choices = [] → state.pair = none)
+    (hchoice : choice ∈ allMentsuHandChoices)
+    (htile : tile ∈ choiceTiles choice) :
+    ∃ final,
+      AppliesMentsuHandTileScan hand
+        (before ++ tile :: after) state [choice] final ∧
+        reachableWithinWithCopyLimit hand
+          ((fuel + before.length) + 1 + after.length) final ∧
+        MentsuHandChoiceStateMatches final (choices ++ [choice]) := by
+  obtain ⟨middle, hbefore, hmiddle, hmatchesMiddle, hpairMiddle,
+      hhistoryMiddle⟩ :=
+    AppliesMentsuHandTileScan.skips_invariants
+      hand before fuel state choices hreachable hmatches hhistory
+  have hpairEmptyMiddle :
+      choices = [] → middle.pair.isNone := by
+    intro hpre
+    simpa [hpairMiddle] using hpairEmpty hpre
+  let hvalid : ValidMentsuHandChoice hand middle choice :=
+    decomposition.valid_next_choice_of_count_prefix_of_pair
+      choices suffix choice middle hchoices hmatchesMiddle.1
+      hmatchesMiddle.2.1 hmatchesMiddle.2.2 hpairEmptyMiddle
+  have hhistoryNext :
+      (applyMentsuHandChoice hand middle choice hvalid).taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus (choices ++ [choice]) :=
+    applyMentsuHandChoice.taatsuHistory_reverse_append_single
+      choice hvalid hhistoryMiddle
+  have hcopy :
+      CompletionRespectsCopyLimit
+        (applyMentsuHandChoice hand middle choice hvalid) := by
+    apply decomposition.completion_respects_of_prefix
+      (choices ++ [choice]) suffix
+      (applyMentsuHandChoice hand middle choice hvalid)
+      (by simpa [List.append_assoc] using hchoices)
+      (by
+        exact (applyMentsuHandChoice.state_matches_append_single
+          choice hvalid hmatchesMiddle).1)
+    rw [hhistoryNext]
+    exact decomposition.prefix_taatsus_sublist
+      (choices ++ [choice]) suffix
+      (by simpa [List.append_assoc] using hchoices)
+  obtain ⟨final, hchosen, hfinal, hmatchesFinal⟩ :=
+    AppliesMentsuHandTileScan.choose_then_skips_state_matches
+      hand tile after (fuel + before.length) middle middle
+      choice choices hmiddle hmatchesMiddle hchoice htile hvalid hcopy
+  refine ⟨final, ?_, hfinal, hmatchesFinal⟩
+  exact AppliesMentsuHandTileScan.append_skips
+    hbefore hchosen
 
 lemma MentsuHandBlockDecomposition.insert_choice_from_prefix
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
