@@ -291,6 +291,8 @@
  抽出列全体を同一牌種の `AppliesMentsuHandChoiceBatch` へ変換する前提が揃った。
 - 代表牌抽出列上のコピー制限付き前向き選択列を、同一牌種のバッチへ変換する
  (`AppliesMentsuHandChoiceBatch.of_forward_for_representative_tile`) ラッパーを追加した。
+- 代表牌による抽出列の各要素が指定牌種を持つことを利用し、抽出列上の前向き
+ 選択列を同一牌種バッチへ変換する前提を明示する補題を追加した。
 
 関連する主な補題:
 
