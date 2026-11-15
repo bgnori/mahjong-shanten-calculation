@@ -2004,8 +2004,8 @@ inductive AppliesMentsuHandTileScan (hand : Hand) :
       (htail :
         AppliesMentsuHandTileScan hand tiles
           (applyMentsuHandChoice hand state .skip hvalid)
-          [] final) :
-      AppliesMentsuHandTileScan hand (tile :: tiles) state [] final
+          choices final) :
+      AppliesMentsuHandTileScan hand (tile :: tiles) state choices final
   | choose (tile : Tile) (tiles : List Tile)
       (state middle final : MentsuHandSearchState)
       (choice : MentsuHandChoice)
@@ -2684,6 +2684,44 @@ lemma applyMentsuHandChoice.exists_skip_state_matches_of_reachable
           hand fuel state hreachable
     · simp [choiceUsesPair]
   exact ⟨hvalid, applyMentsuHandChoice.skip_state_matches hvalid hmatches⟩
+
+lemma AppliesMentsuHandTileScan.state_matches_append
+    {hand : Hand} {tiles : List Tile}
+    {state final : MentsuHandSearchState}
+    {pre choices : List MentsuHandChoice}
+    (hmatches : MentsuHandChoiceStateMatches state pre)
+    (hscan :
+      AppliesMentsuHandTileScan hand tiles state choices final) :
+    MentsuHandChoiceStateMatches final (pre ++ choices) := by
+  induction hscan generalizing pre with
+  | nil =>
+      simpa using hmatches
+  | @skip choices tile tiles state middle final hvalid hnext htail htail_ih =>
+      exact htail_ih
+        (applyMentsuHandChoice.skip_state_matches hvalid hmatches)
+  | @choose choices tile tiles state middle final choice hchoice htile hvalid hcopy
+      htail htail_ih =>
+      have hmid :=
+        applyMentsuHandChoice.state_matches_append_single
+          choice hvalid hmatches
+      have hresult := htail_ih hmid
+      simpa only [List.append_assoc, List.cons_append, List.nil_append] using hresult
+
+lemma AppliesMentsuHandTileScan.state_matches_from_initial
+    {hand : Hand} {tiles : List Tile}
+    {final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hscan :
+      AppliesMentsuHandTileScan hand tiles
+        initialMentsuHandState choices final) :
+    MentsuHandChoiceStateMatches final choices := by
+  have hinitial :
+      MentsuHandChoiceStateMatches initialMentsuHandState [] := by
+    simp [MentsuHandChoiceStateMatches, initialMentsuHandState,
+      mentsuHandChoiceTiles, mentsuHandChoiceMeldCount,
+      mentsuHandChoiceTaatsuCount]
+  simpa using
+    AppliesMentsuHandTileScan.state_matches_append hinitial hscan
 
 lemma reachableOnTilesFromWithCopyLimit_skips_state_matches
    (hand : Hand) (tiles : List Tile) (fuel : Nat)
