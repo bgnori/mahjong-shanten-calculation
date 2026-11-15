@@ -1341,6 +1341,21 @@ lemma MentsuHandBlockDecomposition.blockChoices_taatsuCount
     mentsuHandChoiceTaatsuCount, choiceUsesTaatsu,
     mentsuHandChoiceTaatsuCount_append, aux, auxZero, Nat.add_comm] <;> omega
 
+lemma MentsuHandBlockDecomposition.blockChoices_tail_not_pair
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (choice : MentsuHandChoice)
+    (hchoice :
+      choice ∈
+        decomposition.melds.map MentsuHandChoice.meld ++
+          decomposition.taatsus.map MentsuHandChoice.taatsu) :
+    choiceUsesPair choice = false := by
+  simp only [List.mem_append, List.mem_map] at hchoice
+  rcases hchoice with hmeld | htaatsu
+  · rcases hmeld with ⟨meld, _, rfl⟩
+    rfl
+  · rcases htaatsu with ⟨taatsu, _, rfl⟩
+    rfl
+
 lemma MentsuHandBlockDecomposition.blockChoices_mem_all
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     ∀ choice, choice ∈ decomposition.blockChoices →

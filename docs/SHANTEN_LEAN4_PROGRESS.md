@@ -66,6 +66,8 @@
 - 分解の `blockChoices` に含まれる面子・搭子選択数が、それぞれ元の `melds`・
   `taatsus` のリスト長と一致することを証明した
   (`blockChoices_meldCount`, `blockChoices_taatsuCount`)。
+- `blockChoices` の面子・搭子部分に含まれる選択は、必ず雀頭選択ではないことを
+  証明した (`blockChoices_tail_not_pair`)。
 
 関連する主な補題:
 
@@ -108,6 +110,7 @@
 | 2026-11-15 | `applyMentsuHandChoice_pair_eq_some` | 雀頭選択後の `pair` 状態を確定する遷移補題を追加。 |
 | 2026-11-15 | `applyMentsuHandChoice_pair_eq_of_not_pair` | 雀頭以外の選択後に既存の `pair` が保持されることを証明。 |
 | 2026-11-15 | `blockChoices_meldCount`, `blockChoices_taatsuCount` | ブロック選択列の面子・搭子数を分解リスト長へ対応付け。 |
+| 2026-11-15 | `blockChoices_tail_not_pair` | 面子・搭子部分に雀頭選択が含まれないことを証明。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 
