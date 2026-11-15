@@ -1486,6 +1486,18 @@ lemma MentsuHandBlockDecomposition.blockChoices_mem_all
     rw [← htaatsu]
     exact mentsuHandChoice_mem_all _
 
+lemma MentsuHandBlockDecomposition.blockChoices_ne_skip
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    {choice : MentsuHandChoice}
+    (hchoice : choice ∈ decomposition.blockChoices) :
+    choice ≠ .skip := by
+  unfold MentsuHandBlockDecomposition.blockChoices at hchoice
+  simp only [List.mem_cons, List.mem_append, List.mem_map] at hchoice
+  rcases hchoice with (rfl | ⟨meld, _, rfl⟩) | ⟨taatsu, _, rfl⟩
+  · simp
+  · simp
+  · simp
+
 lemma mentsuHandChoiceTiles_map_meld
     (melds : List Meld) :
     mentsuHandChoiceTiles (melds.map MentsuHandChoice.meld) =
