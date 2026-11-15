@@ -3089,6 +3089,22 @@ lemma AppliesMentsuHandChoiceBatch.of_forward
       exact .cons _ _ (applyMentsuHandChoice hand middle choice hvalid)
         choices choice htail hchoice hchoiceTile hvalid hcopy
 
+lemma AppliesMentsuHandChoiceBatch.of_forward_for_representative_tile
+    {hand : Hand} {tile : Tile}
+    {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand
+        state choices final)
+    (hchoices :
+      ∀ choice, choice ∈ choices →
+        mentsuHandChoiceRepresentative choice = some tile) :
+    AppliesMentsuHandChoiceBatch hand tile state choices final :=
+  AppliesMentsuHandChoiceBatch.of_forward hpath
+    (fun choice hchoice =>
+      mentsuHandChoiceRepresentative_mem
+        (hchoices choice hchoice))
+
 lemma reachableWithinWithCopyLimit_of_forward_choice_path
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
