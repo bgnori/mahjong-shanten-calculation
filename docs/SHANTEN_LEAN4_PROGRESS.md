@@ -43,6 +43,9 @@
 - 制約付きブロック探索の完成状態から、対応するターゲット距離が
   `validMentsuHandTargetDistances` に含まれることを証明した
   (`validMentsuHandTargetDistance_mem_of_constrainedBlockSearch`)。
+- 非 `skip` の面子・搭子・雀頭選択ごとに、`mentsuHandTileOrder` 上で
+  選択を処理できる代表牌が存在することを証明した
+  (`exists_tile_mem_mentsuHandTileOrder_of_choice`)。
 
 関連する主な補題:
 
@@ -55,8 +58,8 @@
 1. **制約付きブロック探索の完全性 (`searchResult_complete`)**
    - `MentsuHandBlockDecomposition` の任意の有効な分解が、
      `MentsuHandBlockSearchOnTileOrderWithCopyLimit` のいずれかの枝で生成されること。
-   - 既存の `reachableOnTilesFromWithCopyLimit_insert_choice` を使い、各ブロックの
-     代表牌を `mentsuHandTileOrder` に挿入できることを示す。
+   - 各ブロックの代表牌を `mentsuHandTileOrder` に挿入する際の、接頭辞状態の
+     `ValidMentsuHandChoice` とコピー制限を示すことが残っている。
 2. **探索結果とターゲットDPの接続**
    - 制約付きブロック探索からターゲット距離集合への健全性接続は完了。
    - 残りは、タイル順探索の完全性を示して逆方向の包含を得ること。
@@ -77,6 +80,7 @@
 | 2026-11-14 | `4e5e5d8` `Connect recursive meld cost DP to shanten search` | 再帰的な面子コストDPとシャンテン探索を接続。 |
 | 2026-11-15 | `MentsuHand.lean` の既存補題を確認 | 全ターゲット列挙DPの最小値と `IsShapeShanten` の一致が既に証明済みであることを進捗へ反映。 |
 | 2026-11-15 | `validMentsuHandTargetDistance_mem_of_constrainedBlockSearch` | 制約付きブロック探索の結果を、仕様一致済みのターゲット距離集合へ接続。 |
+| 2026-11-15 | `exists_tile_mem_mentsuHandTileOrder_of_choice` | 各ブロック選択をタイル順探索へ挿入するための代表牌の存在を証明。 |
 
 ## 検証状況
 

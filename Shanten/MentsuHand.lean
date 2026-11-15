@@ -572,6 +572,34 @@ lemma tile_mem_mentsuHandTileOrder :
     ∀ tile : Tile, tile ∈ mentsuHandTileOrder := by
   native_decide
 
+lemma exists_tile_mem_mentsuHandTileOrder_of_choice
+    (choice : MentsuHandChoice) (hchoice : choice ≠ .skip) :
+    ∃ tile, tile ∈ mentsuHandTileOrder ∧ tile ∈ choiceTiles choice := by
+  cases choice with
+  | skip =>
+      contradiction
+  | pair tile =>
+      exact ⟨tile, tile_mem_mentsuHandTileOrder tile, by
+        simp [choiceTiles, pairTiles]⟩
+  | taatsu taatsu =>
+      cases taatsu with
+      | pair tile =>
+          exact ⟨tile, tile_mem_mentsuHandTileOrder tile, by
+            simp [choiceTiles, taatsuTiles, pairTiles]⟩
+      | sequence suit start =>
+          exact ⟨Tile.suited suit ⟨start.val, by omega⟩,
+            tile_mem_mentsuHandTileOrder _, by
+              simp [choiceTiles, taatsuTiles]⟩
+  | meld meld =>
+      cases meld with
+      | triplet tile =>
+          exact ⟨tile, tile_mem_mentsuHandTileOrder tile, by
+            simp [choiceTiles, meldTiles]⟩
+      | sequence suit start =>
+          exact ⟨Tile.suited suit ⟨start.val, by omega⟩,
+            tile_mem_mentsuHandTileOrder _, by
+              simp [choiceTiles, meldTiles]⟩
+
 /-- A mentsu-hand-form target before the fixed melds are added. -/
 def mentsuHandTarget (pair : Tile) (melds : List Meld) : Multiset Tile :=
   pairTiles pair + meldsTiles melds
