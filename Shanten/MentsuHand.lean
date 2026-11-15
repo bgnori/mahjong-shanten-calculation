@@ -2236,6 +2236,22 @@ lemma AppliesMentsuHandChoices.taatsu_eq_from_initial
     final.taatsu = mentsuHandChoiceTaatsuCount choices := by
   simpa [initialMentsuHandState] using hpath.taatsu_eq
 
+def MentsuHandChoiceStateMatches
+    (state : MentsuHandSearchState)
+    (choices : List MentsuHandChoice) : Prop :=
+  state.used = mentsuHandChoiceTiles choices ∧
+    state.melds = mentsuHandChoiceMeldCount choices ∧
+    state.taatsu = mentsuHandChoiceTaatsuCount choices
+
+lemma AppliesMentsuHandChoices.state_matches_from_initial
+    {hand : Hand} {final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoices hand initialMentsuHandState choices final) :
+    MentsuHandChoiceStateMatches final choices :=
+  ⟨hpath.used_eq_from_initial, hpath.melds_eq_from_initial,
+    hpath.taatsu_eq_from_initial⟩
+
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
     (hvalid : ValidMentsuHandChoice hand state (.pair tile))
