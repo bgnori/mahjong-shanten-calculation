@@ -3924,6 +3924,51 @@ lemma complete_mentsuHand_of_constrainedBlockSearch
     hcomplete
     (reachableWithinWithCopyLimit_copyLimit before fuel state hreachable)
 
+lemma validMentsuHandTargetDistance_mem_of_constrainedBlockSearch
+    (before : Hand) (fuel : Nat) (state : MentsuHandSearchState)
+    (hreachable : reachableWithinWithCopyLimit before fuel state)
+    (hcomplete : IsMentsuHandBlockSearchComplete before state) :
+    ∃ pair melds,
+      melds.length + before.fixedMelds = 4 ∧
+      ValidCounts
+        (targetHand before
+          (countsOfTiles (mentsuHandTarget pair melds))) ∧
+      mentsuHandTargetDistance before pair melds ∈
+        validMentsuHandTargetDistances before := by
+  have hreachable' :
+      reachableWithin before fuel state :=
+    reachableWithinWithCopyLimit_to_reachableWithin
+      before fuel state hreachable
+  rcases hcomplete with ⟨hcount, hpair⟩
+  cases hstatePair : state.pair with
+  | none =>
+      simp [hstatePair] at hpair
+  | some pair =>
+      let melds := completedMeldsForState state
+      have hmelds :
+          melds.length + before.fixedMelds = 4 := by
+        dsimp [melds]
+        exact completedMeldsForState_hasMeldCount
+          before fuel state hreachable' hcount
+      have htarget :
+          mentsuHandTarget pair melds =
+            completedTargetForState state pair := by
+        rfl
+      have hvalid :
+          ValidCounts
+            (targetHand before
+              (countsOfTiles (mentsuHandTarget pair melds))) := by
+        rw [htarget]
+        exact validCounts_completedTarget_of_copyLimit
+          before fuel state hreachable'
+          (reachableWithinWithCopyLimit_copyLimit
+            before fuel state hreachable)
+          pair hstatePair
+      refine ⟨pair, melds, hmelds, hvalid, ?_⟩
+      apply (mem_validMentsuHandTargetDistances_iff
+        before (by omega) (mentsuHandTargetDistance before pair melds)).2
+      exact ⟨pair, melds, hmelds, hvalid, rfl⟩
+
 lemma exists_isShapeShanten_mentsuHand_of_constrainedBlockSearch
     (before : Hand) (hbeforeValid : ValidCounts before)
     (hstanding : tileCount before + 3 * before.fixedMelds = 13)

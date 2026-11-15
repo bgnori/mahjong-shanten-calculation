@@ -40,6 +40,9 @@
   `∃ value, IsShapeShanten hand .mentsuHand value` を導出できるようにした。
 - 全ターゲットを列挙する `mentsuHandTargetMinimumSearch` について、最小距離の検索結果が
   `IsShapeShanten` と一致することを証明した。
+- 制約付きブロック探索の完成状態から、対応するターゲット距離が
+  `validMentsuHandTargetDistances` に含まれることを証明した
+  (`validMentsuHandTargetDistance_mem_of_constrainedBlockSearch`)。
 
 関連する主な補題:
 
@@ -55,8 +58,8 @@
    - 既存の `reachableOnTilesFromWithCopyLimit_insert_choice` を使い、各ブロックの
      代表牌を `mentsuHandTileOrder` に挿入できることを示す。
 2. **探索結果とターゲットDPの接続**
-   - 完全性を証明した後、タイル順探索が生成する候補の距離集合と、
-     既に仕様一致を証明した `validMentsuHandTargetDistances` を接続する。
+   - 制約付きブロック探索からターゲット距離集合への健全性接続は完了。
+   - 残りは、タイル順探索の完全性を示して逆方向の包含を得ること。
 3. **13枚手に対する一様な到達上限**
    - 任意の有効な13枚手について、面子手の完成形へ7手以内（固定面子を含む場合は
      状態に応じた上限）で到達できることを、完全性から構成すること。
@@ -73,6 +76,7 @@
 | 2026-11-14 | `8144828` `proof: expose mentsu search correctness for thirteen-tile hands` | 13枚手に対する面子手探索の正当性補題を公開。 |
 | 2026-11-14 | `4e5e5d8` `Connect recursive meld cost DP to shanten search` | 再帰的な面子コストDPとシャンテン探索を接続。 |
 | 2026-11-15 | `MentsuHand.lean` の既存補題を確認 | 全ターゲット列挙DPの最小値と `IsShapeShanten` の一致が既に証明済みであることを進捗へ反映。 |
+| 2026-11-15 | `validMentsuHandTargetDistance_mem_of_constrainedBlockSearch` | 制約付きブロック探索の結果を、仕様一致済みのターゲット距離集合へ接続。 |
 
 ## 検証状況
 
