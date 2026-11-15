@@ -1506,6 +1506,20 @@ lemma MentsuHandBlockDecomposition.blockChoices_mem_all_and_ne_skip
   ⟨decomposition.blockChoices_mem_all choice hchoice,
     decomposition.blockChoices_ne_skip hchoice⟩
 
+lemma MentsuHandBlockDecomposition.exists_tile_order_split_of_blockChoice
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    {choice : MentsuHandChoice}
+    (hchoice : choice ∈ decomposition.blockChoices) :
+    ∃ before after tile,
+      mentsuHandTileOrder = before ++ tile :: after ∧
+        choice ∈ allMentsuHandChoices ∧
+        tile ∈ choiceTiles choice := by
+  have hfacts :=
+    decomposition.blockChoices_mem_all_and_ne_skip hchoice
+  obtain ⟨before, after, tile, hsplit, htile⟩ :=
+    exists_mentsuHandTileOrder_split_of_choice choice hfacts.2
+  exact ⟨before, after, tile, hsplit, hfacts.1, htile⟩
+
 lemma mentsuHandChoiceTiles_map_meld
     (melds : List Meld) :
     mentsuHandChoiceTiles (melds.map MentsuHandChoice.meld) =

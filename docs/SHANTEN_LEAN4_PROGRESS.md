@@ -155,6 +155,9 @@
   コピー制限付き選択挿入を実際に構成できる状態にした。
 - ブロック選択が探索候補に属し、かつ `skip` ではないことを一つにまとめた
   `MentsuHandBlockDecomposition.blockChoices_mem_all_and_ne_skip` を追加した。
+- 分解ブロック選択から、探索候補所属・非 `skip`・代表牌を含む
+  `mentsuHandTileOrder` の分割を一括取得する
+  `exists_tile_order_split_of_blockChoice` を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
