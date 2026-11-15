@@ -115,6 +115,8 @@
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_from_initial`)。
 - 選択列の搭子部分を抽出する `mentsuHandChoiceTaatsus` と、選択列の末尾追加に
   対応する `mentsuHandChoiceTaatsus_append` を追加した。
+- 搭子列を選択へ写像した場合に、搭子抽出が元の搭子列を復元する
+  `mentsuHandChoiceTaatsus_map_taatsu` を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。

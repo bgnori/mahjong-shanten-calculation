@@ -1473,6 +1473,16 @@ lemma mentsuHandChoiceTiles_map_taatsu
   | cons taatsu taatsus ih =>
       simp [mentsuHandChoiceTiles, choiceTiles, taatsuHistoryTiles, ih]
 
+lemma mentsuHandChoiceTaatsus_map_taatsu
+   (taatsus : List Taatsu) :
+   mentsuHandChoiceTaatsus (taatsus.map MentsuHandChoice.taatsu) =
+     taatsus := by
+  induction taatsus with
+  | nil =>
+     rfl
+  | cons taatsu taatsus ih =>
+     simp [mentsuHandChoiceTaatsus, ih]
+
 lemma MentsuHandBlockDecomposition.blockChoices_tiles
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     mentsuHandChoiceTiles decomposition.blockChoices =
