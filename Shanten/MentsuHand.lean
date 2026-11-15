@@ -230,6 +230,46 @@ lemma mentsuHandChoicesForTile_representative
       · simp [mentsuHandChoicesForTile, hrep] at hmem
         exact ih hmem
 
+def mentsuHandChoicesWithoutTile
+    (tile : Tile) : List MentsuHandChoice → List MentsuHandChoice
+  | [] => []
+  | choice :: choices =>
+      if mentsuHandChoiceRepresentative choice = some tile then
+      mentsuHandChoicesWithoutTile tile choices
+      else
+      choice :: mentsuHandChoicesWithoutTile tile choices
+
+lemma list_perm_rotate
+    {α : Type} (choice : α) (pre suffix : List α) :
+    List.Perm (pre ++ choice :: suffix)
+      (choice :: pre ++ suffix) := by
+  induction pre with
+  | nil =>
+      exact .refl _
+  | cons head pre ih =>
+      exact (List.Perm.cons head ih).trans
+        (List.Perm.swap choice head (pre ++ suffix))
+
+lemma mentsuHandChoicesForTile_partition
+    (tile : Tile) (choices : List MentsuHandChoice) :
+    List.Perm
+      (mentsuHandChoicesForTile tile choices ++
+      mentsuHandChoicesWithoutTile tile choices)
+      choices := by
+  induction choices with
+  | nil =>
+      exact .refl _
+  | cons choice choices ih =>
+      by_cases hrep :
+        mentsuHandChoiceRepresentative choice = some tile
+      · simp [mentsuHandChoicesForTile, mentsuHandChoicesWithoutTile, hrep]
+        exact ih
+      · simp [mentsuHandChoicesForTile, mentsuHandChoicesWithoutTile, hrep]
+        exact (list_perm_rotate choice
+        (mentsuHandChoicesForTile tile choices)
+        (mentsuHandChoicesWithoutTile tile choices)).trans
+          (List.Perm.cons choice ih)
+
 lemma list_sublist_append_single_of_sublist
     {pre : List α} {choice : α} {suffix target : List α}
     (hsub : List.Sublist (pre ++ choice :: suffix) target) :
