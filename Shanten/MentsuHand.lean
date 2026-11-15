@@ -2266,6 +2266,24 @@ lemma applyMentsuHandChoice.state_matches_cons
       mentsuHandChoiceTaatsuCount, hused, hmelds, htaatsu,
       Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] <;> ac_rfl
 
+lemma applyMentsuHandChoice.state_matches_append_single
+    {hand : Hand} {state : MentsuHandSearchState}
+    {choices : List MentsuHandChoice} (choice : MentsuHandChoice)
+    (hvalid : ValidMentsuHandChoice hand state choice)
+    (hmatches : MentsuHandChoiceStateMatches state choices) :
+    MentsuHandChoiceStateMatches
+      (applyMentsuHandChoice hand state choice hvalid)
+      (choices ++ [choice]) := by
+  rcases hmatches with ⟨hused, hmelds, htaatsu⟩
+  cases choice <;>
+    simp [MentsuHandChoiceStateMatches, applyMentsuHandChoice,
+      mentsuHandChoiceTiles, mentsuHandChoiceMeldCount,
+      mentsuHandChoiceTaatsuCount, hused, hmelds, htaatsu,
+      mentsuHandChoiceTiles_append,
+      mentsuHandChoiceMeldCount_append,
+      mentsuHandChoiceTaatsuCount_append, Nat.add_comm,
+      Nat.add_left_comm, Nat.add_assoc] <;> ac_rfl
+
 lemma applyMentsuHandChoice_skip_fields
     (hand : Hand) (state : MentsuHandSearchState)
     (hvalid : ValidMentsuHandChoice hand state .skip) :
