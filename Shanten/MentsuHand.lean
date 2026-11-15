@@ -2217,6 +2217,29 @@ inductive AppliesMentsuHandChoiceBatch (hand : Hand) (tile : Tile) :
         (choices ++ [choice])
         (applyMentsuHandChoice hand middle choice hvalid)
 
+lemma AppliesMentsuHandChoiceBatch.append
+    {hand : Hand} {tile : Tile}
+    {state middle final : MentsuHandSearchState}
+    {choicesBefore choicesAfter : List MentsuHandChoice}
+    (hbefore :
+      AppliesMentsuHandChoiceBatch hand tile
+        state choicesBefore middle)
+    (hafter :
+      AppliesMentsuHandChoiceBatch hand tile
+        middle choicesAfter final) :
+    AppliesMentsuHandChoiceBatch hand tile state
+      (choicesBefore ++ choicesAfter) final := by
+  induction hafter generalizing state choicesBefore with
+  | nil =>
+      simpa using hbefore
+  | @cons state middle choices choice htail hchoice htile hvalid hcopy ih =>
+      have hmiddle :=
+        ih hbefore
+      rw [← List.append_assoc]
+      exact .cons _ _ (applyMentsuHandChoice hand _ choice hvalid)
+        (choicesBefore ++ choices) choice
+        hmiddle hchoice htile hvalid hcopy
+
 /-- A tile-order scan whose step may apply a batch of choices at one tile. -/
 inductive AppliesMentsuHandTileBatchScan (hand : Hand) :
     List Tile → MentsuHandSearchState → List MentsuHandChoice →
