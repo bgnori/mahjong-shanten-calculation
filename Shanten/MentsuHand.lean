@@ -1393,6 +1393,28 @@ lemma MentsuHandBlockDecomposition.nextChoice_completion_count_le_four
   simpa [mentsuHandChoiceTiles, mentsuHandChoiceTiles_append,
     Multiset.count_add, Nat.add_assoc] using hprefix
 
+lemma MentsuHandBlockDecomposition.valid_next_choice_of_prefix
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices :
+      decomposition.blockChoices = pre ++ choice :: suffix)
+    (hused :
+      state.used = mentsuHandChoiceTiles pre)
+    (hmelds :
+      state.melds +
+        (if choiceUsesMeld choice = true then 1 else 0) ≤ 4)
+    (htaatsu :
+      state.taatsu +
+        (if choiceUsesTaatsu choice = true then 1 else 0) ≤ 4)
+    (hpair :
+      state.pair.isNone ∨ choiceUsesPair choice = false) :
+    ValidMentsuHandChoice hand state choice :=
+  validMentsuHandChoice_of hand state choice
+    (decomposition.nextChoice_count_le_hand
+      pre suffix choice state hchoices hused)
+    hmelds htaatsu hpair
+
 def MentsuHandBlockDecomposition.completedTarget
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     Multiset Tile :=
