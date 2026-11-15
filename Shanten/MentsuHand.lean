@@ -2266,6 +2266,17 @@ lemma applyMentsuHandChoice.state_matches_cons
       mentsuHandChoiceTaatsuCount, hused, hmelds, htaatsu,
       Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] <;> ac_rfl
 
+lemma applyMentsuHandChoice_skip_fields
+    (hand : Hand) (state : MentsuHandSearchState)
+    (hvalid : ValidMentsuHandChoice hand state .skip) :
+    let next := applyMentsuHandChoice hand state .skip hvalid
+    next.used = state.used ∧
+      next.pair = state.pair ∧
+      next.melds = state.melds ∧
+      next.taatsu = state.taatsu := by
+  simp [applyMentsuHandChoice, choiceTiles, choiceUsesMeld,
+    choiceUsesTaatsu]
+
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
     (hvalid : ValidMentsuHandChoice hand state (.pair tile))
