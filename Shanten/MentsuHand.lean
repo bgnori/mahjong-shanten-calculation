@@ -1766,6 +1766,92 @@ lemma mentsuHandChoiceTaatsuCount_le_of_sublist
       simp only [mentsuHandChoiceTaatsuCount] at ih ⊢
       omega
 
+lemma MentsuHandBlockDecomposition.nextChoice_count_le_hand_of_sublist
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (choices : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hsub :
+      List.Sublist (choices ++ [choice]) decomposition.blockChoices)
+    (hused :
+      state.used = mentsuHandChoiceTiles choices) :
+    ∀ tile,
+      (state.used + choiceTiles choice).count tile ≤ hand.counts tile := by
+  intro tile
+  rw [hused]
+  have hsubCount :=
+    mentsuHandChoiceTiles_count_le_of_sublist hsub tile
+  have hfull :
+      (mentsuHandChoiceTiles decomposition.blockChoices).count tile ≤
+        hand.counts tile := by
+    rw [decomposition.blockChoices_tiles]
+    exact decomposition.targetWithinHand tile
+  rw [mentsuHandChoiceTiles_append] at hsubCount
+  simpa [mentsuHandChoiceTiles, choiceTiles] using hsubCount.trans hfull
+
+lemma MentsuHandBlockDecomposition.nextChoice_melds_le_four_of_sublist
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (choices : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hsub :
+      List.Sublist (choices ++ [choice]) decomposition.blockChoices)
+    (hmelds :
+      state.melds = mentsuHandChoiceMeldCount choices) :
+    state.melds +
+        (if choiceUsesMeld choice = true then 1 else 0) ≤ 4 := by
+  have hcount :=
+    mentsuHandChoiceMeldCount_le_of_sublist hsub
+  have hfull :=
+    decomposition.blockChoices_meldCount
+  have hblocks := decomposition.blocks
+  rw [mentsuHandChoiceMeldCount_append] at hcount
+  rw [hmelds]
+  simpa [mentsuHandChoiceMeldCount] using hcount.trans
+    (by omega : mentsuHandChoiceMeldCount decomposition.blockChoices ≤ 4)
+
+lemma MentsuHandBlockDecomposition.nextChoice_taatsu_le_four_of_sublist
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (choices : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hsub :
+      List.Sublist (choices ++ [choice]) decomposition.blockChoices)
+    (htaatsu :
+      state.taatsu = mentsuHandChoiceTaatsuCount choices) :
+    state.taatsu +
+        (if choiceUsesTaatsu choice = true then 1 else 0) ≤ 4 := by
+  have hcount :=
+    mentsuHandChoiceTaatsuCount_le_of_sublist hsub
+  have hfull :=
+    decomposition.blockChoices_taatsuCount
+  have hblocks := decomposition.blocks
+  rw [mentsuHandChoiceTaatsuCount_append] at hcount
+  rw [htaatsu]
+  simpa [mentsuHandChoiceTaatsuCount] using hcount.trans
+    (by omega : mentsuHandChoiceTaatsuCount decomposition.blockChoices ≤ 4)
+
+lemma MentsuHandBlockDecomposition.valid_next_choice_of_sublist
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (choices : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hsub :
+      List.Sublist (choices ++ [choice]) decomposition.blockChoices)
+    (hused :
+      state.used = mentsuHandChoiceTiles choices)
+    (hmelds :
+      state.melds = mentsuHandChoiceMeldCount choices)
+    (htaatsu :
+      state.taatsu = mentsuHandChoiceTaatsuCount choices)
+    (hpair :
+      state.pair.isNone ∨ choiceUsesPair choice = false) :
+    ValidMentsuHandChoice hand state choice :=
+  validMentsuHandChoice_of hand state choice
+    (decomposition.nextChoice_count_le_hand_of_sublist
+      choices choice state hsub hused)
+    (decomposition.nextChoice_melds_le_four_of_sublist
+      choices choice state hsub hmelds)
+    (decomposition.nextChoice_taatsu_le_four_of_sublist
+      choices choice state hsub htaatsu)
+    hpair
+
 lemma MentsuHandBlockDecomposition.prefix_completion_count_le_four
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
     (pre suffix : List MentsuHandChoice)
