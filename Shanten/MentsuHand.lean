@@ -2835,6 +2835,30 @@ lemma applyMentsuHandChoice.taatsuHistory_reverse_append_single
     simp [applyMentsuHandChoice, mentsuHandChoiceTaatsus,
       mentsuHandChoiceTaatsus_append, hhistory, List.reverse_append]
 
+lemma AppliesMentsuHandChoiceBatch.taatsuHistory_reverse_append
+    {hand : Hand} {tile : Tile}
+    {state final : MentsuHandSearchState}
+    {pre choices : List MentsuHandChoice}
+    (hbatch :
+      AppliesMentsuHandChoiceBatch hand tile state choices final)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus pre) :
+    final.taatsuHistory.reverse =
+      mentsuHandChoiceTaatsus (pre ++ choices) := by
+  induction hbatch generalizing pre with
+  | nil =>
+      simpa using hhistory
+  | @cons state middle choices choice htail hchoice htile hvalid hcopy ih =>
+      have hstate :
+          state.taatsuHistory.reverse =
+            mentsuHandChoiceTaatsus (pre ++ choices) :=
+        ih hhistory
+      have hfinal :=
+        applyMentsuHandChoice.taatsuHistory_reverse_append_single
+          choice hvalid hstate
+      simpa [List.append_assoc] using hfinal
+
 lemma AppliesMentsuHandChoicesForward.state_matches_from_initial
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
