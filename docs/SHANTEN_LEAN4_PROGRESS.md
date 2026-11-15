@@ -150,6 +150,9 @@
   統合する `reachableOnTilesFromWithCopyLimit_skips_invariants` を追加した。
 - 分解接頭辞の妥当性、搭子履歴、コピー制限を統合し、代表牌の前後の `skip` と選択を
   結合する `MentsuHandBlockDecomposition.insert_choice_from_prefix` を追加した。
+- `skip` 列について、状態不変条件・`pair`・`taatsuHistory` を同一の最終状態へ統合する
+  `reachableOnTilesFromWithCopyLimit_skips_invariants` を実装し、分解接頭辞からの
+  コピー制限付き選択挿入を実際に構成できる状態にした。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
