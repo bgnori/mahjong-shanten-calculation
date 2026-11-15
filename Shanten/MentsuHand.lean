@@ -309,6 +309,28 @@ lemma taatsuCompletionTiles_card (taatsus : List Taatsu) :
   | cons taatsu taatsus ih =>
       simp [taatsuCompletionTiles, ih]
 
+lemma taatsuCompletionTiles_count_le_of_sublist
+    {taatsus subset : List Taatsu}
+    (hsub : List.Sublist subset taatsus) :
+    ∀ tile,
+      (taatsuCompletionTiles subset).count tile ≤
+        (taatsuCompletionTiles taatsus).count tile := by
+  induction hsub with
+  | slnil =>
+      simp
+  | cons taatsu hsub ih =>
+      intro tile
+      have htail := ih tile
+      simp only [taatsuCompletionTiles, Multiset.count_add,
+        Multiset.count_replicate]
+      exact htail.trans (Nat.le_add_left _ _)
+  | cons_cons taatsu hsub ih =>
+      intro tile
+      simp only [taatsuCompletionTiles, Multiset.count_add,
+        Multiset.count_replicate]
+      have htail := ih tile
+      omega
+
 lemma pairTiles_card (tile : Tile) :
     (pairTiles tile).card = 2 := by
   simp [pairTiles]
@@ -1693,6 +1715,24 @@ def completedTargetForState (state : MentsuHandSearchState) (pair : Tile) :
 def CompletionRespectsCopyLimit (state : MentsuHandSearchState) : Prop :=
   ∀ tile,
     (state.used + taatsuCompletionTiles state.taatsuHistory.reverse).count tile ≤ 4
+
+lemma MentsuHandBlockDecomposition.completion_respects_of_prefix
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices : decomposition.blockChoices = pre ++ suffix)
+    (hused : state.used = mentsuHandChoiceTiles pre)
+    (hhistory :
+      List.Sublist state.taatsuHistory.reverse decomposition.taatsus) :
+    CompletionRespectsCopyLimit state := by
+  intro tile
+  rw [hused]
+  have hprefix :=
+    decomposition.prefix_completion_count_le_four pre suffix hchoices tile
+  have hcompletion :=
+    taatsuCompletionTiles_count_le_of_sublist hhistory tile
+  rw [Multiset.count_add] at hprefix ⊢
+  omega
 
 def ValidMentsuHandChoiceWithCopyLimit
     (hand : Hand) (state : MentsuHandSearchState) (choice : MentsuHandChoice) : Prop :=

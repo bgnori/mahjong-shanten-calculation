@@ -117,6 +117,11 @@
   対応する `mentsuHandChoiceTaatsus_append` を追加した。
 - 搭子列を選択へ写像した場合に、搭子抽出が元の搭子列を復元する
   `mentsuHandChoiceTaatsus_map_taatsu` を追加した。
+- 搭子列の部分列に対する補完牌 Multiset の個数単調性
+  (`taatsuCompletionTiles_count_le_of_sublist`) を追加した。
+- 分解の接頭辞の牌数上限と、探索状態の搭子履歴が分解の搭子列の部分列であることから、
+  `CompletionRespectsCopyLimit` を構成する
+  (`MentsuHandBlockDecomposition.completion_respects_of_prefix`) 補題を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
