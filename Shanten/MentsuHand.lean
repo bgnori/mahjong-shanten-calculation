@@ -184,6 +184,29 @@ lemma mentsuHandChoiceRepresentative_mem
           subst tile
           simp [choiceTiles, meldTiles]
 
+def mentsuHandChoicesForTile
+    (tile : Tile) : List MentsuHandChoice → List MentsuHandChoice
+  | [] => []
+  | choice :: choices =>
+      if mentsuHandChoiceRepresentative choice = some tile then
+        choice :: mentsuHandChoicesForTile tile choices
+      else
+        mentsuHandChoicesForTile tile choices
+
+lemma mentsuHandChoicesForTile_sublist
+    (tile : Tile) (choices : List MentsuHandChoice) :
+    List.Sublist (mentsuHandChoicesForTile tile choices) choices := by
+  induction choices with
+  | nil =>
+      exact .slnil
+  | cons choice choices ih =>
+      by_cases hrep :
+          mentsuHandChoiceRepresentative choice = some tile
+      · simpa [mentsuHandChoicesForTile, hrep] using
+          (List.Sublist.cons_cons choice ih)
+      · simpa [mentsuHandChoicesForTile, hrep] using
+          (List.Sublist.cons choice ih)
+
 def choiceUsesMeld : MentsuHandChoice → Bool
   | .meld _ => true
   | _ => false
