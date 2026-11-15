@@ -6,42 +6,40 @@ import Mathlib.Tactic.FinCases
 namespace Shanten
 
 /-!
-# Mentsu-hand shanten: proof map
+# 面子手シャンテン数：証明の地図
 
-The main goal of this file is to connect the mentsu-hand shanten
-specification with a search over complete hand targets:
+このファイルの主な目的は、面子手シャンテン数の仕様と、
+完成形の目標を探索する手続きとを結び付けることです。
 
 ```text
 mentsuHandTargetMinimumSearch hand = some value
   ↔ IsShapeShanten hand .mentsuHand value
 ```
 
-The proof proceeds in the following order:
+証明は次の順序で進みます。
 
-1. Define the search choices and the state carried by the dynamic program.
-2. Prove the basic state invariants: used tiles and block histories agree,
-   and every reachable state stays within the hand.
-3. Relate abstract choice sequences to the fixed tile-order scan.
-4. Define complete targets and the deficit distance to a target.
-5. Show that deficit distance is exactly the number of exchanges needed to
-   reach a completing hand.
-6. Represent partial mentsu-hand decompositions by melds, taatsu, and a pair.
-7. Add the four-copy limit and prove that valid block decompositions can be
-   realized by the constrained tile scan.
-8. Give the finite dynamic programs their mathematical meaning.
-9. Minimize target distance and connect the minimum to shape shanten.
-10. Finish by extracting a shanten witness from a constrained block search.
+1. DP が扱う探索選択と状態を定義する。
+2. 使用牌とブロック履歴が一致し、到達可能な状態が手牌を越えないという
+   基本不変量を証明する。
+3. 抽象的な選択列と、牌種を固定順に走査する探索を関連付ける。
+4. 完成目標と、目標までの不足距離を定義する。
+5. 不足距離が、完成形に到達するために必要な交換回数と一致することを示す。
+6. 面子・ターツ・雀頭による部分的な面子手分解を表現する。
+7. 1 種類 4 枚制限を加え、妥当なブロック分解が制約付き牌走査で実現できることを示す。
+8. 有限 DP が何を表しているかを定理化する。
+9. 目標距離を最小化し、その最小値を形シャンテン数に結び付ける。
+10. 制約付きブロック探索から、シャンテン数の証人を取り出して仕上げる。
 
-The sections below follow the dependency order needed by Lean. The short
-explanations at the start of each section describe its role in the proof
-without changing the implementation structure.
+以下の章は、Lean で必要となる依存関係の順序に従っています。
+各章の冒頭の短い説明は、その章の証明全体における役割を示すものであり、
+実装上の構造を変更するものではありません。
 -/
 
 /-!
-## 1. Basic representations
+## 1. 基本的なデータ構造
 
-This section introduces taatsu, search states, choices, and the local
-operations used to turn a partial block into a completed meld.
+ターツ、探索状態、探索で選ぶ項目、および部分ブロックを完成面子に
+変換する局所的な操作を導入します。
 -/
 
 inductive Taatsu
@@ -130,11 +128,11 @@ lemma taatsuTiles_add_completionTile
             (List.Perm.swap _ _ _).symm
 
 /-!
-## 2. Search transitions and invariants
+## 2. 探索遷移と不変量
 
-Choices are applied one at a time. The central facts proved here are that
-valid transitions do not exceed the hand and that reachable states can be
-reconstructed from their pair, meld, and taatsu histories.
+選択を一つずつ状態に適用します。ここで証明する中心的な事実は、
+妥当な遷移が手牌を越えないことと、到達可能な状態を雀頭・面子・
+ターツの履歴から再構成できることです。
 -/
 
 def choiceTiles : MentsuHandChoice → Multiset Tile
@@ -564,11 +562,10 @@ lemma reachableWithin_taatsu_eq_history_length
 
 /-- States reached from a given state while processing tile kinds in order. -/
 /-
-## 3. Reachability and fixed tile order
+## 3. 到達可能性と固定牌順
 
-This section relates abstract reachable states to the prescribed order of
-tile kinds. It establishes the interface used later by the tile-by-tile
-search.
+抽象的な到達可能状態と、あらかじめ定めた牌種の順序を関連付けます。
+後で使う、牌種ごとの走査との接続を確立します。
 -/
 
 def reachableOnTilesFrom
@@ -706,11 +703,11 @@ lemma exists_mentsuHandTileOrder_split_of_choice
 
 /-- A mentsu-hand-form target before the fixed melds are added. -/
 /-
-## 4. Targets and exchange distance
+## 4. 目標形と交換距離
 
-Here a pair and a list of melds are viewed as a complete target. The
-surrounding lemmas establish how partial histories correspond to targets and
-how target deficits behave under exchanges.
+ここでは、雀頭と面子列を完成目標として扱います。周辺の補題によって、
+部分履歴が目標形に対応することと、交換によって目標までの不足量が
+どのように変化するかを確立します。
 -/
 
 def mentsuHandTarget (pair : Tile) (melds : List Meld) : Multiset Tile :=
@@ -1311,12 +1308,11 @@ lemma reachesCompletion_mentsuHand_of_one_more_target_tile
     ReachesCompletion.step hstep hrest⟩
 
 /-
-## 5. Block decompositions
+## 5. ブロック分解
 
-A block decomposition records a pair, ordinary melds, and taatsu. This is the
-mathematical witness that the constrained search is intended to discover.
-The section proves prefix invariants and shows how taatsu can be completed
-without violating tile-copy limits.
+ブロック分解は、雀頭・通常の面子・ターツを記録します。これは、
+制約付き探索が発見すべき数学的な証人です。この章ではプレフィックスの
+不変量を証明し、牌の枚数制限を破らずにターツを完成できることを示します。
 -/
 
 /-- A target has the required number of concealed melds for a hand. -/
@@ -1966,12 +1962,11 @@ lemma MentsuHandBlockDecomposition.completion_respects_of_prefix
   omega
 
 /-
-## 6. Copy-limited tile scanning
+## 6. 牌の枚数制限付き走査
 
-The ordinary transition system is refined with the four-copy constraint.
-The main result of this section is that valid block decompositions can be
-inserted into the fixed tile-order scan while preserving the state
-invariants.
+通常の遷移系に、同一牌は 4 枚までという制約を加えます。この章の主結果は、
+妥当なブロック分解を状態の不変量を保ったまま固定牌順の走査へ
+組み込めることです。
 -/
 
 def ValidMentsuHandChoiceWithCopyLimit
@@ -3787,11 +3782,11 @@ lemma reachableOnTilesWithCopyLimit_to_reachableWithinWithCopyLimit
   simpa using hresult
 
 /-
-## 7. From search states to completed targets
+## 7. 探索状態から完成目標へ
 
-After the constrained scan is established, these lemmas turn a complete
-search state into a valid completed mentsu-hand target and account for its
-meld count, tile count, and copy limit.
+制約付き走査を確立した後、ここでは完全な探索状態から妥当な
+面子手の完成目標を構成します。また、その面子数・牌数・枚数制限を
+取り扱います。
 -/
 
 lemma completedTargetForState_eq_used_add_completion
@@ -3879,11 +3874,11 @@ lemma complete_mentsuHand_completedTarget
 
 /-- A target is a valid mentsu-hand-form completion for the standing tiles. -/
 /-
-## 8. Dynamic-programming semantics
+## 8. 動的計画法の意味論
 
-This section defines the finite target and cost dynamic programs. The
-membership lemmas explain what each DP state means mathematically, rather
-than treating the recursive Finset definitions as opaque computation.
+有限個の目標 DP とコスト DP を定義します。集合への所属を特徴付ける補題により、
+再帰的な Finset の定義を単なるブラックボックスの計算として扱うのではなく、
+各 DP 状態が数学的に何を意味するかを説明します。
 -/
 
 def IsMentsuHandTarget
@@ -4433,11 +4428,10 @@ lemma recursiveMentsuHandTargetCostStatesDP_eq
     · exact hvalid
 
 /-
-## 9. Minimum target distance and shape shanten
+## 9. 最小目標距離と形シャンテン数
 
-The minimum over valid target distances is connected here to the shanten
-specification. The key interpretation is that a target at distance `d`
-corresponds to shape shanten `d - 1`.
+妥当な目標距離の最小値を、ここでシャンテン数の仕様に結び付けます。
+中心となる解釈は、距離 `d` の目標が形シャンテン数 `d - 1` に対応することです。
 -/
 
 def validMentsuHandTargetDistances (hand : Hand) :
@@ -5753,12 +5747,12 @@ lemma completedMeldsForState_hasMeldCount
   rw [completedMeldsForState_length, ← hmelds, ← htaatsu]
   omega
 
-  /-
-## 10. Final connection from constrained search
+/-
+## 10. 制約付き探索からの最終接続
 
-The final lemmas extract a completed target, and hence a shape-shanten
-witness, from a constrained block search. This closes the implementation
-side of the proof map given at the top of the file.
+最後の補題では、制約付きブロック探索から完成目標、ひいては形シャンテン数の
+証人を取り出します。これにより、ファイル冒頭の地図における実装側の証明を
+完結させます。
 -/
 
 lemma complete_mentsuHand_of_blockSearch
