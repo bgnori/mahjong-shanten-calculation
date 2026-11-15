@@ -1498,6 +1498,14 @@ lemma MentsuHandBlockDecomposition.blockChoices_ne_skip
   · simp
   · simp
 
+lemma MentsuHandBlockDecomposition.blockChoices_mem_all_and_ne_skip
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    {choice : MentsuHandChoice}
+    (hchoice : choice ∈ decomposition.blockChoices) :
+    choice ∈ allMentsuHandChoices ∧ choice ≠ .skip :=
+  ⟨decomposition.blockChoices_mem_all choice hchoice,
+    decomposition.blockChoices_ne_skip hchoice⟩
+
 lemma mentsuHandChoiceTiles_map_meld
     (melds : List Meld) :
     mentsuHandChoiceTiles (melds.map MentsuHandChoice.meld) =
