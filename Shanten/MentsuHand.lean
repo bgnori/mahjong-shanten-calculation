@@ -3278,6 +3278,21 @@ lemma mentsuHandChoiceStateMatches_of_perm
   exact ⟨hmatches.1.trans htiles, hmatches.2.1.trans hmelds,
     hmatches.2.2.trans htaatsus⟩
 
+lemma mentsuHandChoiceStateMatches_of_groupedByTiles
+    {state : MentsuHandSearchState}
+    {tiles : List Tile} {choices : List MentsuHandChoice}
+    (hrep :
+      ∀ choice, choice ∈ choices →
+        ∃ tile, tile ∈ tiles ∧
+          mentsuHandChoiceRepresentative choice = some tile)
+    (hmatches : MentsuHandChoiceStateMatches state choices) :
+    MentsuHandChoiceStateMatches state
+      (mentsuHandChoicesGroupedByTiles tiles choices ++
+        mentsuHandChoicesWithoutTileForTiles tiles choices) := by
+  have hperm :=
+    mentsuHandChoicesGroupedByTiles_perm_append hrep
+  exact mentsuHandChoiceStateMatches_of_perm hperm.symm hmatches
+
 lemma MentsuHandBlockDecomposition.valid_next_choice_of_sublist_append
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
     (pre : List MentsuHandChoice) (choice : MentsuHandChoice)
