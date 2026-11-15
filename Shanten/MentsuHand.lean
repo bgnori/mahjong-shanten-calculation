@@ -1356,6 +1356,48 @@ lemma MentsuHandBlockDecomposition.blockChoices_tail_not_pair
   · rcases htaatsu with ⟨taatsu, _, rfl⟩
     rfl
 
+lemma MentsuHandBlockDecomposition.nextChoice_melds_le_four
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices :
+      decomposition.blockChoices = pre ++ choice :: suffix)
+    (hmelds :
+      state.melds = mentsuHandChoiceMeldCount pre) :
+    state.melds +
+        (if choiceUsesMeld choice = true then 1 else 0) ≤ 4 := by
+  rw [hmelds]
+  have hprefix :
+      mentsuHandChoiceMeldCount pre +
+          (if choiceUsesMeld choice = true then 1 else 0) ≤
+        mentsuHandChoiceMeldCount decomposition.blockChoices := by
+    rw [hchoices, mentsuHandChoiceMeldCount_append]
+    simp [mentsuHandChoiceMeldCount]
+  rw [decomposition.blockChoices_meldCount] at hprefix
+  have hblocks := decomposition.blocks
+  omega
+
+lemma MentsuHandBlockDecomposition.nextChoice_taatsu_le_four
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices :
+      decomposition.blockChoices = pre ++ choice :: suffix)
+    (htaatsu :
+      state.taatsu = mentsuHandChoiceTaatsuCount pre) :
+    state.taatsu +
+        (if choiceUsesTaatsu choice = true then 1 else 0) ≤ 4 := by
+  rw [htaatsu]
+  have hprefix :
+      mentsuHandChoiceTaatsuCount pre +
+          (if choiceUsesTaatsu choice = true then 1 else 0) ≤
+        mentsuHandChoiceTaatsuCount decomposition.blockChoices := by
+    rw [hchoices, mentsuHandChoiceTaatsuCount_append]
+    simp [mentsuHandChoiceTaatsuCount]
+  rw [decomposition.blockChoices_taatsuCount] at hprefix
+  have hblocks := decomposition.blocks
+  omega
+
 lemma MentsuHandBlockDecomposition.blockChoices_mem_all
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     ∀ choice, choice ∈ decomposition.blockChoices →
