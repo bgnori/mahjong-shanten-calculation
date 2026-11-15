@@ -3210,6 +3210,30 @@ lemma AppliesMentsuHandTileBatchScan.taatsuHistory_reverse_append
       have hfinal := ih hmiddle
       simpa [List.append_assoc] using hfinal
 
+lemma MentsuHandBlockDecomposition.completion_respects_of_tile_batch_scan_append
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    {tiles : List Tile}
+    {state final : MentsuHandSearchState}
+    {pre choices : List MentsuHandChoice}
+    (hscan :
+      AppliesMentsuHandTileBatchScan hand tiles state choices final)
+    (hmatches : MentsuHandChoiceStateMatches state pre)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus pre)
+    (hsub :
+      List.Sublist (pre ++ choices) decomposition.blockChoices) :
+    CompletionRespectsCopyLimit final := by
+  have hmatchesFinal :=
+    hscan.state_matches_append hmatches
+  have hhistoryFinal :=
+    hscan.taatsuHistory_reverse_append hhistory
+  apply decomposition.completion_respects_of_sublist
+    (pre ++ choices) final hsub hmatchesFinal.1
+  rw [hhistoryFinal]
+  rw [← decomposition.blockChoices_taatsus]
+  exact mentsuHandChoiceTaatsus_sublist_of_sublist hsub
+
 lemma reachableWithinWithCopyLimit_of_choice_batch
     {hand : Hand} {tile : Tile}
     {state final : MentsuHandSearchState}
