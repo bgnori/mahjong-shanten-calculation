@@ -1245,6 +1245,28 @@ def mentsuHandChoiceTaatsuCount : List MentsuHandChoice → Nat
       (if choiceUsesTaatsu choice = true then 1 else 0) +
         mentsuHandChoiceTaatsuCount choices
 
+lemma mentsuHandChoiceMeldCount_append
+    (left right : List MentsuHandChoice) :
+    mentsuHandChoiceMeldCount (left ++ right) =
+      mentsuHandChoiceMeldCount left +
+        mentsuHandChoiceMeldCount right := by
+  induction left with
+  | nil =>
+      simp [mentsuHandChoiceMeldCount]
+  | cons choice left ih =>
+      simp [mentsuHandChoiceMeldCount, ih, Nat.add_assoc]
+
+lemma mentsuHandChoiceTaatsuCount_append
+    (left right : List MentsuHandChoice) :
+    mentsuHandChoiceTaatsuCount (left ++ right) =
+      mentsuHandChoiceTaatsuCount left +
+        mentsuHandChoiceTaatsuCount right := by
+  induction left with
+  | nil =>
+      simp [mentsuHandChoiceTaatsuCount]
+  | cons choice left ih =>
+      simp [mentsuHandChoiceTaatsuCount, ih, Nat.add_assoc]
+
 lemma mentsuHandChoiceTiles_append
     (left right : List MentsuHandChoice) :
     mentsuHandChoiceTiles (left ++ right) =
@@ -1268,6 +1290,56 @@ lemma MentsuHandBlockDecomposition.blockChoices_length
       1 + decomposition.melds.length + decomposition.taatsus.length := by
   simp [MentsuHandBlockDecomposition.blockChoices]
   omega
+
+lemma MentsuHandBlockDecomposition.blockChoices_meldCount
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
+    mentsuHandChoiceMeldCount decomposition.blockChoices =
+      decomposition.melds.length := by
+  have aux : ∀ melds : List Meld,
+      mentsuHandChoiceMeldCount (melds.map MentsuHandChoice.meld) =
+        melds.length := by
+    intro melds
+    induction melds with
+    | nil =>
+        simp [mentsuHandChoiceMeldCount]
+    | cons meld melds ih =>
+        simp [mentsuHandChoiceMeldCount, choiceUsesMeld, ih, Nat.add_comm]
+  have auxZero : ∀ taatsus : List Taatsu,
+      mentsuHandChoiceMeldCount (taatsus.map MentsuHandChoice.taatsu) = 0 := by
+    intro taatsus
+    induction taatsus with
+    | nil =>
+        rfl
+    | cons taatsu taatsus ih =>
+        simp [mentsuHandChoiceMeldCount, choiceUsesMeld, ih]
+  simp [MentsuHandBlockDecomposition.blockChoices,
+    mentsuHandChoiceMeldCount, choiceUsesMeld,
+    mentsuHandChoiceMeldCount_append, aux, auxZero, Nat.add_comm] <;> omega
+
+lemma MentsuHandBlockDecomposition.blockChoices_taatsuCount
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
+    mentsuHandChoiceTaatsuCount decomposition.blockChoices =
+      decomposition.taatsus.length := by
+  have aux : ∀ taatsus : List Taatsu,
+      mentsuHandChoiceTaatsuCount (taatsus.map MentsuHandChoice.taatsu) =
+        taatsus.length := by
+    intro taatsus
+    induction taatsus with
+    | nil =>
+        simp [mentsuHandChoiceTaatsuCount]
+    | cons taatsu taatsus ih =>
+        simp [mentsuHandChoiceTaatsuCount, choiceUsesTaatsu, ih, Nat.add_comm]
+  have auxZero : ∀ melds : List Meld,
+      mentsuHandChoiceTaatsuCount (melds.map MentsuHandChoice.meld) = 0 := by
+    intro melds
+    induction melds with
+    | nil =>
+        rfl
+    | cons meld melds ih =>
+        simp [mentsuHandChoiceTaatsuCount, choiceUsesTaatsu, ih]
+  simp [MentsuHandBlockDecomposition.blockChoices,
+    mentsuHandChoiceTaatsuCount, choiceUsesTaatsu,
+    mentsuHandChoiceTaatsuCount_append, aux, auxZero, Nat.add_comm] <;> omega
 
 lemma MentsuHandBlockDecomposition.blockChoices_mem_all
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
