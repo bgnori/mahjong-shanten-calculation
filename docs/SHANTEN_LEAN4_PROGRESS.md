@@ -55,6 +55,10 @@
 - 牌カウント以外の `melds`・`taatsu`・`pair` 条件を組み合わせて、
   `ValidMentsuHandChoice` を構成する補題を追加した
   (`valid_next_choice_of_prefix`)。
+- 選択列の `meld`・`taatsu` の個数を定義し、選択列を適用した後の探索状態の
+  `melds`・`taatsu` カウンタと一致することを証明した
+  (`AppliesMentsuHandChoices.melds_eq`,
+  `AppliesMentsuHandChoices.taatsu_eq`)。
 
 関連する主な補題:
 
@@ -93,6 +97,7 @@
 | 2026-11-15 | `validMentsuHandTargetDistance_mem_of_constrainedBlockSearch` | 制約付きブロック探索の結果を、仕様一致済みのターゲット距離集合へ接続。 |
 | 2026-11-15 | `exists_tile_mem_mentsuHandTileOrder_of_choice` | 各ブロック選択をタイル順探索へ挿入するための代表牌の存在を証明。 |
 | 2026-11-15 | `valid_next_choice_of_prefix` | 接頭辞条件から `ValidMentsuHandChoice` を構成。 |
+| 2026-11-15 | `AppliesMentsuHandChoices.melds_eq`, `AppliesMentsuHandChoices.taatsu_eq` | 選択列の面子・搭子個数と探索状態カウンタを対応付け。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 

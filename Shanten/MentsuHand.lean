@@ -1233,6 +1233,18 @@ def mentsuHandChoiceTiles : List MentsuHandChoice → Multiset Tile
   | choice :: choices =>
       choiceTiles choice + mentsuHandChoiceTiles choices
 
+def mentsuHandChoiceMeldCount : List MentsuHandChoice → Nat
+  | [] => 0
+  | choice :: choices =>
+      (if choiceUsesMeld choice = true then 1 else 0) +
+        mentsuHandChoiceMeldCount choices
+
+def mentsuHandChoiceTaatsuCount : List MentsuHandChoice → Nat
+  | [] => 0
+  | choice :: choices =>
+      (if choiceUsesTaatsu choice = true then 1 else 0) +
+        mentsuHandChoiceTaatsuCount choices
+
 lemma mentsuHandChoiceTiles_append
     (left right : List MentsuHandChoice) :
     mentsuHandChoiceTiles (left ++ right) =
@@ -1973,6 +1985,36 @@ lemma AppliesMentsuHandChoices.used_eq
         try rw [ih]
         try simp [applyMentsuHandChoice, choiceTiles]
         try ac_rfl
+
+lemma AppliesMentsuHandChoices.melds_eq
+    {hand : Hand} {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath : AppliesMentsuHandChoices hand state choices final) :
+    final.melds =
+      state.melds + mentsuHandChoiceMeldCount choices := by
+  induction hpath with
+  | nil =>
+      simp [mentsuHandChoiceMeldCount]
+  | @cons state choice hchoice hvalid final choices htail ih =>
+      simp only [mentsuHandChoiceMeldCount]
+      rw [ih]
+      simp [applyMentsuHandChoice, Nat.add_assoc, Nat.add_left_comm,
+        Nat.add_comm]
+
+lemma AppliesMentsuHandChoices.taatsu_eq
+    {hand : Hand} {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath : AppliesMentsuHandChoices hand state choices final) :
+    final.taatsu =
+      state.taatsu + mentsuHandChoiceTaatsuCount choices := by
+  induction hpath with
+  | nil =>
+      simp [mentsuHandChoiceTaatsuCount]
+  | @cons state choice hchoice hvalid final choices htail ih =>
+      simp only [mentsuHandChoiceTaatsuCount]
+      rw [ih]
+      simp [applyMentsuHandChoice, Nat.add_assoc, Nat.add_left_comm,
+        Nat.add_comm]
 
 lemma nextMentsuHandStateWithCopyLimit_toNext
     (hand : Hand) (state next : MentsuHandSearchState)
