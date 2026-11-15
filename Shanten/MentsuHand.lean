@@ -2638,6 +2638,49 @@ lemma reachableOnTilesFromWithCopyLimit_skips_state_matches
            omega]
        exact hfinal
 
+lemma reachableOnTilesFromWithCopyLimit_skips_pair
+    (hand : Hand) (tiles : List Tile) (fuel : Nat)
+    (state : MentsuHandSearchState)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state) :
+    ∃ final,
+      reachableOnTilesFromWithCopyLimit hand tiles state final ∧
+       reachableWithinWithCopyLimit hand (fuel + tiles.length) final ∧
+       final.pair = state.pair := by
+  induction tiles generalizing fuel state with
+  | nil =>
+      exact ⟨state, rfl, by simpa using hreachable, rfl⟩
+  | cons tile tiles ih =>
+      let hvalid : ValidMentsuHandChoice hand state .skip := by
+       refine ⟨?_, ?_, ?_, ?_⟩
+       · simpa [choiceTiles] using
+           reachableWithinWithCopyLimit_used_subset
+             hand fuel state hreachable
+       · simpa [choiceUsesMeld] using
+           reachableWithinWithCopyLimit_melds_le_four
+             hand fuel state hreachable
+       · simpa [choiceUsesTaatsu] using
+           reachableWithinWithCopyLimit_taatsu_le_four
+             hand fuel state hreachable
+       · simp [choiceUsesPair]
+      have hskip :=
+       nextMentsuHandStateAtWithCopyLimit_skip_of_reachable
+         hand tile fuel state hreachable
+      let next := applyMentsuHandChoice hand state .skip hvalid
+      have hreachableNext :
+         reachableWithinWithCopyLimit hand (fuel + 1) next := by
+       exact ⟨state, hreachable,
+         nextMentsuHandStateAtWithCopyLimit_toNextWithCopyLimit
+           hand tile state next (by simpa [next] using hskip)⟩
+      obtain ⟨final, hpath, hfinal, hpair⟩ :=
+       ih (fuel + 1) next hreachableNext
+      refine ⟨final, ⟨next, ?_, hpath⟩, ?_, ?_⟩
+      · simpa [next] using hskip
+      · simpa [List.length_cons, Nat.add_assoc, Nat.add_comm,
+         Nat.add_left_comm] using hfinal
+      · calc
+         final.pair = next.pair := hpair
+         _ = state.pair := by simp [next, applyMentsuHandChoice]
+
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
     (hvalid : ValidMentsuHandChoice hand state (.pair tile))
