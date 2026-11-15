@@ -2016,6 +2016,14 @@ lemma AppliesMentsuHandChoices.taatsu_eq
       simp [applyMentsuHandChoice, Nat.add_assoc, Nat.add_left_comm,
         Nat.add_comm]
 
+lemma applyMentsuHandChoice_pair_eq_some
+    (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
+    (hvalid : ValidMentsuHandChoice hand state (.pair tile))
+    (hpair : state.pair = none) :
+    (applyMentsuHandChoice hand state (.pair tile) hvalid).pair =
+      some tile := by
+  simp [applyMentsuHandChoice, hpair]
+
 lemma nextMentsuHandStateWithCopyLimit_toNext
     (hand : Hand) (state next : MentsuHandSearchState)
     (hnext : NextMentsuHandStateWithCopyLimit hand state next) :
