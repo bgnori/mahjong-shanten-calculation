@@ -78,6 +78,10 @@
   空接頭辞での雀頭なし条件と合わせて妥当な選択を自動構成する補題を追加した
   (`nextChoice_not_pair_of_nonempty_prefix`,
   `valid_next_choice_of_count_prefix_of_pair`)。
+- 初期探索状態から選択列を適用した場合の `used`・`melds`・`taatsu` の一致を、
+  初期値を消去した簡約形として公開した
+  (`used_eq_from_initial`, `melds_eq_from_initial`,
+  `taatsu_eq_from_initial`)。
 
 関連する主な補題:
 
@@ -124,6 +128,7 @@
 | 2026-11-15 | `nextChoice_melds_le_four`, `nextChoice_taatsu_le_four` | 接頭辞から次選択後の面子・搭子上限を導出。 |
 | 2026-11-15 | `valid_next_choice_of_count_prefix` | 接頭辞カウンタ条件から次の選択の妥当性を一括構成。 |
 | 2026-11-15 | `nextChoice_not_pair_of_nonempty_prefix`, `valid_next_choice_of_count_prefix_of_pair` | 接頭辞の空・非空から雀頭条件を導出し、妥当な選択を構成。 |
+| 2026-11-15 | `used_eq_from_initial`, `melds_eq_from_initial`, `taatsu_eq_from_initial` | 初期状態からの選択列に対する状態不変条件の簡約形を追加。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 

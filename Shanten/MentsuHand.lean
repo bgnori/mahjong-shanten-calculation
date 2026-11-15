@@ -2212,6 +2212,30 @@ lemma AppliesMentsuHandChoices.taatsu_eq
       simp [applyMentsuHandChoice, Nat.add_assoc, Nat.add_left_comm,
         Nat.add_comm]
 
+lemma AppliesMentsuHandChoices.used_eq_from_initial
+    {hand : Hand} {final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoices hand initialMentsuHandState choices final) :
+    final.used = mentsuHandChoiceTiles choices := by
+  simpa [initialMentsuHandState] using hpath.used_eq
+
+lemma AppliesMentsuHandChoices.melds_eq_from_initial
+    {hand : Hand} {final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoices hand initialMentsuHandState choices final) :
+    final.melds = mentsuHandChoiceMeldCount choices := by
+  simpa [initialMentsuHandState] using hpath.melds_eq
+
+lemma AppliesMentsuHandChoices.taatsu_eq_from_initial
+    {hand : Hand} {final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoices hand initialMentsuHandState choices final) :
+    final.taatsu = mentsuHandChoiceTaatsuCount choices := by
+  simpa [initialMentsuHandState] using hpath.taatsu_eq
+
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
     (hvalid : ValidMentsuHandChoice hand state (.pair tile))
