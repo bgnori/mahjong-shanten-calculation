@@ -2638,6 +2638,42 @@ lemma reachableOnTilesFromWithCopyLimit_skips_state_matches
            omega]
        exact hfinal
 
+lemma reachableOnTilesFromWithCopyLimit_skips_state_matches_pair
+    (hand : Hand) (tiles : List Tile) (fuel : Nat)
+    (state : MentsuHandSearchState) (choices : List MentsuHandChoice)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hmatches : MentsuHandChoiceStateMatches state choices) :
+    ∃ final,
+      reachableOnTilesFromWithCopyLimit hand tiles state final ∧
+       reachableWithinWithCopyLimit hand (fuel + tiles.length) final ∧
+       MentsuHandChoiceStateMatches final choices ∧
+       final.pair = state.pair := by
+  induction tiles generalizing fuel state with
+  | nil =>
+      exact ⟨state, rfl, by simpa using hreachable, hmatches, rfl⟩
+  | cons tile tiles ih =>
+      obtain ⟨hvalid, hmatchesNext⟩ :=
+       applyMentsuHandChoice.exists_skip_state_matches_of_reachable
+         hand fuel state choices hreachable hmatches
+      have hskip :=
+       nextMentsuHandStateAtWithCopyLimit_skip_of_reachable
+         hand tile fuel state hreachable
+      let next := applyMentsuHandChoice hand state .skip hvalid
+      have hreachableNext :
+         reachableWithinWithCopyLimit hand (fuel + 1) next := by
+       exact ⟨state, hreachable,
+         nextMentsuHandStateAtWithCopyLimit_toNextWithCopyLimit
+           hand tile state next (by simpa [next] using hskip)⟩
+      obtain ⟨final, hpath, hfinal, hmatchesFinal, hpair⟩ :=
+       ih (fuel + 1) next hreachableNext hmatchesNext
+      refine ⟨final, ⟨next, ?_, hpath⟩, ?_, hmatchesFinal, ?_⟩
+      · simpa [next] using hskip
+      · simpa [List.length_cons, Nat.add_assoc, Nat.add_comm,
+         Nat.add_left_comm] using hfinal
+      · calc
+         final.pair = next.pair := hpair
+         _ = state.pair := by simp [next, applyMentsuHandChoice]
+
 lemma reachableOnTilesFromWithCopyLimit_skips_pair
     (hand : Hand) (tiles : List Tile) (fuel : Nat)
     (state : MentsuHandSearchState)
@@ -2719,6 +2755,44 @@ lemma reachableOnTilesFromWithCopyLimit_choice_then_skips_state_matches
   refine ⟨final, ⟨applyMentsuHandChoice hand state choice hvalid, hnext, htail⟩,
     ?_, hmatchesFinal⟩
   exact hfinal
+
+lemma reachableOnTilesFromWithCopyLimit_insert_choice_state_matches
+    (hand : Hand) (before after : List Tile) (tile : Tile)
+    (fuel : Nat) (state : MentsuHandSearchState)
+    (choice : MentsuHandChoice) (choices : List MentsuHandChoice)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hmatches : MentsuHandChoiceStateMatches state choices)
+    (hchoice : choice ∈ allMentsuHandChoices)
+    (htile : tile ∈ choiceTiles choice)
+    (hvalid : ∀ middle,
+      MentsuHandChoiceStateMatches middle choices →
+        middle.pair = state.pair →
+        ValidMentsuHandChoice hand middle choice)
+    (hcopy : ∀ (middle : MentsuHandSearchState)
+      (hmiddle : MentsuHandChoiceStateMatches middle choices)
+      (hpair : middle.pair = state.pair)
+      (hvalidMiddle : ValidMentsuHandChoice hand middle choice),
+      CompletionRespectsCopyLimit
+        (applyMentsuHandChoice hand middle choice hvalidMiddle)) :
+    ∃ final,
+      reachableOnTilesFromWithCopyLimit hand (before ++ tile :: after)
+        state final ∧
+        reachableWithinWithCopyLimit hand
+          ((fuel + before.length) + 1 + after.length) final ∧
+        MentsuHandChoiceStateMatches final (choices ++ [choice]) := by
+  obtain ⟨middle, hbefore, hmiddle, hmatchesMiddle, hpairMiddle⟩ :=
+    reachableOnTilesFromWithCopyLimit_skips_state_matches_pair
+      hand before fuel state choices hreachable hmatches
+  let hvalidMiddle := hvalid middle hmatchesMiddle hpairMiddle
+  obtain ⟨final, hchosen, hfinal, hmatchesFinal⟩ :=
+    reachableOnTilesFromWithCopyLimit_choice_then_skips_state_matches
+      hand tile after (fuel + before.length) middle choice choices
+      hmiddle hmatchesMiddle hchoice htile hvalidMiddle
+      (hcopy middle hmatchesMiddle hpairMiddle hvalidMiddle)
+  refine ⟨final, ?_, ?_, hmatchesFinal⟩
+  · exact reachableOnTilesFromWithCopyLimit_append
+      hand before (tile :: after) state middle final hbefore hchosen
+  · exact hfinal
 
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)

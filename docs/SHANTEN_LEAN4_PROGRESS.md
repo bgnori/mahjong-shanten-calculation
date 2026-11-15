@@ -135,9 +135,13 @@
   (`reachableOnTilesFromWithCopyLimit_skips_state_matches`) 補題を追加した。
 - `skip` 列が探索状態の `pair` を変更しないことを追跡する
   (`reachableOnTilesFromWithCopyLimit_skips_pair`) 補題を追加した。
+- `skip` 列について、状態不変条件と `pair` 保存を同じ最終状態に対して返す
+  (`reachableOnTilesFromWithCopyLimit_skips_state_matches_pair`) 補題を追加した。
 - 代表牌で1選択を適用した後、残りのタイル列を `skip` で進めても、
   選択列の状態不変条件を保持する
   (`reachableOnTilesFromWithCopyLimit_choice_then_skips_state_matches`) 補題を追加した。
+- 前方 `skip`・代表牌選択・後方 `skip` を結合し、状態不変条件付きでタイル順到達性を
+  構成する `reachableOnTilesFromWithCopyLimit_insert_choice_state_matches` を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
@@ -209,6 +213,7 @@
 | 2026-11-15 | `skips_state_matches` | `skip` 列を状態不変条件付きのタイル順到達性へ拡張。 |
 | 2026-11-15 | `skips_pair` | `skip` 列で雀頭状態が保持されることを証明。 |
 | 2026-11-15 | `choice_then_skips_state_matches` | 選択適用後の残りタイル列でも状態不変条件を保持。 |
+| 2026-11-15 | `insert_choice_state_matches` | 前後の `skip` と代表牌選択を結合してタイル順到達性を構成。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 
