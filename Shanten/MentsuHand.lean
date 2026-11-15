@@ -3497,6 +3497,20 @@ lemma AppliesMentsuHandChoiceBatch.of_forward_for_representative_tile
       mentsuHandChoiceRepresentative_mem
         (hchoices choice hchoice))
 
+lemma AppliesMentsuHandChoiceBatch.of_forward_for_tile_filter
+    {hand : Hand} {tile : Tile}
+    {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand
+        state (mentsuHandChoicesForTile tile choices) final) :
+    AppliesMentsuHandChoiceBatch hand tile state
+      (mentsuHandChoicesForTile tile choices) final :=
+  AppliesMentsuHandChoiceBatch.of_forward_for_representative_tile
+    hpath
+    (fun choice hchoice =>
+      mentsuHandChoicesForTile_representative hchoice)
+
 lemma reachableWithinWithCopyLimit_of_forward_choice_path
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
