@@ -2252,6 +2252,20 @@ lemma AppliesMentsuHandChoices.state_matches_from_initial
   ⟨hpath.used_eq_from_initial, hpath.melds_eq_from_initial,
     hpath.taatsu_eq_from_initial⟩
 
+lemma applyMentsuHandChoice.state_matches_cons
+    {hand : Hand} {state : MentsuHandSearchState}
+    {choices : List MentsuHandChoice} (choice : MentsuHandChoice)
+    (hvalid : ValidMentsuHandChoice hand state choice)
+    (hmatches : MentsuHandChoiceStateMatches state choices) :
+    MentsuHandChoiceStateMatches
+      (applyMentsuHandChoice hand state choice hvalid) (choice :: choices) := by
+  rcases hmatches with ⟨hused, hmelds, htaatsu⟩
+  cases choice <;>
+    simp [MentsuHandChoiceStateMatches, applyMentsuHandChoice,
+      mentsuHandChoiceTiles, mentsuHandChoiceMeldCount,
+      mentsuHandChoiceTaatsuCount, hused, hmelds, htaatsu,
+      Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] <;> ac_rfl
+
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
     (hvalid : ValidMentsuHandChoice hand state (.pair tile))
