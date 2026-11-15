@@ -2291,6 +2291,22 @@ inductive AppliesMentsuHandChoicesForwardWithCopyLimit (hand : Hand) :
         (choices ++ [choice])
         (applyMentsuHandChoice hand middle choice hvalid)
 
+lemma reachableWithinWithCopyLimit_of_forward_choice_path
+    {hand : Hand} {final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hpath :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand
+        initialMentsuHandState choices final) :
+    reachableWithinWithCopyLimit hand choices.length final := by
+  induction hpath with
+  | nil =>
+      rfl
+  | @snoc middle choices choice hpath hchoice hvalid hcopy ih =>
+      have hnext :=
+        reachableWithinWithCopyLimit_append_choice
+          hand choices.length middle choice ih hchoice hvalid hcopy
+      simpa [List.length_append] using hnext
+
 lemma AppliesMentsuHandChoices.state_matches_from_initial
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
