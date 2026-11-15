@@ -1387,6 +1387,31 @@ lemma mentsuHandChoiceTaatsus_append
       cases choice <;>
         simp only [List.cons_append, mentsuHandChoiceTaatsus, ih]
 
+lemma mentsuHandChoiceTaatsus_sublist_of_sublist
+    {subset choices : List MentsuHandChoice}
+    (hsub : List.Sublist subset choices) :
+    List.Sublist (mentsuHandChoiceTaatsus subset)
+      (mentsuHandChoiceTaatsus choices) := by
+  induction hsub with
+  | slnil =>
+      exact .slnil
+  | cons choice hsub ih =>
+      cases choice with
+      | skip | pair | meld =>
+          simp only [mentsuHandChoiceTaatsus]
+          exact ih
+      | taatsu taatsu =>
+          simp only [mentsuHandChoiceTaatsus]
+          exact .cons _ ih
+  | cons_cons choice hsub ih =>
+      cases choice with
+      | skip | pair | meld =>
+          simp only [mentsuHandChoiceTaatsus]
+          exact ih
+      | taatsu taatsu =>
+          simp only [mentsuHandChoiceTaatsus]
+          exact .cons₂ taatsu ih
+
 lemma mentsuHandChoiceTaatsus_sublist_append
     (choices choices' : List MentsuHandChoice) :
     List.Sublist (mentsuHandChoiceTaatsus choices)
@@ -3120,6 +3145,25 @@ lemma AppliesMentsuHandChoiceBatch.taatsuHistory_reverse_from_initial
       mentsuHandChoiceTaatsus choices :=
   hbatch.taatsuHistory_reverse_append (pre := []) (by
     simp [initialMentsuHandState, mentsuHandChoiceTaatsus])
+
+lemma MentsuHandBlockDecomposition.completion_respects_of_choice_batch
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    {tile : Tile} {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hbatch :
+      AppliesMentsuHandChoiceBatch hand tile
+        initialMentsuHandState choices final)
+    (hsub : List.Sublist choices decomposition.blockChoices) :
+    CompletionRespectsCopyLimit final := by
+  have hmatches :=
+    hbatch.state_matches_from_initial
+  have hhistory :=
+    hbatch.taatsuHistory_reverse_from_initial
+  apply decomposition.completion_respects_of_sublist
+    choices final hsub hmatches.1
+  rw [hhistory]
+  rw [← decomposition.blockChoices_taatsus]
+  exact mentsuHandChoiceTaatsus_sublist_of_sublist hsub
 
 lemma AppliesMentsuHandTileBatchScan.taatsuHistory_reverse_append
     {hand : Hand}
