@@ -207,6 +207,24 @@ lemma mentsuHandChoicesForTile_sublist
       · simpa [mentsuHandChoicesForTile, hrep] using
           (List.Sublist.cons choice ih)
 
+lemma mentsuHandChoicesForTile_representative
+    {tile : Tile} {choices : List MentsuHandChoice}
+    {choice : MentsuHandChoice}
+    (hmem : choice ∈ mentsuHandChoicesForTile tile choices) :
+    mentsuHandChoiceRepresentative choice = some tile := by
+  induction choices with
+  | nil =>
+      simp [mentsuHandChoicesForTile] at hmem
+  | cons head choices ih =>
+      by_cases hrep :
+          mentsuHandChoiceRepresentative head = some tile
+      · simp [mentsuHandChoicesForTile, hrep] at hmem
+        rcases hmem with rfl | hmem
+        · exact hrep
+        · exact ih hmem
+      · simp [mentsuHandChoicesForTile, hrep] at hmem
+        exact ih hmem
+
 def choiceUsesMeld : MentsuHandChoice → Bool
   | .meld _ => true
   | _ => false
