@@ -1648,6 +1648,25 @@ lemma MentsuHandBlockDecomposition.prefix_count_le_hand
     exact decomposition.targetWithinHand tile
   exact hprefix.trans htarget
 
+lemma mentsuHandChoiceTiles_count_le_of_sublist
+    {subset choices : List MentsuHandChoice}
+    (hsub : List.Sublist subset choices) :
+    ∀ tile,
+      (mentsuHandChoiceTiles subset).count tile ≤
+        (mentsuHandChoiceTiles choices).count tile := by
+  induction hsub with
+  | slnil =>
+      simp
+  | cons choice hsub ih =>
+      intro tile
+      simp only [mentsuHandChoiceTiles, Multiset.count_add]
+      exact (ih tile).trans (Nat.le_add_left _ _)
+  | cons_cons choice hsub ih =>
+      intro tile
+      simp only [mentsuHandChoiceTiles, Multiset.count_add]
+      have htail := ih tile
+      omega
+
 lemma MentsuHandBlockDecomposition.prefix_completion_count_le_four
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
     (pre suffix : List MentsuHandChoice)
@@ -1820,6 +1839,31 @@ def completedTargetForState (state : MentsuHandSearchState) (pair : Tile) :
 def CompletionRespectsCopyLimit (state : MentsuHandSearchState) : Prop :=
   ∀ tile,
     (state.used + taatsuCompletionTiles state.taatsuHistory.reverse).count tile ≤ 4
+
+lemma MentsuHandBlockDecomposition.completion_respects_of_sublist
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (choices : List MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices :
+      List.Sublist choices decomposition.blockChoices)
+    (hused :
+      state.used = mentsuHandChoiceTiles choices)
+    (hhistory :
+      List.Sublist state.taatsuHistory.reverse decomposition.taatsus) :
+    CompletionRespectsCopyLimit state := by
+  intro tile
+  rw [hused]
+  have husedCount :=
+    mentsuHandChoiceTiles_count_le_of_sublist hchoices tile
+  have hfull :
+      (mentsuHandChoiceTiles decomposition.blockChoices +
+        taatsuCompletionTiles decomposition.taatsus).count tile ≤ 4 := by
+    rw [decomposition.blockChoices_tiles]
+    exact decomposition.completionCopyLimit tile
+  have hcompletion :=
+    taatsuCompletionTiles_count_le_of_sublist hhistory tile
+  rw [Multiset.count_add] at hfull ⊢
+  omega
 
 lemma completionRespectsCopyLimit_of_history_perm
     (state : MentsuHandSearchState) (taatsus : List Taatsu)
