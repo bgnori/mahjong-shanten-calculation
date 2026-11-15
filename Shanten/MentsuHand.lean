@@ -1356,6 +1356,27 @@ lemma MentsuHandBlockDecomposition.blockChoices_tail_not_pair
   · rcases htaatsu with ⟨taatsu, _, rfl⟩
     rfl
 
+lemma MentsuHandBlockDecomposition.nextChoice_not_pair_of_nonempty_prefix
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (hpre : pre ≠ [])
+    (hchoices :
+      decomposition.blockChoices = pre ++ choice :: suffix) :
+    choiceUsesPair choice = false := by
+  cases pre with
+  | nil =>
+      contradiction
+  | cons first pre =>
+      have htail :
+          decomposition.melds.map MentsuHandChoice.meld ++
+              decomposition.taatsus.map MentsuHandChoice.taatsu =
+            pre ++ choice :: suffix := by
+        have htail' := congrArg List.tail hchoices
+        simpa [MentsuHandBlockDecomposition.blockChoices] using htail'
+      apply decomposition.blockChoices_tail_not_pair choice
+      rw [htail]
+      simp
+
 lemma MentsuHandBlockDecomposition.nextChoice_melds_le_four
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
     (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
@@ -1578,6 +1599,29 @@ lemma MentsuHandBlockDecomposition.valid_next_choice_of_count_prefix
     (decomposition.nextChoice_taatsu_le_four
       pre suffix choice state hchoices htaatsu)
     hpair
+
+lemma MentsuHandBlockDecomposition.valid_next_choice_of_count_prefix_of_pair
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices :
+      decomposition.blockChoices = pre ++ choice :: suffix)
+    (hused :
+      state.used = mentsuHandChoiceTiles pre)
+    (hmelds :
+      state.melds = mentsuHandChoiceMeldCount pre)
+    (htaatsu :
+      state.taatsu = mentsuHandChoiceTaatsuCount pre)
+    (hpairEmpty :
+      pre = [] → state.pair.isNone) :
+    ValidMentsuHandChoice hand state choice := by
+  apply decomposition.valid_next_choice_of_count_prefix
+    pre suffix choice state hchoices hused hmelds htaatsu
+  by_cases hpre : pre = []
+  · exact Or.inl (hpairEmpty hpre)
+  · exact Or.inr
+      (decomposition.nextChoice_not_pair_of_nonempty_prefix
+        pre suffix choice hpre hchoices)
 
 def MentsuHandBlockDecomposition.completedTarget
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
