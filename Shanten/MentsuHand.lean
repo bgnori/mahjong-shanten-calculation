@@ -1736,6 +1736,36 @@ lemma mentsuHandChoiceTiles_count_le_of_sublist
       have htail := ih tile
       omega
 
+lemma mentsuHandChoiceMeldCount_le_of_sublist
+    {subset choices : List MentsuHandChoice}
+    (hsub : List.Sublist subset choices) :
+    mentsuHandChoiceMeldCount subset ≤
+      mentsuHandChoiceMeldCount choices := by
+  induction hsub with
+  | slnil =>
+      simp [mentsuHandChoiceMeldCount]
+  | cons choice hsub ih =>
+      simp only [mentsuHandChoiceMeldCount] at ih ⊢
+      omega
+  | cons_cons choice hsub ih =>
+      simp only [mentsuHandChoiceMeldCount] at ih ⊢
+      omega
+
+lemma mentsuHandChoiceTaatsuCount_le_of_sublist
+    {subset choices : List MentsuHandChoice}
+    (hsub : List.Sublist subset choices) :
+    mentsuHandChoiceTaatsuCount subset ≤
+      mentsuHandChoiceTaatsuCount choices := by
+  induction hsub with
+  | slnil =>
+      simp [mentsuHandChoiceTaatsuCount]
+  | cons choice hsub ih =>
+      simp only [mentsuHandChoiceTaatsuCount] at ih ⊢
+      omega
+  | cons_cons choice hsub ih =>
+      simp only [mentsuHandChoiceTaatsuCount] at ih ⊢
+      omega
+
 lemma MentsuHandBlockDecomposition.prefix_completion_count_le_four
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
     (pre suffix : List MentsuHandChoice)

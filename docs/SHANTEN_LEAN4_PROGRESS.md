@@ -201,6 +201,9 @@
 - 初期状態からのバッチについて、状態不変量と搭子履歴対応を直接取り出す
   `AppliesMentsuHandChoiceBatch.state_matches_from_initial`,
   `AppliesMentsuHandChoiceBatch.taatsuHistory_reverse_from_initial` を追加した。
+- 選択列の部分列に対する面子数・搭子数カウンタの単調性
+  (`mentsuHandChoiceMeldCount_le_of_sublist`,
+  `mentsuHandChoiceTaatsuCount_le_of_sublist`) を証明した。
 - 一回走査関係の `skip`・`choose` 帰納に対して、選択列接頭辞と探索状態の
   `MentsuHandChoiceStateMatches` を最後まで保持する
   (`AppliesMentsuHandTileScan.state_matches_append`,
@@ -327,7 +330,7 @@
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
-| 2026-11-15 | `b5e3bf1`, `622fd10`, `d6547eb`, `5ea7f63`, `0638aad`, `4c4bc5a`, `7ac5ac4`, `15bfbf3`, `a1768b9`, `3d36f53` / `AppliesMentsuHandChoiceBatch`, `AppliesMentsuHandTileBatchScan` | 同一牌種を共有する複数ブロックをバッチ処理する中間関係を追加し、状態不変量・搭子履歴対応・制約付き到達性・牌種走査全体の状態追跡・バッチ連結・前向き選択列からのバッチ構成・走査区間連結・単一牌種区間の基底・初期状態ラッパーを証明。既存の一選択走査だけでは表せない分解を明示化。 |
+| 2026-11-15 | `b5e3bf1`, `622fd10`, `d6547eb`, `5ea7f63`, `0638aad`, `4c4bc5a`, `7ac5ac4`, `15bfbf3`, `a1768b9`, `3d36f53`, `88a565b` / バッチ走査・部分列不変量 | 同一牌種を共有する複数ブロックをバッチ処理する中間関係、状態不変量、搭子履歴対応、制約付き到達性、牌種走査全体の状態追跡、バッチ連結、前向き選択列からのバッチ構成、走査区間連結、単一牌種区間の基底、初期状態ラッパー、部分列カウンタ単調性を証明。既存の一選択走査だけでは表せない分解を明示化。 |
 
 ## 検証状況
 
