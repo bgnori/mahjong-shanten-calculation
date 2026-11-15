@@ -1990,6 +1990,55 @@ def reachableOnTilesFromWithCopyLimit
         NextMentsuHandStateAtWithCopyLimit hand tile start middle ∧
           reachableOnTilesFromWithCopyLimit hand tiles middle state
 
+inductive AppliesMentsuHandTileScan (hand : Hand) :
+    List Tile → MentsuHandSearchState → List MentsuHandChoice →
+      MentsuHandSearchState → Prop
+  | nil (state : MentsuHandSearchState) :
+      AppliesMentsuHandTileScan hand [] state [] state
+  | skip (tile : Tile) (tiles : List Tile)
+      (state middle final : MentsuHandSearchState)
+      (hvalid : ValidMentsuHandChoice hand state .skip)
+      (hnext :
+        NextMentsuHandStateAtWithCopyLimit hand tile state
+          (applyMentsuHandChoice hand state .skip hvalid))
+      (htail :
+        AppliesMentsuHandTileScan hand tiles
+          (applyMentsuHandChoice hand state .skip hvalid)
+          [] final) :
+      AppliesMentsuHandTileScan hand (tile :: tiles) state [] final
+  | choose (tile : Tile) (tiles : List Tile)
+      (state middle final : MentsuHandSearchState)
+      (choice : MentsuHandChoice)
+      (hchoice : choice ∈ allMentsuHandChoices)
+      (htile : tile ∈ choiceTiles choice)
+      (hvalid : ValidMentsuHandChoice hand state choice)
+      (hcopy :
+        CompletionRespectsCopyLimit
+          (applyMentsuHandChoice hand state choice hvalid))
+      (htail :
+        AppliesMentsuHandTileScan hand tiles
+          (applyMentsuHandChoice hand state choice hvalid)
+          choices final) :
+      AppliesMentsuHandTileScan hand (tile :: tiles) state
+        (choice :: choices) final
+
+lemma AppliesMentsuHandTileScan.to_reachable
+    {hand : Hand} {tiles : List Tile}
+    {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hscan :
+      AppliesMentsuHandTileScan hand tiles state choices final) :
+    reachableOnTilesFromWithCopyLimit hand tiles state final := by
+  induction hscan with
+  | nil =>
+      rfl
+  | skip tile tiles state middle final hvalid hnext htail ih =>
+      exact ⟨_, hnext, ih⟩
+  | choose tile tiles state middle final choice hchoice htile hvalid hcopy
+      htail ih =>
+      exact ⟨_, nextMentsuHandStateAtWithCopyLimit_of_choice
+        hand tile state choice hchoice htile hvalid hcopy, ih⟩
+
 def reachableOnTilesWithCopyLimit
     (hand : Hand) (tiles : List Tile) (state : MentsuHandSearchState) : Prop :=
   reachableOnTilesFromWithCopyLimit hand tiles initialMentsuHandState state

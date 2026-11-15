@@ -162,6 +162,10 @@
   `MentsuHandBlockDecomposition.insert_blockChoice_from_prefix` を追加した。
 - 初期状態から分解の雀頭選択をタイル順探索へ挿入する基底補題
   (`insert_pair_from_initial`) を追加した。
+- タイル列を一度だけ左から右へ走査し、各タイルで `skip` または有効な選択を行う
+  `AppliesMentsuHandTileScan` を導入し、既存の
+  `reachableOnTilesFromWithCopyLimit` へ変換する
+  (`AppliesMentsuHandTileScan.to_reachable`) 補題を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
