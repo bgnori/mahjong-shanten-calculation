@@ -3658,6 +3658,37 @@ lemma MentsuHandBlockDecomposition.forward_of_sublist
       · simpa [List.append_assoc] using hmatchesFinal
       · simpa [List.append_assoc] using hhistoryFinal
 
+lemma MentsuHandBlockDecomposition.batch_of_representative_group
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (tile : Tile)
+    (pre choices : List MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hsub :
+      List.Sublist (pre ++ choices) decomposition.blockChoices)
+    (hmatches : MentsuHandChoiceStateMatches state pre)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus pre)
+    (hpairEmpty : pre = [] → state.pair = none)
+    (hnotPair :
+      ∀ choice, choice ∈ choices →
+        choiceUsesPair choice = false)
+    (hrepresentative :
+      ∀ choice, choice ∈ choices →
+        mentsuHandChoiceRepresentative choice = some tile) :
+    ∃ final,
+      AppliesMentsuHandChoiceBatch hand tile state choices final ∧
+      MentsuHandChoiceStateMatches final (pre ++ choices) ∧
+      final.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus (pre ++ choices) := by
+  obtain ⟨final, hpath, hmatchesFinal, hhistoryFinal⟩ :=
+    decomposition.forward_of_sublist
+      pre choices state hsub hmatches hhistory
+      hpairEmpty hnotPair
+  refine ⟨final, ?_, hmatchesFinal, hhistoryFinal⟩
+  exact AppliesMentsuHandChoiceBatch.of_forward_for_representative_tile
+    hpath hrepresentative
+
 lemma AppliesMentsuHandChoicesForwardWithCopyLimit.completion_respects_from_prefix
     {hand : Hand} {state : MentsuHandSearchState}
     {choices suffix : List MentsuHandChoice}

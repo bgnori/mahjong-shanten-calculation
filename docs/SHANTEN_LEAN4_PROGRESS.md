@@ -313,6 +313,9 @@
  `AppliesMentsuHandChoicesForwardWithCopyLimit` として構成する
  (`MentsuHandBlockDecomposition.forward_of_sublist`) 補題を追加した。
  各選択後のコピー制限も分解の部分列補題から自動的に供給される。
+- `forward_of_sublist` の結果に代表牌条件を適用し、代表牌抽出列を直接
+ `AppliesMentsuHandChoiceBatch` へ変換する
+ (`MentsuHandBlockDecomposition.batch_of_representative_group`) 補題を追加した。
 
 関連する主な補題:
 
@@ -409,6 +412,7 @@
 | 2026-11-15 | `completion_respects_of_forward_group` | 代表牌グループの前向き経路を分解のコピー制限へ接続。 |
 | 2026-11-15 | `list_sublist_append_single_of_sublist`, `valid_next_choice_of_sublist_append` | 選択列部分列から次選択の妥当性を構成。 |
 | 2026-11-15 | `MentsuHandBlockDecomposition.forward_of_sublist` | 部分列選択列をコピー制限付き前向き経路へ構成。 |
+| 2026-11-15 | `MentsuHandBlockDecomposition.batch_of_representative_group` | 代表牌グループを前向き経路経由で同一牌種バッチへ変換。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
