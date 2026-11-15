@@ -122,6 +122,12 @@
 - 分解の接頭辞の牌数上限と、探索状態の搭子履歴が分解の搭子列の部分列であることから、
   `CompletionRespectsCopyLimit` を構成する
   (`MentsuHandBlockDecomposition.completion_respects_of_prefix`) 補題を追加した。
+- 選択列の搭子抽出列がブロック分解の搭子列の部分列になることを証明した
+  (`prefix_taatsus_sublist`)。
+- コピー制限付き前向き選択列と分解接頭辞から、
+  `CompletionRespectsCopyLimit` を構成する
+  (`AppliesMentsuHandChoicesForwardWithCopyLimit.completion_respects_from_prefix`)
+  補題を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
@@ -188,6 +194,7 @@
 | 2026-11-15 | `AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_from_initial` | コピー制限付き選択列の状態不変条件を証明。 |
 | 2026-11-15 | `reachableWithinWithCopyLimit_append_choice` | 妥当な選択を制約付き到達性へ接続。 |
 | 2026-11-15 | `mentsuHandChoiceTaatsus`, `taatsuHistory_reverse_from_initial` | 選択列の搭子列と探索状態の `taatsuHistory` を対応付け。 |
+| 2026-11-15 | `prefix_taatsus_sublist`, `completion_respects_from_prefix` | 分解接頭辞からコピー制限付き前向き選択列の妥当性を構成。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 

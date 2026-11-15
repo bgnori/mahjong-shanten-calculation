@@ -1284,6 +1284,17 @@ lemma mentsuHandChoiceTaatsus_append
       cases choice <;>
         simp only [List.cons_append, mentsuHandChoiceTaatsus, ih]
 
+lemma mentsuHandChoiceTaatsus_sublist_append
+    (choices choices' : List MentsuHandChoice) :
+    List.Sublist (mentsuHandChoiceTaatsus choices)
+      (mentsuHandChoiceTaatsus (choices ++ choices')) := by
+  rw [mentsuHandChoiceTaatsus_append]
+  induction mentsuHandChoiceTaatsus choices with
+  | nil =>
+      simp
+  | cons taatsu taatsus ih =>
+      exact List.Sublist.cons₂ taatsu ih
+
 lemma mentsuHandChoiceMeldCount_append
     (left right : List MentsuHandChoice) :
     mentsuHandChoiceMeldCount (left ++ right) =
@@ -1504,6 +1515,32 @@ lemma mentsuHandChoiceTaatsus_map_taatsu
      rfl
   | cons taatsu taatsus ih =>
      simp [mentsuHandChoiceTaatsus, ih]
+
+lemma MentsuHandBlockDecomposition.blockChoices_taatsus
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
+    mentsuHandChoiceTaatsus decomposition.blockChoices =
+     decomposition.taatsus := by
+  have hmelds : ∀ melds : List Meld,
+     mentsuHandChoiceTaatsus (melds.map MentsuHandChoice.meld) = [] := by
+    intro melds
+    induction melds with
+    | nil =>
+       rfl
+    | cons meld melds ih =>
+       simp [ih, mentsuHandChoiceTaatsus]
+  unfold MentsuHandBlockDecomposition.blockChoices
+  simp only [mentsuHandChoiceTaatsus, mentsuHandChoiceTaatsus_append,
+    hmelds, List.nil_append, mentsuHandChoiceTaatsus_map_taatsu]
+
+lemma MentsuHandBlockDecomposition.prefix_taatsus_sublist
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice)
+    (hchoices : decomposition.blockChoices = pre ++ suffix) :
+    List.Sublist (mentsuHandChoiceTaatsus pre) decomposition.taatsus := by
+  have hsub :=
+    mentsuHandChoiceTaatsus_sublist_append pre suffix
+  rw [← hchoices, decomposition.blockChoices_taatsus] at hsub
+  exact hsub
 
 lemma MentsuHandBlockDecomposition.blockChoices_tiles
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
@@ -2488,6 +2525,26 @@ lemma AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_in
   | @snoc state middle choices hpath hchoice hvalid hcopy ih =>
       exact applyMentsuHandChoice.taatsuHistory_reverse_append_single
         _ hvalid ih
+
+lemma AppliesMentsuHandChoicesForwardWithCopyLimit.completion_respects_from_prefix
+    {hand : Hand} {state : MentsuHandSearchState}
+    {choices suffix : List MentsuHandChoice}
+    (decomposition : MentsuHandBlockDecomposition hand)
+    (hpath :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand
+        initialMentsuHandState choices state)
+    (hchoices : decomposition.blockChoices = choices ++ suffix) :
+    CompletionRespectsCopyLimit state := by
+  have hmatches :=
+    AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_from_initial
+      hpath
+  have hhistory :=
+    AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial
+      hpath
+  apply decomposition.completion_respects_of_prefix
+    choices suffix state hchoices hmatches.1
+  rw [hhistory]
+  exact decomposition.prefix_taatsus_sublist choices suffix hchoices
 
 lemma applyMentsuHandChoice_skip_fields
     (hand : Hand) (state : MentsuHandSearchState)
