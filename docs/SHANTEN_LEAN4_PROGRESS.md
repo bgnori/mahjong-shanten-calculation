@@ -146,6 +146,10 @@
   (`applyMentsuHandChoice.skip_taatsuHistory_reverse`)、
   タイル列全体の `skip` に対して履歴対応を保持する
   (`reachableOnTilesFromWithCopyLimit_skips_taatsuHistory`) 補題を追加した。
+- `skip` 列について、状態不変条件・`pair` 保存・`taatsuHistory` 対応を同じ最終状態へ
+  統合する `reachableOnTilesFromWithCopyLimit_skips_invariants` を追加した。
+- 分解接頭辞の妥当性、搭子履歴、コピー制限を統合し、代表牌の前後の `skip` と選択を
+  結合する `MentsuHandBlockDecomposition.insert_choice_from_prefix` を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
@@ -219,6 +223,7 @@
 | 2026-11-15 | `choice_then_skips_state_matches` | 選択適用後の残りタイル列でも状態不変条件を保持。 |
 | 2026-11-15 | `insert_choice_state_matches` | 前後の `skip` と代表牌選択を結合してタイル順到達性を構成。 |
 | 2026-11-15 | `skips_taatsuHistory` | `skip` 列で搭子履歴対応を保持。 |
+| 2026-11-15 | `skips_invariants`, `insert_choice_from_prefix` | 3つの不変条件を統合し、分解接頭辞から代表牌選択を挿入。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 
