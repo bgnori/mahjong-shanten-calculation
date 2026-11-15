@@ -2603,6 +2603,41 @@ lemma applyMentsuHandChoice.exists_skip_state_matches_of_reachable
     · simp [choiceUsesPair]
   exact ⟨hvalid, applyMentsuHandChoice.skip_state_matches hvalid hmatches⟩
 
+lemma reachableOnTilesFromWithCopyLimit_skips_state_matches
+   (hand : Hand) (tiles : List Tile) (fuel : Nat)
+   (state : MentsuHandSearchState) (choices : List MentsuHandChoice)
+   (hreachable : reachableWithinWithCopyLimit hand fuel state)
+   (hmatches : MentsuHandChoiceStateMatches state choices) :
+   ∃ final,
+     reachableOnTilesFromWithCopyLimit hand tiles state final ∧
+       reachableWithinWithCopyLimit hand (fuel + tiles.length) final ∧
+       MentsuHandChoiceStateMatches final choices := by
+  induction tiles generalizing fuel state with
+  | nil =>
+     exact ⟨state, rfl, by simpa using hreachable, hmatches⟩
+  | cons tile tiles ih =>
+     obtain ⟨hvalid, hmatchesNext⟩ :=
+       applyMentsuHandChoice.exists_skip_state_matches_of_reachable
+         hand fuel state choices hreachable hmatches
+     have hskip :=
+       nextMentsuHandStateAtWithCopyLimit_skip_of_reachable
+         hand tile fuel state hreachable
+     let next := applyMentsuHandChoice hand state .skip hvalid
+     have hreachableNext :
+         reachableWithinWithCopyLimit hand (fuel + 1) next := by
+       exact ⟨state, hreachable,
+         nextMentsuHandStateAtWithCopyLimit_toNextWithCopyLimit
+           hand tile state next (by simpa [next] using hskip)⟩
+     obtain ⟨final, hpath, hfinal, hmatchesFinal⟩ :=
+       ih (fuel + 1) next hreachableNext hmatchesNext
+     refine ⟨final, ⟨next, ?_, hpath⟩, ?_, hmatchesFinal⟩
+     · simpa [next] using hskip
+     · rw [show fuel + (tile :: tiles).length =
+         (fuel + 1) + tiles.length by
+           simp only [List.length_cons]
+           omega]
+       exact hfinal
+
 lemma applyMentsuHandChoice_pair_eq_some
     (hand : Hand) (state : MentsuHandSearchState) (tile : Tile)
     (hvalid : ValidMentsuHandChoice hand state (.pair tile))

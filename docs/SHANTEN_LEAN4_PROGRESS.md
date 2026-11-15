@@ -130,6 +130,9 @@
   補題を追加した。
 - ブロック分解の選択列に `skip` が含まれないことを示す
   (`MentsuHandBlockDecomposition.blockChoices_ne_skip`) 補題を追加した。
+- タイルを `skip` しながら、選択列に対する
+  `MentsuHandChoiceStateMatches` を保持して到達性を延長する
+  (`reachableOnTilesFromWithCopyLimit_skips_state_matches`) 補題を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
@@ -198,6 +201,7 @@
 | 2026-11-15 | `mentsuHandChoiceTaatsus`, `taatsuHistory_reverse_from_initial` | 選択列の搭子列と探索状態の `taatsuHistory` を対応付け。 |
 | 2026-11-15 | `prefix_taatsus_sublist`, `completion_respects_from_prefix` | 分解接頭辞からコピー制限付き前向き選択列の妥当性を構成。 |
 | 2026-11-15 | `blockChoices_ne_skip` | タイル順探索への挿入対象がすべて非 `skip` であることを証明。 |
+| 2026-11-15 | `skips_state_matches` | `skip` 列を状態不変条件付きのタイル順到達性へ拡張。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 
