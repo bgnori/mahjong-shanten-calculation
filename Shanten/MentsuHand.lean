@@ -2942,6 +2942,30 @@ lemma reachableWithinWithCopyLimit_of_choice_batch
       simpa [List.length_append, Nat.add_assoc, Nat.add_comm,
         Nat.add_left_comm] using hnext
 
+lemma reachableWithinWithCopyLimit_of_tile_batch_scan
+    {hand : Hand}
+    {tiles : List Tile}
+    {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (fuel : Nat)
+    (hreachable :
+      reachableWithinWithCopyLimit hand fuel state)
+    (hscan :
+      AppliesMentsuHandTileBatchScan hand tiles state choices final) :
+    reachableWithinWithCopyLimit hand
+      (fuel + choices.length) final := by
+  induction hscan generalizing fuel with
+  | nil =>
+      simpa using hreachable
+  | @step tile tiles start middle final batchChoices choices hbatch htail ih =>
+      have hmiddle :=
+        reachableWithinWithCopyLimit_of_choice_batch
+          fuel hreachable hbatch
+      have hfinal :=
+        ih (fuel + batchChoices.length) hmiddle
+      simpa [List.length_append, Nat.add_assoc, Nat.add_comm,
+        Nat.add_left_comm] using hfinal
+
 lemma AppliesMentsuHandChoicesForward.state_matches_from_initial
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
