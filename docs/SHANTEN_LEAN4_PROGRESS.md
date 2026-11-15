@@ -299,7 +299,7 @@
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
-| 2026-11-15 | `AppliesMentsuHandChoiceBatch` | 同一牌種を共有する複数ブロックを、牌種走査を進めずに連続適用する完全性用の中間関係を追加。既存の一選択走査だけでは表せない分解を明示化。 |
+| 2026-11-15 | `b5e3bf1` / `AppliesMentsuHandChoiceBatch` | 同一牌種を共有する複数ブロックを、牌種走査を進めずに連続適用する完全性用の中間関係を追加。既存の一選択走査だけでは表せない分解を明示化。 |
 
 ## 検証状況
 
