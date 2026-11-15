@@ -2825,6 +2825,32 @@ lemma AppliesMentsuHandTileScan.state_matches_from_initial
   simpa using
     AppliesMentsuHandTileScan.state_matches_append hinitial hscan
 
+lemma AppliesMentsuHandTileScan.taatsuHistory_reverse_append
+    {hand : Hand} {tiles : List Tile}
+    {state final : MentsuHandSearchState}
+    {pre choices : List MentsuHandChoice}
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus pre)
+    (hscan :
+      AppliesMentsuHandTileScan hand tiles state choices final) :
+    final.taatsuHistory.reverse =
+      mentsuHandChoiceTaatsus (pre ++ choices) := by
+  induction hscan generalizing pre with
+  | nil =>
+      simpa using hhistory
+  | @skip choices tile tiles state middle final hvalid hnext htail ih =>
+      apply ih
+      exact applyMentsuHandChoice.skip_taatsuHistory_reverse
+        hvalid hhistory
+  | @choose choices tile tiles state middle final choice hchoice htile
+      hvalid hcopy htail ih =>
+      have hnext :=
+        applyMentsuHandChoice.taatsuHistory_reverse_append_single
+          choice hvalid hhistory
+      have hfinal := ih (pre := pre ++ [choice]) hnext
+      simpa [List.append_assoc] using hfinal
+
 lemma reachableOnTilesFromWithCopyLimit_skips_state_matches
    (hand : Hand) (tiles : List Tile) (fuel : Nat)
    (state : MentsuHandSearchState) (choices : List MentsuHandChoice)

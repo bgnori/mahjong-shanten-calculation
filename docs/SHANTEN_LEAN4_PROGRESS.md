@@ -195,6 +195,9 @@
   順序依存性を除去する基礎を追加した。
 - 搭子履歴が順序変更された場合でも、既存のコピー制限を新しい履歴へ移送する
   (`completionRespectsCopyLimit_of_history_perm`) 補題を追加した。
+- 一回走査関係の `skip`・`choose` 列全体について、搭子履歴の逆順を走査前の
+  履歴と選択列の連結へ対応付ける
+  (`AppliesMentsuHandTileScan.taatsuHistory_reverse_append`) 補題を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
@@ -279,6 +282,7 @@
 | 2026-11-15 | `mentsuHandChoiceStateMatches_of_perm` | 選択列の順序変更に対する状態カウンタ不変性を追加。 |
 | 2026-11-15 | `taatsuCompletionTiles_of_perm` | 搭子列の順序変更に対する補完牌 Multiset の不変性を追加。 |
 | 2026-11-15 | `completionRespectsCopyLimit_of_history_perm` | 搭子履歴の順序変更後もコピー制限を保持する補題を追加。 |
+| 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 
