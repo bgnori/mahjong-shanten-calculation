@@ -2100,6 +2100,38 @@ lemma completionRespectsCopyLimit_of_history_perm
   rw [← taatsuCompletionTiles_of_perm hperm]
   exact hcopy tile
 
+lemma MentsuHandBlockDecomposition.completion_respects_of_perm
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    {state : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (hperm : List.Perm choices decomposition.blockChoices)
+    (hused : state.used = mentsuHandChoiceTiles choices)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus choices) :
+    CompletionRespectsCopyLimit state := by
+  intro tile
+  rw [hused]
+  have husedPerm :
+      mentsuHandChoiceTiles choices =
+        mentsuHandChoiceTiles decomposition.blockChoices :=
+    mentsuHandChoiceTiles_of_perm hperm
+  rw [husedPerm]
+  have hfull :
+      (mentsuHandChoiceTiles decomposition.blockChoices +
+        taatsuCompletionTiles decomposition.taatsus).count tile ≤ 4 := by
+    rw [decomposition.blockChoices_tiles]
+    exact decomposition.completionCopyLimit tile
+  have htaatsuPerm :
+      List.Perm
+        (mentsuHandChoiceTaatsus choices)
+        decomposition.taatsus := by
+    rw [← decomposition.blockChoices_taatsus]
+    exact mentsuHandChoiceTaatsus_of_perm hperm
+  rw [hhistory, taatsuCompletionTiles_of_perm htaatsuPerm]
+  rw [Multiset.count_add] at hfull ⊢
+  exact hfull
+
 lemma MentsuHandBlockDecomposition.completion_respects_of_prefix
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
     (pre suffix : List MentsuHandChoice)

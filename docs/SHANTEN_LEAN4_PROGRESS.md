@@ -269,6 +269,9 @@
 - 選択列の順序を牌種走査順に並べ替えるための基礎として、
   `List.Perm` に対する使用牌 Multiset の不変性
   (`mentsuHandChoiceTiles_of_perm`) を公開補題として追加した。
+- 使用牌 Multiset と搭子履歴の両方について `List.Perm` 不変性を組み合わせ、
+  牌種順に並べ替えた選択列からコピー制限を導出する
+  (`MentsuHandBlockDecomposition.completion_respects_of_perm`) 補題を追加した。
 
 関連する主な補題:
 
@@ -353,6 +356,7 @@
 | 2026-11-15 | `completion_respects_of_choice_batch_append` | 処理済み接頭辞を持つ状態へのバッチ追加にコピー制限を接続。 |
 | 2026-11-15 | `completion_respects_of_tile_batch_scan_append` | 牌種バッチ走査区間全体へコピー制限の接続を拡張。 |
 | 2026-11-15 | `mentsuHandChoiceTiles_of_perm` | 選択列の順序変更に対する使用牌 Multiset の不変性を追加。 |
+| 2026-11-15 | `completion_respects_of_perm` | 選択列の並べ替え後も使用牌・搭子補完のコピー制限を保持。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
