@@ -1556,6 +1556,29 @@ lemma MentsuHandBlockDecomposition.valid_next_choice_of_prefix
       pre suffix choice state hchoices hused)
     hmelds htaatsu hpair
 
+lemma MentsuHandBlockDecomposition.valid_next_choice_of_count_prefix
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices :
+      decomposition.blockChoices = pre ++ choice :: suffix)
+    (hused :
+      state.used = mentsuHandChoiceTiles pre)
+    (hmelds :
+      state.melds = mentsuHandChoiceMeldCount pre)
+    (htaatsu :
+      state.taatsu = mentsuHandChoiceTaatsuCount pre)
+    (hpair :
+      state.pair.isNone ∨ choiceUsesPair choice = false) :
+    ValidMentsuHandChoice hand state choice :=
+  decomposition.valid_next_choice_of_prefix
+    pre suffix choice state hchoices hused
+    (decomposition.nextChoice_melds_le_four
+      pre suffix choice state hchoices hmelds)
+    (decomposition.nextChoice_taatsu_le_four
+      pre suffix choice state hchoices htaatsu)
+    hpair
+
 def MentsuHandBlockDecomposition.completedTarget
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     Multiset Tile :=
