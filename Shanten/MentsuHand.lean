@@ -2256,6 +2256,31 @@ inductive AppliesMentsuHandTileBatchScan (hand : Hand) :
       AppliesMentsuHandTileBatchScan hand (tile :: tiles) state
         (batchChoices ++ choices) final
 
+lemma AppliesMentsuHandTileBatchScan.append
+    {hand : Hand} {before rest : List Tile}
+    {start middle final : MentsuHandSearchState}
+    {choicesBefore choicesAfter : List MentsuHandChoice}
+    (hbefore :
+      AppliesMentsuHandTileBatchScan hand before
+        start choicesBefore middle)
+    (htail :
+      AppliesMentsuHandTileBatchScan hand rest
+        middle choicesAfter final) :
+    AppliesMentsuHandTileBatchScan hand (before ++ rest)
+      start (choicesBefore ++ choicesAfter) final := by
+  induction before generalizing start middle choicesBefore with
+  | nil =>
+      cases hbefore
+      simpa using htail
+  | cons tile tiles ih =>
+      cases hbefore with
+      | step =>
+          rename_i middle' batchChoices' choices' hbatch htail'
+          simpa [List.append_assoc] using
+            (.step tile (tiles ++ rest) start middle' final
+              batchChoices' (choices' ++ choicesAfter) hbatch
+              (ih htail' htail))
+
 lemma AppliesMentsuHandTileScan.to_reachable
     {hand : Hand} {tiles : List Tile}
     {state final : MentsuHandSearchState}
