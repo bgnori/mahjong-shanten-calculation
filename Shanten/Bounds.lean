@@ -1,4 +1,6 @@
 import Shanten.SevenPairs
+import Mathlib.Data.Nat.Find
+import Mathlib.Tactic.Convert
 
 namespace Shanten
 

@@ -1,4 +1,5 @@
 import Shanten.Specification
+import Mathlib.Algebra.BigOperators.Ring.Finset
 
 namespace Shanten
 

@@ -1,4 +1,9 @@
-import Mathlib
+import Mathlib.Algebra.Order.BigOperators.Group.Finset
+import Mathlib.Data.Fintype.Sigma
+import Mathlib.Data.Fintype.Sum
+import Mathlib.Data.Multiset.Replicate
+import Mathlib.Tactic.DeriveFintype
+import Mathlib.Tactic.Push
 
 namespace Shanten
 

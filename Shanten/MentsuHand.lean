@@ -1,5 +1,7 @@
 import Shanten.Specification
 import Shanten.SevenPairs
+import Mathlib.Data.Finset.Union
+import Mathlib.Tactic.FinCases
 
 namespace Shanten
 

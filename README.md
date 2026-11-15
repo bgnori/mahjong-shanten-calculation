@@ -117,15 +117,29 @@ Two Dev Container configurations are available; both are limited to 2 CPUs:
 The `dev` configuration is the default when opening this repository in a
 Dev Container. To use the lighter `user` configuration instead, select
 `.devcontainer/user/devcontainer.json` explicitly in VS Code. Lean 4 and
-mathlib in `dev` are both pinned to `v4.35.0`;
-mathlib's prebuilt cache is fetched when the container is created. The `dev`
-configuration mounts the host's `~/.cache/mathlib` at
+mathlib in `dev` are both pinned to `v4.35.0`.
+Only the imported mathlib modules and their transitive dependencies are loaded
+and their prebuilt cache is fetched when the container is created. The Lean
+proofs use finite sets, multisets, natural numbers, and integers rather than
+the full `Mathlib` import (including real analysis). Keep mathlib imports
+specific when adding proofs. The `dev` configuration mounts the host's
+`~/.cache/mathlib` at
 `/home/vscode/.cache/mathlib`, so the downloaded mathlib cache is reused when
 the container is rebuilt or recreated. Set `MATHLIB_CACHE_DIR` in
 `devcontainer.json` if you use a different host cache location.
+Both Lean configurations set `LEAN_NUM_THREADS=2` to match their CPU limit.
+They also set `MATHLIB_NO_CACHE_ON_UPDATE=1` to prevent `lake update` from
+automatically fetching all of mathlib. After updating dependencies or adding
+imports, fetch only the required cache with:
+
+```sh
+lake exe cache get $(sed -n 's/^import \(Mathlib\..*\)$/\1/p' Shanten/*.lean)
+```
 
 Build the Lean project in `dev` with:
 
 ```sh
-lake build Shanten
+lake build
 ```
+
+`Shanten` is the default build target; `lake build Shanten` is equivalent.

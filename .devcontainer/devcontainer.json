@@ -8,9 +8,11 @@
     "source=${localEnv:HOME}/.cache/mathlib,target=/home/vscode/.cache/mathlib,type=bind"
   ],
   "containerEnv": {
-    "MATHLIB_CACHE_DIR": "/home/vscode/.cache/mathlib"
+    "MATHLIB_CACHE_DIR": "/home/vscode/.cache/mathlib",
+    "MATHLIB_NO_CACHE_ON_UPDATE": "1",
+    "LEAN_NUM_THREADS": "2"
   },
-  "postCreateCommand": "elan toolchain install leanprover/lean4:v4.35.0 && lake update && lake exe cache get",
+  "postCreateCommand": "elan toolchain install leanprover/lean4:v4.35.0 && lake update && lake exe cache get $(sed -n 's/^import \\(Mathlib\\..*\\)$/\\1/p' Shanten/*.lean)",
   "customizations": {
     "vscode": {
       "extensions": ["golang.go", "leanprover.lean4"]
