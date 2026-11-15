@@ -2935,6 +2935,51 @@ lemma AppliesMentsuHandTileBatchScan.single
         tile [] state final final choices [] hbatch (.nil final))
         using 1 <;> simp
 
+/-- Batch traversal driven by representative groups.
+
+The source column is carried separately from the tile-order scan. Each step
+consumes exactly the choices whose representative is the current tile and
+recurses on the remaining source column. The base case therefore requires the
+remaining column to be empty.
+-/
+inductive AppliesMentsuHandGroupedTileBatches (hand : Hand) :
+    List Tile → List MentsuHandChoice → MentsuHandSearchState →
+      MentsuHandSearchState → Prop
+  | nil (state : MentsuHandSearchState) :
+      AppliesMentsuHandGroupedTileBatches hand [] [] state state
+  | step (tile : Tile) (tiles : List Tile)
+      (source : List MentsuHandChoice)
+      (state middle final : MentsuHandSearchState)
+      (hbatch :
+        AppliesMentsuHandChoiceBatch hand tile state
+          (mentsuHandChoicesForTile tile source) middle)
+      (htail :
+        AppliesMentsuHandGroupedTileBatches hand tiles
+          (mentsuHandChoicesWithoutTile tile source) middle final) :
+      AppliesMentsuHandGroupedTileBatches hand (tile :: tiles)
+        source state final
+
+lemma AppliesMentsuHandGroupedTileBatches.to_scan
+    {hand : Hand} {tiles : List Tile}
+    {choices : List MentsuHandChoice}
+    {state final : MentsuHandSearchState}
+    (hgrouped :
+      AppliesMentsuHandGroupedTileBatches hand tiles choices state final) :
+    AppliesMentsuHandTileBatchScan hand tiles state
+      (mentsuHandChoicesGroupedByTiles tiles choices) final := by
+  induction hgrouped with
+  | nil state =>
+      simpa [mentsuHandChoicesGroupedByTiles] using
+        (AppliesMentsuHandTileBatchScan.nil state)
+  | @step tile tiles source state middle final hbatch htail ih =>
+      simpa [mentsuHandChoicesGroupedByTiles] using
+        (AppliesMentsuHandTileBatchScan.step
+          tile tiles state middle final
+          (mentsuHandChoicesForTile tile source)
+          (mentsuHandChoicesGroupedByTiles tiles
+            (mentsuHandChoicesWithoutTile tile source))
+          hbatch ih)
+
 lemma AppliesMentsuHandTileScan.to_reachable
     {hand : Hand} {tiles : List Tile}
     {state final : MentsuHandSearchState}
