@@ -1353,6 +1353,46 @@ lemma MentsuHandBlockDecomposition.prefix_completion_count_le_four
   rw [Multiset.count_add] at hfull ⊢
   omega
 
+lemma MentsuHandBlockDecomposition.nextChoice_count_le_hand
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices :
+      decomposition.blockChoices = pre ++ choice :: suffix)
+    (hused :
+      state.used = mentsuHandChoiceTiles pre) :
+    ∀ tile,
+      (state.used + choiceTiles choice).count tile ≤ hand.counts tile := by
+  intro tile
+  rw [hused]
+  have hprefix :=
+    decomposition.prefix_count_le_hand
+      (pre ++ [choice]) suffix (by
+        simpa [List.append_assoc] using hchoices) tile
+  rw [Multiset.count_add] at ⊢
+  simpa [mentsuHandChoiceTiles, mentsuHandChoiceTiles_append] using hprefix
+
+lemma MentsuHandBlockDecomposition.nextChoice_completion_count_le_four
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (pre suffix : List MentsuHandChoice) (choice : MentsuHandChoice)
+    (state : MentsuHandSearchState)
+    (hchoices :
+      decomposition.blockChoices = pre ++ choice :: suffix)
+    (hused :
+      state.used = mentsuHandChoiceTiles pre) :
+    ∀ tile,
+      (state.used + choiceTiles choice +
+        taatsuCompletionTiles decomposition.taatsus).count tile ≤ 4 := by
+  intro tile
+  rw [hused]
+  have hprefix :=
+    decomposition.prefix_completion_count_le_four
+      (pre ++ [choice]) suffix (by
+        simpa [List.append_assoc] using hchoices) tile
+  rw [Multiset.count_add] at ⊢
+  simpa [mentsuHandChoiceTiles, mentsuHandChoiceTiles_append,
+    Multiset.count_add, Nat.add_assoc] using hprefix
+
 def MentsuHandBlockDecomposition.completedTarget
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     Multiset Tile :=

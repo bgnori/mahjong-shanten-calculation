@@ -48,6 +48,10 @@
   (`exists_tile_mem_mentsuHandTileOrder_of_choice`)。
 - 代表牌を `before ++ tile :: after` というタイル順の分割に変換する補題を追加した
   (`exists_mentsuHandTileOrder_split_of_choice`)。
+- 分解の接頭辞と探索状態の `used` が一致する場合、次の選択が手牌カウント内に収まり、
+  完成後のコピー制限も維持する補題を追加した
+  (`nextChoice_count_le_hand`,
+  `nextChoice_completion_count_le_four`)。
 
 関連する主な補題:
 
@@ -61,7 +65,8 @@
    - `MentsuHandBlockDecomposition` の任意の有効な分解が、
      `MentsuHandBlockSearchOnTileOrderWithCopyLimit` のいずれかの枝で生成されること。
    - 各ブロックの代表牌を `mentsuHandTileOrder` に挿入する際の、接頭辞状態の
-     `ValidMentsuHandChoice` とコピー制限を示すことが残っている。
+     `ValidMentsuHandChoice` のうち、牌カウントと完成後コピー制限は完了。
+   - 探索状態の面子数・搭子数・雀頭状態との対応を示し、残りの選択妥当性を構成することが残っている。
 2. **探索結果とターゲットDPの接続**
    - 制約付きブロック探索からターゲット距離集合への健全性接続は完了。
    - 残りは、タイル順探索の完全性を示して逆方向の包含を得ること。
@@ -84,6 +89,7 @@
 | 2026-11-15 | `validMentsuHandTargetDistance_mem_of_constrainedBlockSearch` | 制約付きブロック探索の結果を、仕様一致済みのターゲット距離集合へ接続。 |
 | 2026-11-15 | `exists_tile_mem_mentsuHandTileOrder_of_choice` | 各ブロック選択をタイル順探索へ挿入するための代表牌の存在を証明。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
+| 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 
 ## 検証状況
 
