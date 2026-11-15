@@ -1946,6 +1946,21 @@ lemma reachableWithinWithCopyLimit_copyLimit
       rcases hreachable with ⟨previous, hprevious, hnext⟩
       exact nextMentsuHandStateWithCopyLimit_copyLimit hand previous state hnext
 
+lemma reachableWithinWithCopyLimit_append_choice
+    (hand : Hand) (fuel : Nat) (state : MentsuHandSearchState)
+    (choice : MentsuHandChoice)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hchoice : choice ∈ allMentsuHandChoices)
+    (hvalid : ValidMentsuHandChoice hand state choice)
+    (hcopy :
+      CompletionRespectsCopyLimit
+        (applyMentsuHandChoice hand state choice hvalid)) :
+    reachableWithinWithCopyLimit hand (fuel + 1)
+      (applyMentsuHandChoice hand state choice hvalid) :=
+  ⟨state, hreachable,
+    nextMentsuHandStateWithCopyLimit_of_choice
+      hand state choice hchoice hvalid hcopy⟩
+
 lemma reachableWithinWithCopyLimit_melds_le_four
     (hand : Hand) (fuel : Nat) (state : MentsuHandSearchState)
     (hreachable : reachableWithinWithCopyLimit hand fuel state) :
