@@ -5,6 +5,45 @@ import Mathlib.Tactic.FinCases
 
 namespace Shanten
 
+/-!
+# Mentsu-hand shanten: proof map
+
+The main goal of this file is to connect the mentsu-hand shanten
+specification with a search over complete hand targets:
+
+```text
+mentsuHandTargetMinimumSearch hand = some value
+  ↔ IsShapeShanten hand .mentsuHand value
+```
+
+The proof proceeds in the following order:
+
+1. Define the search choices and the state carried by the dynamic program.
+2. Prove the basic state invariants: used tiles and block histories agree,
+   and every reachable state stays within the hand.
+3. Relate abstract choice sequences to the fixed tile-order scan.
+4. Define complete targets and the deficit distance to a target.
+5. Show that deficit distance is exactly the number of exchanges needed to
+   reach a completing hand.
+6. Represent partial mentsu-hand decompositions by melds, taatsu, and a pair.
+7. Add the four-copy limit and prove that valid block decompositions can be
+   realized by the constrained tile scan.
+8. Give the finite dynamic programs their mathematical meaning.
+9. Minimize target distance and connect the minimum to shape shanten.
+10. Finish by extracting a shanten witness from a constrained block search.
+
+The sections below follow the dependency order needed by Lean. The short
+explanations at the start of each section describe its role in the proof
+without changing the implementation structure.
+-/
+
+/-!
+## 1. Basic representations
+
+This section introduces taatsu, search states, choices, and the local
+operations used to turn a partial block into a completed meld.
+-/
+
 inductive Taatsu
   | pair (tile : Tile)
   | sequence (suit : Suit) (start : Fin 8)
@@ -89,6 +128,14 @@ lemma taatsuTiles_add_completionTile
         exact
           (List.Perm.cons _ (List.Perm.swap _ _ [])).trans
             (List.Perm.swap _ _ _).symm
+
+/-!
+## 2. Search transitions and invariants
+
+Choices are applied one at a time. The central facts proved here are that
+valid transitions do not exceed the hand and that reachable states can be
+reconstructed from their pair, meld, and taatsu histories.
+-/
 
 def choiceTiles : MentsuHandChoice → Multiset Tile
   | .skip => 0
@@ -516,6 +563,14 @@ lemma reachableWithin_taatsu_eq_history_length
         hand previous choice hvalid (ih previous hprevious)
 
 /-- States reached from a given state while processing tile kinds in order. -/
+/-
+## 3. Reachability and fixed tile order
+
+This section relates abstract reachable states to the prescribed order of
+tile kinds. It establishes the interface used later by the tile-by-tile
+search.
+-/
+
 def reachableOnTilesFrom
     (hand : Hand) : List Tile → MentsuHandSearchState →
       MentsuHandSearchState → Prop
@@ -650,6 +705,14 @@ lemma exists_mentsuHandTileOrder_split_of_choice
   exact hsplit
 
 /-- A mentsu-hand-form target before the fixed melds are added. -/
+/-
+## 4. Targets and exchange distance
+
+Here a pair and a list of melds are viewed as a complete target. The
+surrounding lemmas establish how partial histories correspond to targets and
+how target deficits behave under exchanges.
+-/
+
 def mentsuHandTarget (pair : Tile) (melds : List Meld) : Multiset Tile :=
   pairTiles pair + meldsTiles melds
 
@@ -1246,6 +1309,15 @@ lemma reachesCompletion_mentsuHand_of_one_more_target_tile
     exact hdeficitNext
   exact ⟨distance + 1, hdistanceTotal,
     ReachesCompletion.step hstep hrest⟩
+
+/-
+## 5. Block decompositions
+
+A block decomposition records a pair, ordinary melds, and taatsu. This is the
+mathematical witness that the constrained search is intended to discover.
+The section proves prefix invariants and shows how taatsu can be completed
+without violating tile-copy limits.
+-/
 
 /-- A target has the required number of concealed melds for a hand. -/
 def HasMentsuHandMeldCount (hand : Hand) (melds : List Meld) : Prop :=
@@ -1892,6 +1964,15 @@ lemma MentsuHandBlockDecomposition.completion_respects_of_prefix
     taatsuCompletionTiles_count_le_of_sublist hhistory tile
   rw [Multiset.count_add] at hprefix ⊢
   omega
+
+/-
+## 6. Copy-limited tile scanning
+
+The ordinary transition system is refined with the four-copy constraint.
+The main result of this section is that valid block decompositions can be
+inserted into the fixed tile-order scan while preserving the state
+invariants.
+-/
 
 def ValidMentsuHandChoiceWithCopyLimit
     (hand : Hand) (state : MentsuHandSearchState) (choice : MentsuHandChoice) : Prop :=
@@ -3705,6 +3786,14 @@ lemma reachableOnTilesWithCopyLimit_to_reachableWithinWithCopyLimit
     (by rfl) hreachable
   simpa using hresult
 
+/-
+## 7. From search states to completed targets
+
+After the constrained scan is established, these lemmas turn a complete
+search state into a valid completed mentsu-hand target and account for its
+meld count, tile count, and copy limit.
+-/
+
 lemma completedTargetForState_eq_used_add_completion
     (state : MentsuHandSearchState) (pair : Tile)
     (hpair : state.pair = some pair) :
@@ -3789,6 +3878,14 @@ lemma complete_mentsuHand_completedTarget
       (completedTargetForState state pair)
 
 /-- A target is a valid mentsu-hand-form completion for the standing tiles. -/
+/-
+## 8. Dynamic-programming semantics
+
+This section defines the finite target and cost dynamic programs. The
+membership lemmas explain what each DP state means mathematically, rather
+than treating the recursive Finset definitions as opaque computation.
+-/
+
 def IsMentsuHandTarget
     (hand : Hand) (pair : Tile) (melds : List Meld) : Prop :=
   HasMentsuHandMeldCount hand melds ∧
@@ -4334,6 +4431,14 @@ lemma recursiveMentsuHandTargetCostStatesDP_eq
     · rw [← htarget, mentsuHandTarget]
       ac_rfl
     · exact hvalid
+
+/-
+## 9. Minimum target distance and shape shanten
+
+The minimum over valid target distances is connected here to the shanten
+specification. The key interpretation is that a target at distance `d`
+corresponds to shape shanten `d - 1`.
+-/
 
 def validMentsuHandTargetDistances (hand : Hand) :
     Finset Nat :=
@@ -5647,6 +5752,14 @@ lemma completedMeldsForState_hasMeldCount
   unfold HasMentsuHandMeldCount
   rw [completedMeldsForState_length, ← hmelds, ← htaatsu]
   omega
+
+  /-
+## 10. Final connection from constrained search
+
+The final lemmas extract a completed target, and hence a shape-shanten
+witness, from a constrained block search. This closes the implementation
+side of the proof map given at the top of the file.
+-/
 
 lemma complete_mentsuHand_of_blockSearch
     (before : Hand) (fuel : Nat) (state : MentsuHandSearchState)
