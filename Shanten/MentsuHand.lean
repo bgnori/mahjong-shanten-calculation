@@ -3556,6 +3556,22 @@ lemma AppliesMentsuHandChoiceBatch.of_forward_for_tile_filter
     (fun choice hchoice =>
       mentsuHandChoicesForTile_representative hchoice)
 
+lemma AppliesMentsuHandGroupedTileBatches.step_of_forward
+    {hand : Hand} {tile : Tile} {tiles : List Tile}
+    {source : List MentsuHandChoice}
+    {state middle final : MentsuHandSearchState}
+    (hpath :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand
+        state (mentsuHandChoicesForTile tile source) middle)
+    (htail :
+      AppliesMentsuHandGroupedTileBatches hand tiles
+        (mentsuHandChoicesWithoutTile tile source) middle final) :
+    AppliesMentsuHandGroupedTileBatches hand (tile :: tiles)
+      source state final :=
+  .step tile tiles source state middle final
+    (AppliesMentsuHandChoiceBatch.of_forward_for_tile_filter hpath)
+    htail
+
 lemma reachableWithinWithCopyLimit_of_forward_choice_path
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
