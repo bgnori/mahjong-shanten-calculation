@@ -2807,6 +2807,43 @@ lemma reachableOnTilesFromWithCopyLimit_skips_taatsuHistory
       · simpa [List.length_cons, Nat.add_assoc, Nat.add_comm,
          Nat.add_left_comm] using hfinal
 
+lemma AppliesMentsuHandTileScan.skips_state_matches
+    (hand : Hand) (tiles : List Tile) (fuel : Nat)
+    (state : MentsuHandSearchState) (choices : List MentsuHandChoice)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hmatches : MentsuHandChoiceStateMatches state choices) :
+    ∃ final,
+      AppliesMentsuHandTileScan hand tiles state [] final ∧
+        reachableWithinWithCopyLimit hand (fuel + tiles.length) final ∧
+        MentsuHandChoiceStateMatches final choices ∧
+        final.pair = state.pair := by
+  induction tiles generalizing fuel state with
+  | nil =>
+      exact ⟨state, .nil state, by simpa using hreachable, hmatches, rfl⟩
+  | cons tile tiles ih =>
+      obtain ⟨hvalid, hmatchesNext⟩ :=
+        applyMentsuHandChoice.exists_skip_state_matches_of_reachable
+          hand fuel state choices hreachable hmatches
+      have hskip :=
+        nextMentsuHandStateAtWithCopyLimit_skip_of_reachable
+          hand tile fuel state hreachable
+      let next := applyMentsuHandChoice hand state .skip hvalid
+      have hreachableNext :
+          reachableWithinWithCopyLimit hand (fuel + 1) next := by
+        exact ⟨state, hreachable,
+          nextMentsuHandStateAtWithCopyLimit_toNextWithCopyLimit
+            hand tile state next (by simpa [next] using hskip)⟩
+      obtain ⟨final, hscan, hfinal, hmatchesFinal, hpair⟩ :=
+        ih (fuel + 1) next hreachableNext hmatchesNext
+      refine ⟨final, ?_, ?_, hmatchesFinal, ?_⟩
+      · exact .skip tile tiles state next final hvalid
+          (by simpa [next] using hskip) hscan
+      · simpa [List.length_cons, Nat.add_assoc, Nat.add_comm,
+          Nat.add_left_comm] using hfinal
+      · calc
+          final.pair = next.pair := hpair
+          _ = state.pair := by simp [next, applyMentsuHandChoice]
+
 lemma reachableOnTilesFromWithCopyLimit_skips_invariants
     (hand : Hand) (tiles : List Tile) (fuel : Nat)
     (state : MentsuHandSearchState) (choices : List MentsuHandChoice)

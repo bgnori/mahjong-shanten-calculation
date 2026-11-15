@@ -170,6 +170,9 @@
   `MentsuHandChoiceStateMatches` を最後まで保持する
   (`AppliesMentsuHandTileScan.state_matches_append`,
   `AppliesMentsuHandTileScan.state_matches_from_initial`) 補題を追加した。
+- 任意の到達済み状態からタイル列全体を `skip` だけで一度走査し、
+  `AppliesMentsuHandTileScan`・状態不変条件・雀頭保存を同時に得る
+  (`AppliesMentsuHandTileScan.skips_state_matches`) 補題を追加した。
 - コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
   搭子列と一致することを証明した
   (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
@@ -245,6 +248,7 @@
 | 2026-11-15 | `skips_taatsuHistory` | `skip` 列で搭子履歴対応を保持。 |
 | 2026-11-15 | `skips_invariants`, `insert_choice_from_prefix` | 3つの不変条件を統合し、分解接頭辞から代表牌選択を挿入。 |
 | 2026-11-15 | `AppliesMentsuHandTileScan.state_matches_append`, `state_matches_from_initial` | 一回走査関係の依存帰納を修正し、状態不変条件を初期状態から最終状態まで接続。 |
+| 2026-11-15 | `AppliesMentsuHandTileScan.skips_state_matches` | 到達済み状態からの全 `skip` 走査を一回走査関係へ持ち上げ、状態不変条件と雀頭保存を接続。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
 
