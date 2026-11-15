@@ -3308,6 +3308,68 @@ lemma MentsuHandBlockDecomposition.insert_blockChoice_from_prefix
       hprefix hreachable hmatches hhistory hpairEmpty hfacts.1 htile
   exact ⟨before, after, tile, final, hpath, hfinal, hmatchesFinal⟩
 
+lemma MentsuHandBlockDecomposition.insert_blockChoice_scan_from_prefix
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand)
+    (fuel : Nat) (state : MentsuHandSearchState)
+    (choices suffix : List MentsuHandChoice)
+    (choice : MentsuHandChoice)
+    (hchoice : choice ∈ decomposition.blockChoices)
+    (hprefix :
+      decomposition.blockChoices = choices ++ choice :: suffix)
+    (hreachable : reachableWithinWithCopyLimit hand fuel state)
+    (hmatches : MentsuHandChoiceStateMatches state choices)
+    (hhistory :
+      state.taatsuHistory.reverse =
+        mentsuHandChoiceTaatsus choices)
+    (hpairEmpty : choices = [] → state.pair = none) :
+    ∃ before after tile final,
+      AppliesMentsuHandTileScan hand
+        (before ++ tile :: after) state [choice] final ∧
+        reachableWithinWithCopyLimit hand
+          ((fuel + before.length) + 1 + after.length) final ∧
+        MentsuHandChoiceStateMatches final (choices ++ [choice]) := by
+  have hfacts :=
+    decomposition.blockChoices_mem_all_and_ne_skip hchoice
+  obtain ⟨before, after, tile, _, _, htile⟩ :=
+    decomposition.exists_tile_order_split_of_blockChoice hchoice
+  obtain ⟨final, hscan, hfinal, hmatchesFinal⟩ :=
+    decomposition.insert_choice_scan_from_prefix
+      before after tile fuel state choices suffix choice
+      hprefix hreachable hmatches hhistory hpairEmpty hfacts.1 htile
+  exact ⟨before, after, tile, final, hscan, hfinal, hmatchesFinal⟩
+
+lemma MentsuHandBlockDecomposition.insert_pair_scan_from_initial
+    {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
+    ∃ before after tile final,
+      AppliesMentsuHandTileScan hand
+        (before ++ tile :: after) initialMentsuHandState
+        [.pair decomposition.pair] final ∧
+      reachableWithinWithCopyLimit hand
+        (before.length + 1 + after.length) final ∧
+      MentsuHandChoiceStateMatches final
+        [.pair decomposition.pair] := by
+  let suffix :=
+    decomposition.melds.map MentsuHandChoice.meld ++
+      decomposition.taatsus.map MentsuHandChoice.taatsu
+  have hprefix :
+      decomposition.blockChoices =
+        [] ++ MentsuHandChoice.pair decomposition.pair :: suffix := by
+    rfl
+  obtain ⟨before, after, tile, final, hscan, hfinal, hmatches⟩ :=
+    decomposition.insert_blockChoice_scan_from_prefix
+      0 initialMentsuHandState [] suffix
+      (.pair decomposition.pair)
+      (by simp [MentsuHandBlockDecomposition.blockChoices])
+      hprefix
+      (by rfl)
+      (by
+        simp [MentsuHandChoiceStateMatches, initialMentsuHandState,
+          mentsuHandChoiceTiles, mentsuHandChoiceMeldCount,
+          mentsuHandChoiceTaatsuCount])
+      (by rfl)
+      (by intro h; rfl)
+  exact ⟨before, after, tile, final, hscan, by simpa using hfinal, hmatches⟩
+
 lemma MentsuHandBlockDecomposition.insert_pair_from_initial
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     ∃ before after tile final,
