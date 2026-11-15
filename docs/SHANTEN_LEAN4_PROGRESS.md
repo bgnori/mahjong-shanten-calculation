@@ -179,6 +179,9 @@
 - 同じバッチ内で複数選択を適用した場合にも、
   `taatsuHistory.reverse` が選択列から抽出した搭子列へ対応する
   `AppliesMentsuHandChoiceBatch.taatsuHistory_reverse_append` を証明した。
+- バッチ内の各選択が持つコピー制限を使い、バッチ全体を選択数分の
+  `reachableWithinWithCopyLimit` へ変換する
+  `reachableWithinWithCopyLimit_of_choice_batch` を追加した。
 - 一回走査関係の `skip`・`choose` 帰納に対して、選択列接頭辞と探索状態の
   `MentsuHandChoiceStateMatches` を最後まで保持する
   (`AppliesMentsuHandTileScan.state_matches_append`,
@@ -305,7 +308,7 @@
 | 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
 | 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
 | 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
-| 2026-11-15 | `b5e3bf1`, `622fd10` / `AppliesMentsuHandChoiceBatch` | 同一牌種を共有する複数ブロックを、牌種走査を進めずに連続適用する完全性用の中間関係を追加し、状態不変量と搭子履歴対応を証明。既存の一選択走査だけでは表せない分解を明示化。 |
+| 2026-11-15 | `b5e3bf1`, `622fd10`, `d6547eb` / `AppliesMentsuHandChoiceBatch` | 同一牌種を共有する複数ブロックを、牌種走査を進めずに連続適用する完全性用の中間関係を追加し、状態不変量・搭子履歴対応・制約付き到達性を証明。既存の一選択走査だけでは表せない分解を明示化。 |
 
 ## 検証状況
 

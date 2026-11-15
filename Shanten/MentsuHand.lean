@@ -2859,6 +2859,32 @@ lemma AppliesMentsuHandChoiceBatch.taatsuHistory_reverse_append
           choice hvalid hstate
       simpa [List.append_assoc] using hfinal
 
+lemma reachableWithinWithCopyLimit_of_choice_batch
+    {hand : Hand} {tile : Tile}
+    {state final : MentsuHandSearchState}
+    {choices : List MentsuHandChoice}
+    (fuel : Nat)
+    (hreachable :
+      reachableWithinWithCopyLimit hand fuel state)
+    (hbatch :
+      AppliesMentsuHandChoiceBatch hand tile state choices final) :
+    reachableWithinWithCopyLimit hand
+      (fuel + choices.length) final := by
+  induction hbatch generalizing fuel with
+  | nil =>
+      simpa using hreachable
+  | @cons state middle choices choice htail hchoice htile hvalid hcopy ih =>
+      have hstate :
+          reachableWithinWithCopyLimit hand
+            (fuel + choices.length) state :=
+        ih fuel hreachable
+      have hnext :=
+        reachableWithinWithCopyLimit_append_choice
+          hand (fuel + choices.length) state choice
+          hstate hchoice hvalid hcopy
+      simpa [List.length_append, Nat.add_assoc, Nat.add_comm,
+        Nat.add_left_comm] using hnext
+
 lemma AppliesMentsuHandChoicesForward.state_matches_from_initial
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
