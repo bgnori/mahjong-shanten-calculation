@@ -2273,6 +2273,24 @@ inductive AppliesMentsuHandChoicesForward (hand : Hand) :
         (choices ++ [choice])
         (applyMentsuHandChoice hand middle choice hvalid)
 
+inductive AppliesMentsuHandChoicesForwardWithCopyLimit (hand : Hand) :
+    MentsuHandSearchState → List MentsuHandChoice →
+      MentsuHandSearchState → Prop
+  | nil (state : MentsuHandSearchState) :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand state [] state
+  | snoc (state middle : MentsuHandSearchState)
+      (choices : List MentsuHandChoice) (choice : MentsuHandChoice)
+      (hpath :
+        AppliesMentsuHandChoicesForwardWithCopyLimit hand state choices middle)
+      (hchoice : choice ∈ allMentsuHandChoices)
+      (hvalid : ValidMentsuHandChoice hand middle choice)
+      (hcopy :
+        CompletionRespectsCopyLimit
+          (applyMentsuHandChoice hand middle choice hvalid)) :
+      AppliesMentsuHandChoicesForwardWithCopyLimit hand state
+        (choices ++ [choice])
+        (applyMentsuHandChoice hand middle choice hvalid)
+
 lemma AppliesMentsuHandChoices.state_matches_from_initial
     {hand : Hand} {final : MentsuHandSearchState}
     {choices : List MentsuHandChoice}
