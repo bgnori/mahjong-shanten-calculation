@@ -1,6 +1,7 @@
 import Shanten.MentsuHand
 import Shanten.ThirteenOrphans
 import Shanten.Bounds
+import Shanten.Capacity
 import Mathlib.Util.AssertNoSorry
 
 /-!
@@ -26,5 +27,14 @@ assert_no_sorry MentsuHandBlockDecomposition.exists_tileBatchScan_complete
 assert_no_sorry reaches_sevenPairs_completion
 assert_no_sorry overallShanten_le_six_of_thirteenTileHand
 assert_no_sorry thirteenOrphansShanten_maximum
+assert_no_sorry Capacity.ValidHand.validCounts
+assert_no_sorry Capacity.ValidHand.exchange
+assert_no_sorry Capacity.ReachesHand.validHand
+assert_no_sorry Capacity.ReachesCompletion.toAbstract
+assert_no_sorry Capacity.isShapeShanten_unique
+assert_no_sorry Capacity.IsShapeShanten.abstract_le
+assert_no_sorry Capacity.isShapeShanten_nil_iff
+assert_no_sorry Capacity.Examples.inputA_shanten
+assert_no_sorry Capacity.Examples.inputB_shanten
 
 end Shanten

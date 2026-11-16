@@ -17,6 +17,11 @@
 | [ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) | 有効13枚手の国士無双の仕様値の存在・上界13と、最大値を達成する具体例。 |
 | [MentsuHand.lean](../Shanten/MentsuHand.lean) | 面子手のターゲットDP、選択列・バッチ走査、仕様への接続。 |
 | [Bounds.lean](../Shanten/Bounds.lean) | 到達性からの条件付き上界、国士無双の閉形式の直接計算などの上位補題。 |
+| [Capacity.lean](../Shanten/Capacity.lean) | 固定面子の実牌内容を持つ容量付きモデルの公開入口。既存抽象モデルとは別の段階導入。 |
+| [Capacity/Basic.lean](../Shanten/Capacity/Basic.lean) | 槓を含む固定面子、残余容量、合算容量の有効性と保存。 |
+| [Capacity/Specification.lean](../Shanten/Capacity/Specification.lean) | 容量付き完成・遷移・最短距離仕様、旧モデルへの射影と固定面子なしでの同値。 |
+| [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/Bの正確な値1・0と、容量超過・槓の回帰例。 |
+| [ProofChecks.lean](../Shanten/ProofChecks.lean) | 主要出口定理の推移的な `sorryAx` 依存を通常ビルドで拒否する。 |
 
 ## 七対子の構成と読む順序
 
@@ -78,7 +83,13 @@ SevenPairs.Reachability -> SevenPairs.Exchange.{Distinctness,PairMaking,Protecte
 SevenPairs    -> SevenPairs.Completion, SevenPairs.Reachability
 MentsuHand.Targets -> MentsuHand.State, Exchange
 Bounds        -> SevenPairs
-Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, MentsuHand, Bounds
+Capacity.Basic -> Exchange
+Capacity.Specification -> Capacity.Basic
+Capacity.Examples -> Capacity.Specification
+Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Examples
+ProofChecks   -> MentsuHand, ThirteenOrphans, Bounds, Capacity
+Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, MentsuHand, Bounds,
+                 Capacity, ProofChecks
 ```
 
 上表はプロジェクト内の依存を示す（Mathlibのimportは省略）。

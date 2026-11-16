@@ -121,6 +121,7 @@ The default Lean build imports [Shanten/ProofChecks.lean](Shanten/ProofChecks.le
 Its `assert_no_sorry` checks reject transitive `sorryAx` dependencies in the main
 exit theorems, including the shared validity proofs, general search correctness
 and totality, batch scans, seven-pairs bounds, and the thirteen-orphans maximum.
+It also checks the capacity-model correspondence and the R2 acceptance proofs.
 Existing `native_decide` dependencies remain permitted; ordinary warnings are
 not treated as errors. Add new exit theorems to this check list when extending
 the proof surface.
@@ -165,6 +166,17 @@ lake build
 `Shanten` is the default build target; `lake build Shanten` is equivalent.
 
 ### Lean proof layout
+
+[Shanten/Capacity.lean](./Shanten/Capacity.lean) is the staged, capacity-aware
+model under `Shanten.Capacity`. Fixed meld contents, including all four kan
+tiles, constrain standing counts, completion targets, draws, and exchanges.
+Its [acceptance proofs](./Shanten/Capacity/Examples.lean) distinguish the review's
+A/B inputs and establish exact shanten values 1 and 0, not just reachable bounds.
+For valid hands without fixed melds, its specification agrees with the existing
+abstract specification. With fixed melds, abstraction only provides a lower
+bound when both values exist. The existing general search still uses the
+abstract model; migration of that search and correspondence with 37-kind Go
+inputs remain follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
 
 [Shanten/MentsuHand.lean](./Shanten/MentsuHand.lean) is the stable import for
 mentsu-hand proofs. Its implementation is split under
