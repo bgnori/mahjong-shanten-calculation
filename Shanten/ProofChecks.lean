@@ -2,6 +2,7 @@ import Shanten.MentsuHand
 import Shanten.ThirteenOrphans
 import Shanten.Bounds
 import Shanten.Capacity
+import Shanten.Input37
 import Mathlib.Util.AssertNoSorry
 
 /-!
@@ -78,5 +79,27 @@ assert_no_sorry Capacity.overallMinimumSearch_nil
 assert_no_sorry Capacity.Examples.overallFixed_search
 assert_no_sorry Capacity.Examples.overallMentsuComplete_search
 assert_no_sorry Capacity.Examples.overallSpecialComplete_search
+assert_no_sorry Input37.normalizeTile_normalIndex
+assert_no_sorry Input37.capacity_fiber
+assert_no_sorry Input37.normalizeCounts_sum
+assert_no_sorry Input37.normalizeCounts_le_four
+assert_no_sorry Input37.parseMeld_some_matches
+assert_no_sorry Input37.parseMeld_isSome_iff
+assert_no_sorry Input37.validateAndNormalize_accepts_iff
+assert_no_sorry Input37.normalizedHand_tileCount
+assert_no_sorry Input37.parsedMelds_counts
+assert_no_sorry Input37.validateAndNormalize_valid
+assert_no_sorry Input37.validated_overall_eq_some_iff
+assert_no_sorry Input37.validated_overall_exists_unique
+assert_no_sorry Input37.normalized_equivalent
+assert_no_sorry Input37.overall_normalization_invariant
+assert_no_sorry Input37.Examples.red_mixture_normalizes
+assert_no_sorry Input37.Examples.fourteen_normalizes
+assert_no_sorry Input37.Examples.melds_normalize
+assert_no_sorry Input37.Examples.physical_capacity_rejections
+assert_no_sorry Input37.Examples.negative_count_rejections
+assert_no_sorry Input37.Examples.malformed_meld_rejections
+assert_no_sorry Input37.Examples.hand_size_rejections
+assert_no_sorry Input37.Examples.red_identity_invariant
 
 end Shanten

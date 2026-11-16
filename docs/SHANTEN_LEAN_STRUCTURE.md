@@ -29,6 +29,11 @@
 | [Capacity/Special.lean](../Shanten/Capacity/Special.lean) | 特殊形の計算API、13・14枚相当の容量付き仕様一致、固定面子による適用除外。 |
 | [Capacity/Overall.lean](../Shanten/Capacity/Overall.lean) | 3形の計算窓口と総合最小値、仕様一致・存在一意性、完成値・固定面子時の帰着・旧総合仕様との一致。 |
 | [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/B、14枚相当の最適打牌、特殊形・総合値、容量超過・槓の回帰例。 |
+| [Input37.lean](../Shanten/Input37.lean) | 符号付き37種入力のLean側の公開入口。Go実装ではない。 |
+| [Input37/Basic.lean](../Shanten/Input37/Basic.lean) | aka37添字・物理容量、整数上の赤5統合、総枚数保存、統合後容量、入力妥当性の宣言的仕様。 |
+| [Input37/Validation.lean](../Shanten/Input37/Validation.lean) | 正規化前の検証と位置付きエラー、面子の構造認識、受理と入力仕様の同値。 |
+| [Input37/Correctness.lean](../Shanten/Input37/Correctness.lean) | 枚数・固定牌の保存、容量付き入力への接続、総合計算の前提、赤の割当て変更に対する値不変性。 |
+| [Input37/Examples.lean](../Shanten/Input37/Examples.lean) | 13・14枚の赤混在、赤を含む面子・槓、容量超過・負数・不正面子・枚数の回帰検査。 |
 | [ProofChecks.lean](../Shanten/ProofChecks.lean) | 主要出口定理の推移的な `sorryAx` 依存を通常ビルドで拒否する。 |
 
 ## 七対子の構成と読む順序
@@ -105,9 +110,14 @@ Capacity.Examples -> Capacity.Discard, Capacity.Special, Capacity.Overall
 Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Reachability,
                  Capacity.Search, Capacity.Totality, Capacity.Fourteen,
                  Capacity.Discard, Capacity.Special, Capacity.Overall, Capacity.Examples
-ProofChecks   -> MentsuHand, ThirteenOrphans, Bounds, Capacity
+Input37.Basic -> Capacity.Basic
+Input37.Validation -> Input37.Basic
+Input37.Correctness -> Input37.Validation, Capacity.Overall
+Input37.Examples -> Input37.Correctness
+Input37       -> Input37.Basic, Input37.Validation, Input37.Correctness, Input37.Examples
+ProofChecks   -> MentsuHand, ThirteenOrphans, Bounds, Capacity, Input37
 Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, Special, MentsuHand, Bounds,
-                 Capacity, ProofChecks
+                 Capacity, Input37, ProofChecks
 ```
 
 上表はプロジェクト内の依存を示す（Mathlibのimportは省略）。

@@ -125,6 +125,8 @@ It also checks the capacity-model correspondence, the R2 acceptance proofs, and
 the general seven-pairs and thirteen-orphans formula correctness.
 The overall calculation's correctness, totality, completion, and abstract-model
 agreement are checked as well.
+The signed 37-kind validator, normalization guarantees, and rejection regressions
+are included in the same checks.
 Existing `native_decide` dependencies remain permitted; ordinary warnings are
 not treated as errors. Add new exit theorems to this check list when extending
 the proof surface.
@@ -220,8 +222,30 @@ The result is at least `-1`, and equals `-1` exactly when any shape is complete.
 With fixed melds it reduces to mentsu search; without fixed melds it agrees with
 the original abstract `OverallShanten` specification.
 Input validation remains a separate prerequisite, and the underlying mentsu
-enumeration is not optimized. Correspondence with 37-kind Go inputs remains
-follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
+enumeration is not optimized. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
+
+[Shanten/Input37.lean](./Shanten/Input37.lean) is the Lean-only input layer under
+`Shanten.Input37`. `Counts37` is `Fin 37 → Int`, preserving signed values and the
+contract's exact index layout. `Input` contains standing counts and a list of
+`MeldInput` records with a kind string and all physical tiles.
+`validateAndNormalize` returns `Except ValidationError NormalizedInput`.
+It rejects negative counts in each source field, combined physical-copy
+capacity violations, more than four melds, inconsistent standing size, and
+malformed or unknown meld kinds. Errors identify the offending tile or meld
+index where applicable. Red/ordinary-five capacities are checked before merging;
+a normalized four-copy check alone cannot detect two red fives or four ordinary
+fives. Invalid inputs return no normalized result.
+
+Successful validation preserves standing tile count, fixed-set count, and every
+fixed tile (all four tiles of a kan), and supplies the existing capacity-aware
+thirteen- or fourteen-tile-equivalent calculator prerequisites.
+Linear integer normalization preserves total counts; conversion to natural
+counts requires nonnegativity. Two accepted inputs with the same normalized
+standing counts, meld kinds, and normalized meld contents produce identical
+normalized hands and overall values, even if red identity is redistributed.
+This is not a Go implementation or a proof of Go integer arithmetic, bindings,
+or error wrapping. Go implementation is deferred pending the user's separate
+plan; no Go source or development-container settings were changed.
 
 [Shanten/MentsuHand.lean](./Shanten/MentsuHand.lean) is the stable import for
 mentsu-hand proofs. Its implementation is split under

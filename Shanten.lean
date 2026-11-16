@@ -6,4 +6,5 @@ import Shanten.Special
 import Shanten.MentsuHand
 import Shanten.Bounds
 import Shanten.Capacity
+import Shanten.Input37
 import Shanten.ProofChecks
