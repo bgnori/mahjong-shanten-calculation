@@ -1,5 +1,6 @@
 import Shanten.Capacity.Discard
 import Shanten.Capacity.Special
+import Shanten.Capacity.Overall
 
 namespace Shanten.Capacity.Examples
 
@@ -304,5 +305,59 @@ example :
       thirteenOrphansSearch specialKanStanding = none := by
   unfold IsThirteenTileEquivalentHand ValidHand
   decide
+
+theorem overallFixed_search :
+    overallMinimumSearch fixedA standing = some 1 ∧
+      overallMinimumSearch fixedB standing = some 0 ∧
+      overallMinimumSearch blockedFixed (drawHand standing south) = some 1 := by
+  refine ⟨?_, ?_, ?_⟩
+  · rw [overallMinimumSearch_of_fixed (by decide : standing.fixedMelds ≠ 0)]
+    exact inputA_search
+  · rw [overallMinimumSearch_of_fixed (by decide : standing.fixedMelds ≠ 0)]
+    exact inputB_search
+  · rw [overallMinimumSearch_of_fixed
+      (by decide : (drawHand standing south).fixedMelds ≠ 0)]
+    exact fourteenBlocked_search.2.1
+
+def overallMentsuComplete : Hand :=
+  { counts := fun tile => match tile with
+      | .honor rank => if rank.val < 4 then 3 else if rank.val = 4 then 2 else 0
+      | .suited _ _ => 0
+    fixedMelds := 0 }
+
+theorem overallMentsuComplete_search :
+    IsFourteenTileEquivalentHand [] overallMentsuComplete ∧
+      sevenPairsSearch overallMentsuComplete = some 3 ∧
+      thirteenOrphansSearch overallMentsuComplete = some 7 ∧
+      overallMinimumSearch [] overallMentsuComplete = some (-1) := by
+  have hvalid : IsFourteenTileEquivalentHand [] overallMentsuComplete := by
+    unfold IsFourteenTileEquivalentHand ValidHand
+    decide
+  refine ⟨hvalid, by decide, by decide, ?_⟩
+  apply (overallMinimumSearch_eq_neg_one_iff hvalid.1 (Or.inr hvalid.2)).mpr
+  refine ⟨.mentsuHand, hvalid.1, hvalid.1.validCounts, white,
+    [ .triplet east, .triplet south, .triplet (.honor ⟨2, by omega⟩),
+      .triplet (.honor ⟨3, by omega⟩) ], by decide, ?_⟩
+  unfold HasTiles
+  decide
+
+theorem overallSpecialComplete_search :
+    overallMinimumSearch [] (drawHand sevenPairsReady (.honor ⟨6, by omega⟩)) = some (-1) ∧
+      thirteenOrphansSearch (drawHand sevenPairsReady (.honor ⟨6, by omega⟩)) = some 5 ∧
+      overallMinimumSearch [] (drawHand kokushiReady east) = some (-1) ∧
+      sevenPairsSearch (drawHand kokushiReady east) = some 5 := by
+  have hseven := sevenPairsFormula_search.2.2.1
+  have horphans := kokushiFormula_search.2.2.1
+  refine ⟨?_, by decide, ?_, by decide⟩
+  · apply (overallMinimumSearch_eq_some_iff hseven.1 (Or.inr hseven.2)).mpr
+    exact ⟨⟨.sevenPairs,
+      (sevenPairsSearch_eq_some_iff hseven.1 (Or.inr hseven.2)).mp
+        sevenPairsFormula_search.2.2.2⟩,
+      fun _ _ hother => hother.neg_one_le⟩
+  · apply (overallMinimumSearch_eq_some_iff horphans.1 (Or.inr horphans.2)).mpr
+    exact ⟨⟨.thirteenOrphans,
+      (thirteenOrphansSearch_eq_some_iff horphans.1 (Or.inr horphans.2)).mp
+        kokushiFormula_search.2.2.2.1⟩,
+      fun _ _ hother => hother.neg_one_le⟩
 
 end Shanten.Capacity.Examples

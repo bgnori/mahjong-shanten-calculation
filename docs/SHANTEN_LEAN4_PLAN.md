@@ -26,7 +26,8 @@ R2への段階導入として、固定面子の実牌内容と合算容量を保
 有効13枚相当・14枚相当手牌すべてで面子手の容量付き仕様との一致・全域性まで証明済み。
 14枚相当では未完成手の最適打牌との一致も証明した。
 七対子・国士無双も有効13・14枚手の閉形式と容量付き仕様の一致を証明した。
-3形の総合値・37種入力との対応は後続課題であり、契約全体を証明済みとは扱わない。
+適用可能な3形の最小値を返す総合計算も仕様一致・存在一意性まで証明した。
+37種入力との対応は後続課題であり、契約全体を証明済みとは扱わない。
 
 ## ファイル構成と読む順序
 
@@ -50,6 +51,7 @@ R2への段階導入として、固定面子の実牌内容と合算容量を保
 [Fourteen](../Shanten/Capacity/Fourteen.lean)（14枚相当の仕様一致・完成値）、
 [Discard](../Shanten/Capacity/Discard.lean)（最適打牌・打牌後最小値との対応）、
 [Special](../Shanten/Capacity/Special.lean)（特殊形の計算と容量付き仕様一致）、
+[Overall](../Shanten/Capacity/Overall.lean)（3形の総合計算と仕様一致）、
 [Examples](../Shanten/Capacity/Examples.lean)（R2のA/B受入例・計算結果）の順に読む。
 既存の抽象仕様を置き換えるものではなく、名前空間 `Shanten.Capacity` で区別する。
 特殊形の閉形式そのものの証明は [Special.lean](../Shanten/Special.lean) に置き、
@@ -291,7 +293,37 @@ R2の `inputA_search` / `inputB_search` は実際の探索を `decide` で計算
 
 回帰例は13枚テンパイ・14枚完成、四枚使いと牌種不足、中張牌の対の除外、
 么九牌の刻子、国士の最大値13、暗槓を含む適用除外を検査する。
-3形の最小値を返す計算APIと、その総合仕様への接続は後続とする。
+3形の最小値を返す計算APIと、その総合仕様への接続は以下で完了した。
+
+### 適用可能な3形の総合値（完了）
+
+対象は `ValidHand fixed hand` を満たし、
+`tileCount hand + 3 * fixed.length` が13または14となる入力。
+[Specification.lean](../Shanten/Capacity/Specification.lean) の
+`Capacity.IsOverallShanten fixed hand value` は、
+いずれかの形でその仕様値を達成し、全形の仕様値以下となることを要求する。
+計算関数の結果を定義に使わず、一意性と、値−1がいずれかの完成形と同値になることを証明した。
+
+[Overall.lean](../Shanten/Capacity/Overall.lean) の
+`shapeSearch fixed hand shape` は既存3形の計算への共通窓口、
+`overallMinimumSearch fixed hand` は既存の `minOption` による最小値。
+特殊形が適用不可なら `none` として除外し、0などへ置き換えない。
+
+- `shapeSearch_eq_some_iff` / `shapeSearch_eq_none_iff`：
+  有効13・14枚相当入力で、形の仕様値・適用不可とそれぞれ同値。
+- `overallMinimumSearch_eq_some_iff` / `overallMinimumSearch_exists_unique`：
+  同じ対象入力すべてで、総合仕様との双方向の一致と結果の存在一意性を保証する。
+  面子手の全域性により、適用可能な候補がなくなることはない。
+- `overallMinimumSearch_of_fixed`：固定面子があれば面子手の計算結果そのものとなる。
+- `overallMinimumSearch_neg_one_le` / `overallMinimumSearch_eq_neg_one_iff`：
+  結果は−1以上で、値−1といずれかの形の完成が同値。
+- `overallMinimumSearch_nil`：固定面子がない対象入力では、
+  既存の抽象仕様 `Shanten.OverallShanten` と一致する。
+
+回帰例はR2のA/Bと14枚相当未完成手の値1、および3形それぞれの完成による総合値−1を検査する。
+固定面子なしの完成例では、構造的完成・特殊形の閉形式と一般定理を使い、
+巨大な面子手候補集合の全評価は行わない。基準探索の性能最適化は別の課題とする。
+37種入力の検証器・赤5正規化・Go実装、容量付きモデル全域での追加の数値上限は今回の対象外。
 
 ## 現在の作業で維持する境界
 
@@ -312,7 +344,7 @@ R2の `inputA_search` / `inputB_search` は実際の探索を `decide` で計算
 
 | 範囲 | 必要な成果 |
 |---|---|
-| 総合値・上限 | 適用可能性に従う3形の最小値と一般到達上限の証明。数値目標と前提を別途確定する。 |
+| 追加の上限 | 容量付きモデル全域での一般到達上限。数値目標と前提を別途確定する。3形の最小値との仕様一致・全域性・下界−1は証明済み。 |
 | 入力モデル | 37種の赤5正規化・統合前容量検証と、容量付き34種モデルとの対応。 |
 | Go実装・適合性 | Leanとの状態・遷移・評価の対応表、共有fixture、入力・エラー境界のテスト。 |
 | 最適化 | 基準探索・仕様との値一致を維持したキャッシュ・枝刈り等。 |

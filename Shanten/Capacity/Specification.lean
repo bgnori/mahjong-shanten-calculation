@@ -104,6 +104,56 @@ theorem isShapeShanten_unique
     · exact hm₁ d₂ hgt hr₂
   omega
 
+/-- An attained minimum over the applicable shapes, independently of any calculator. -/
+def IsOverallShanten (fixed : List FixedMeld) (hand : Hand) (value : Int) : Prop :=
+  (∃ shape, IsShapeShanten fixed hand shape value) ∧
+    ∀ shape other, IsShapeShanten fixed hand shape other → value ≤ other
+
+theorem isOverallShanten_unique
+    (h₁ : IsOverallShanten fixed hand value₁)
+    (h₂ : IsOverallShanten fixed hand value₂) :
+    value₁ = value₂ := by
+  obtain ⟨shape₁, hs₁⟩ := h₁.1
+  obtain ⟨shape₂, hs₂⟩ := h₂.1
+  exact le_antisymm (h₁.2 shape₂ _ hs₂) (h₂.2 shape₁ _ hs₁)
+
+lemma IsShapeShanten.neg_one_le (hvalue : IsShapeShanten fixed hand shape value) :
+    -1 ≤ value := by
+  obtain ⟨_, distance, hdistance, _⟩ := hvalue
+  omega
+
+lemma Complete.applicable (hcomplete : Complete fixed shape hand) :
+    Applicable shape hand := by
+  cases shape with
+  | mentsuHand => trivial
+  | sevenPairs => exact hcomplete.2.2.1
+  | thirteenOrphans => exact hcomplete.2.2.1
+
+theorem isShapeShanten_neg_one_iff :
+    IsShapeShanten fixed hand shape (-1) ↔ Complete fixed shape hand := by
+  constructor
+  · rintro ⟨_, distance, hdistance, hreach, _⟩
+    have : distance = 0 := by omega
+    subst distance
+    exact reachesCompletion_zero_iff.mp hreach
+  · intro hcomplete
+    exact ⟨hcomplete.applicable, 0, by omega, reachesCompletion_zero_iff.mpr hcomplete,
+      fun smaller hsmaller => by omega⟩
+
+lemma IsOverallShanten.neg_one_le (hvalue : IsOverallShanten fixed hand value) :
+    -1 ≤ value := by
+  obtain ⟨shape, hshape⟩ := hvalue.1
+  exact hshape.neg_one_le
+
+theorem isOverallShanten_neg_one_iff :
+    IsOverallShanten fixed hand (-1) ↔ ∃ shape, Complete fixed shape hand := by
+  constructor
+  · rintro ⟨⟨shape, hshape⟩, _⟩
+    exact ⟨shape, isShapeShanten_neg_one_iff.mp hshape⟩
+  · rintro ⟨shape, hshape⟩
+    exact ⟨⟨shape, isShapeShanten_neg_one_iff.mpr hshape⟩,
+      fun _ _ hother => hother.neg_one_le⟩
+
 /-- Erasing occupied capacity can only make the abstract answer smaller. -/
 theorem IsShapeShanten.abstract_le
     (hvalue : IsShapeShanten fixed hand shape value)

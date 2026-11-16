@@ -123,6 +123,8 @@ exit theorems, including the shared validity proofs, general search correctness
 and totality, batch scans, seven-pairs bounds, and the thirteen-orphans maximum.
 It also checks the capacity-model correspondence, the R2 acceptance proofs, and
 the general seven-pairs and thirteen-orphans formula correctness.
+The overall calculation's correctness, totality, completion, and abstract-model
+agreement are checked as well.
 Existing `native_decide` dependencies remain permitted; ordinary warnings are
 not treated as errors. Add new exit theorems to this check list when extending
 the proof surface.
@@ -207,8 +209,19 @@ thirteen- or fourteen-tile-equivalent inputs, and `none` exactly when fixed
 melds make the shape inapplicable (including ankan).
 As with mentsu search, input validation is a separate prerequisite; these are
 not validators for arbitrary hands.
-Overall three-shape integration and correspondence with 37-kind Go inputs
-remain follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
+
+[Shanten/Capacity/Overall.lean](./Shanten/Capacity/Overall.lean) exposes
+`shapeSearch fixed hand shape` and `overallMinimumSearch fixed hand`.
+The latter takes the minimum of the applicable shape results, omitting `none`
+rather than treating it as zero. For valid thirteen- or fourteen-tile-equivalent
+inputs, it always returns a unique `some value`, exactly characterized by the
+calculator-independent `Capacity.IsOverallShanten` attained-minimum predicate.
+The result is at least `-1`, and equals `-1` exactly when any shape is complete.
+With fixed melds it reduces to mentsu search; without fixed melds it agrees with
+the original abstract `OverallShanten` specification.
+Input validation remains a separate prerequisite, and the underlying mentsu
+enumeration is not optimized. Correspondence with 37-kind Go inputs remains
+follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
 
 [Shanten/MentsuHand.lean](./Shanten/MentsuHand.lean) is the stable import for
 mentsu-hand proofs. Its implementation is split under

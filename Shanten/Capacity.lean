@@ -6,4 +6,5 @@ import Shanten.Capacity.Totality
 import Shanten.Capacity.Fourteen
 import Shanten.Capacity.Discard
 import Shanten.Capacity.Special
+import Shanten.Capacity.Overall
 import Shanten.Capacity.Examples
