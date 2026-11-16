@@ -15,6 +15,11 @@ aka37 `a945c9e36c2ae0c407e20e0f45da4f041d75b8c8`。
 麻雀の**ドメイン知識・語彙・不変条件を一貫して獲得し、長期に安定させる**。
 コードの行数削減や分類器・シャンテン計算器の統合は主目的ではない。
 
+背景には、架空の天鳳IDを作らずにInt37で分類器へ入力する
+[mahjong-formalizationのIssue #2][formal-issue-2]がある。
+同IssueはGo分類APIの拡張として完了している。本計画はその考えを発展させ、
+Int37・Int34とその対応をLeanで共通定義し、各プロジェクトが同じ意味に従うことを目指す。
+
 そのために、Int37を含む牌の表現、変換、枚数制約、面子と通常形の基礎仕様を、
 小さな独立したLeanライブラリに置くことを提案する。
 両プロジェクトがこの核を利用し、実行可能な定義・証明・用語を同じ出典に結び付ける。
@@ -314,6 +319,7 @@ aka37の牌定義・天鳳変換・Int37契約を読み直した。
 リポジトリ作成、依存追加、コード移動、ライセンス変更も行っていない。
 
 [formalization]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
+[formal-issue-2]: https://github.com/bgnori/mahjong-formalization/issues/2
 [formal-go]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/mahjong/README.md#int37-input-aka37-int37v1
 [formal-wait]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/WaitCompletionFinder.lean#L323
 [formal-direct]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/DirectWaitGeneration.lean#L134
