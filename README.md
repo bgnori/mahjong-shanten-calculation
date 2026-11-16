@@ -23,6 +23,9 @@ environment is recorded in
 The comparison with mahjong-formalization and recommendations for a shared
 domain core are recorded in
 [docs/MAHJONG_FORMALIZATION_REUSE_REVIEW_2026-11-16.md](docs/MAHJONG_FORMALIZATION_REUSE_REVIEW_2026-11-16.md).
+A proposed independent Lean domain core, including Int37 terminology and tile
+capacity constraints, is described in
+[docs/MAHJONG_DOMAIN_CORE_PLAN_2026-11-16.md](docs/MAHJONG_DOMAIN_CORE_PLAN_2026-11-16.md).
 
 ## Input
 
