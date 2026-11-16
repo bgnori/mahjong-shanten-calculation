@@ -32,6 +32,9 @@ def ValidHand (fixed : List FixedMeld) (hand : Hand) : Prop :=
 def IsThirteenTileEquivalentHand (fixed : List FixedMeld) (hand : Hand) : Prop :=
   ValidHand fixed hand ∧ tileCount hand + 3 * fixed.length = 13
 
+def IsFourteenTileEquivalentHand (fixed : List FixedMeld) (hand : Hand) : Prop :=
+  ValidHand fixed hand ∧ tileCount hand + 3 * fixed.length = 14
+
 lemma ValidHand.validCounts (hvalid : ValidHand fixed hand) :
     ValidCounts hand := by
   intro tile

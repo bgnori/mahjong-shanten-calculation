@@ -23,7 +23,9 @@
 | [Capacity/Reachability.lean](../Shanten/Capacity/Reachability.lean) | 共有の目標方向交換列を容量付き経路へ変換し、不足枚数で完成目標へ到達する。 |
 | [Capacity/Search.lean](../Shanten/Capacity/Search.lean) | 既存ブロック探索の容量フィルタ、完成形との対応、到達上界・下界、最小値証明。 |
 | [Capacity/Totality.lean](../Shanten/Capacity/Totality.lean) | 有効固定文脈の完成目標を構成し、13枚相当入力すべての全域性・仕様一致・最適状態を証明する。 |
-| [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/Bの正確な値1・0と実際の探索結果、容量超過・槓の回帰例。 |
+| [Capacity/Fourteen.lean](../Shanten/Capacity/Fourteen.lean) | 14枚相当の全域性・仕様一致・最適状態、完成と値−1の同値。 |
+| [Capacity/Discard.lean](../Shanten/Capacity/Discard.lean) | 合法打牌後の13枚相当入力、打牌結果・最適打牌列挙、未完成14枚相当の値と打牌後最小値の一致。 |
+| [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/Bの値1・0と探索結果、14枚相当の完成値・最適打牌、容量超過・槓の回帰例。 |
 | [ProofChecks.lean](../Shanten/ProofChecks.lean) | 主要出口定理の推移的な `sorryAx` 依存を通常ビルドで拒否する。 |
 
 ## 七対子の構成と読む順序
@@ -91,9 +93,12 @@ Capacity.Specification -> Capacity.Basic
 Capacity.Reachability -> Capacity.Specification
 Capacity.Search -> Capacity.Reachability, MentsuHand.Search.BlockSearch
 Capacity.Totality -> Capacity.Search
-Capacity.Examples -> Capacity.Totality
+Capacity.Fourteen -> Capacity.Totality
+Capacity.Discard -> Capacity.Fourteen
+Capacity.Examples -> Capacity.Discard
 Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Reachability,
-                 Capacity.Search, Capacity.Totality, Capacity.Examples
+                 Capacity.Search, Capacity.Totality, Capacity.Fourteen,
+                 Capacity.Discard, Capacity.Examples
 ProofChecks   -> MentsuHand, ThirteenOrphans, Bounds, Capacity
 Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, MentsuHand, Bounds,
                  Capacity, ProofChecks

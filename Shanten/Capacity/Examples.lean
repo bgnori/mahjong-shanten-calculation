@@ -1,4 +1,4 @@
-import Shanten.Capacity.Totality
+import Shanten.Capacity.Discard
 
 namespace Shanten.Capacity.Examples
 
@@ -142,6 +142,70 @@ example : generalMentsuHandMinimumSearch fixedKan
 example : ¬ ValidHand (List.replicate 2 (.kan east))
     { counts := fun _ => 0, fixedMelds := 2 } := by
   unfold ValidHand
+  decide
+
+def fourteenStanding : Hand := drawHand standing white
+
+private lemma fourteenA_valid : IsFourteenTileEquivalentHand fixedA fourteenStanding := by
+  unfold IsFourteenTileEquivalentHand ValidHand
+  decide
+
+private lemma fourteenB_valid : IsFourteenTileEquivalentHand fixedB fourteenStanding := by
+  unfold IsFourteenTileEquivalentHand ValidHand
+  decide
+
+set_option maxRecDepth 4096 in
+theorem fourteenA_search :
+    generalMentsuHandMinimumSearch fixedA fourteenStanding = some 0 ∧
+      minimumDiscardSearch fixedA fourteenStanding = some 0 ∧
+      optimalDiscards fixedA fourteenStanding = {east} := by
+  decide
+
+set_option maxRecDepth 4096 in
+theorem fourteenB_search :
+    generalMentsuHandMinimumSearch fixedB fourteenStanding = some 0 ∧
+      optimalDiscards fixedB fourteenStanding = {east, white} := by
+  decide
+
+example : IsShapeShanten fixedA fourteenStanding .mentsuHand 0 :=
+  (generalMentsuHandMinimumSearch_eq_some_iff_of_fourteen fourteenA_valid 0).mp
+    fourteenA_search.1
+
+example : IsShapeShanten fixedB fourteenStanding .mentsuHand 0 :=
+  (generalMentsuHandMinimumSearch_eq_some_iff_of_fourteen fourteenB_valid 0).mp
+    fourteenB_search.1
+
+set_option maxRecDepth 4096 in
+theorem fourteenComplete_search :
+    generalMentsuHandMinimumSearch fixedB (drawHand standing east) = some (-1) ∧
+      minimumDiscardSearch fixedB (drawHand standing east) = some 0 := by
+  decide
+
+set_option maxRecDepth 4096 in
+example :
+    (south, 0) ∉ discardSearchResults fixedA fourteenStanding := by
+  decide
+
+def blockedFixed : List FixedMeld :=
+  [ .meld (.triplet east), .meld (.triplet south)
+  , .meld (.sequence .man ⟨0, by omega⟩), .meld (.sequence .pin ⟨0, by omega⟩) ]
+
+set_option maxRecDepth 4096 in
+theorem fourteenBlocked_search :
+    let hand := drawHand standing south
+    IsFourteenTileEquivalentHand blockedFixed hand ∧
+      generalMentsuHandMinimumSearch blockedFixed hand = some 1 ∧
+      minimumDiscardSearch blockedFixed hand = some 1 ∧
+      optimalDiscards blockedFixed hand = {east, south} := by
+  unfold IsFourteenTileEquivalentHand ValidHand
+  decide
+
+set_option maxRecDepth 4096 in
+example :
+    let hand := drawHand (discardHand fourteenStanding east) white
+    IsFourteenTileEquivalentHand fixedKan hand ∧
+      generalMentsuHandMinimumSearch fixedKan hand = some (-1) := by
+  unfold IsFourteenTileEquivalentHand ValidHand
   decide
 
 end Shanten.Capacity.Examples

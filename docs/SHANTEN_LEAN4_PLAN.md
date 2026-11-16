@@ -23,8 +23,9 @@ Leanで数学的仕様と計算可能な探索の一致を証明し、その仕�
 R2への段階導入として、固定面子の実牌内容と合算容量を保持する
 [容量付きモデル](../Shanten/Capacity.lean) を別層に追加した。
 このモデル上の `Capacity.generalMentsuHandMinimumSearch fixed hand` は、
-有効13枚相当手牌すべてで容量付き仕様との一致・全域性まで証明済み。
-14枚相当手牌・37種入力との対応は後続課題であり、契約全体を証明済みとは扱わない。
+有効13枚相当・14枚相当手牌すべてで面子手の容量付き仕様との一致・全域性まで証明済み。
+14枚相当では未完成手の最適打牌との一致も証明した。
+特殊形の一般計算・37種入力との対応は後続課題であり、契約全体を証明済みとは扱わない。
 
 ## ファイル構成と読む順序
 
@@ -45,6 +46,8 @@ R2への段階導入として、固定面子の実牌内容と合算容量を保
 [Reachability](../Shanten/Capacity/Reachability.lean)（容量を守る目標到達）、
 [Search](../Shanten/Capacity/Search.lean)（容量付き候補と最小値）、
 [Totality](../Shanten/Capacity/Totality.lean)（一般入力の全域性・仕様一致）、
+[Fourteen](../Shanten/Capacity/Fourteen.lean)（14枚相当の仕様一致・完成値）、
+[Discard](../Shanten/Capacity/Discard.lean)（最適打牌・打牌後最小値との対応）、
 [Examples](../Shanten/Capacity/Examples.lean)（R2のA/B受入例・計算結果）の順に読む。
 既存の抽象仕様を置き換えるものではなく、名前空間 `Shanten.Capacity` で区別する。
 
@@ -223,7 +226,39 @@ R2の `inputA_search` / `inputB_search` は実際の探索を `decide` で計算
 固定面子の実牌容量を考慮する呼出側は `Shanten.Capacity` の関数へ固定文脈を渡す。
 
 37種の赤5を統合する前の容量検証・正規化の値保存やGo入力との対応は未証明。
-今回の完了範囲は正規化34牌種・13枚相当の容量付き仕様と一般探索までとする。
+13枚相当の接続に続き、以下の14枚相当への拡張も完了した。
+
+### 14枚相当の打牌選択と仕様一致（完了）
+
+`IsFourteenTileEquivalentHand fixed hand` は `ValidHand fixed hand` と
+`tileCount hand + 3 * fixed.length = 14` を要求する。
+同じ `generalMentsuHandMinimumSearch` を使い、完成目標と手牌の枚数が等しい場合の
+共有交換列を再利用して、不足枚数ちょうどの容量付き経路を構成する。
+13枚相当向けの既存定理の型・保証は維持した。
+
+- `generalMentsuHandMinimumSearch_eq_some_iff_of_fourteen` /
+  `generalMentsuHandMinimumSearch_exists_unique_of_fourteen` /
+  `generalMentsuHandMinimumSearch_optimal_of_fourteen`：
+  有効14枚相当入力すべてで仕様一致・結果の存在一意性・最適状態を保証する。
+- `generalMentsuHandMinimumSearch_eq_neg_one_iff`：
+  完成形であることと、探索結果が `some (-1)` であることが同値。
+- `discardHand` は手元牌だけを1枚減らす。実際に持つ牌を捨てると有効性を保ち、
+  `IsFourteenTileEquivalentHand.discard` が有効な13枚相当入力を与える。
+  固定面子から牌を捨てたり、固定面子数を減らしたりしない。
+- `discardSearchResults` は持っている牌種だけを列挙し、
+  各打牌と13枚相当探索の結果の組を返す。`minimumDiscardSearch` はその最小値。
+- 未完成手では `generalMentsuHandMinimumSearch_eq_minimumDiscardSearch` が
+  14枚相当の値と打牌後最小値の一致を保証する。
+  各打牌で不足枚数は減らず、最適完成目標に対して余剰の牌を捨てれば不足枚数を保てることを使う。
+- `optimalDiscards` はその最小値を達成する全打牌種を返す。
+  `mem_optimalDiscards_iff` と `optimalDiscards_nonempty` で、
+  未完成の有効14枚相当入力では全候補が合法で最適、かつ少なくとも1候補あることを保証する。
+
+完成済みの手牌は打牌すると値が変わるため、打牌後最小値との一致の対象から除外する。
+計算側は先に一般探索で完成値 `-1` を確認し、未完成の場合に打牌候補を使う。
+回帰例は容量により最適打牌が1種／複数種となる場合、値1の未完成手、
+完成値 `-1` と打牌後値0の違い、持っていない牌の除外、槓を含む14枚相当完成形を実計算で検査する。
+今回の完了範囲は面子手までであり、七対子／国士の一般計算や総合値を完了扱いにしない。
 
 ## 現在の作業で維持する境界
 
@@ -244,7 +279,7 @@ R2の `inputA_search` / `inputB_search` は実際の探索を `decide` で計算
 
 | 範囲 | 必要な成果 |
 |---|---|
-| 入力枚数の拡張 | 14枚手の打牌選択を含む計算と仕様の対応。13枚相当の一般手牌は新探索で証明済み。 |
+| 特殊形の一般計算 | 七対子／国士の13・14枚相当の計算と仕様一致。面子手の13・14枚相当と最適打牌は証明済み。 |
 | 総合値・上限 | 適用可能性に従う3形の最小値と一般到達上限の証明。数値目標と前提を別途確定する。 |
 | 入力モデル | 37種の赤5正規化・統合前容量検証と、容量付き34種モデルとの対応。 |
 | Go実装・適合性 | Leanとの状態・遷移・評価の対応表、共有fixture、入力・エラー境界のテスト。 |

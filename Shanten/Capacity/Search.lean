@@ -54,19 +54,37 @@ lemma generalMentsuHandStates_invariants (hvalid : ValidHand fixed hand)
   exact ⟨generalMentsuHandStateFor_used_le hand _, Multiset.inter_le_left,
     hcapacity.2.2, generalMentsuHandStateFor_accounting hand _⟩
 
-lemma generalMentsuHandState_reaches (h13 : IsThirteenTileEquivalentHand fixed hand)
+lemma generalMentsuHandState_reaches_of_size (hvalid : ValidHand fixed hand)
+    (hsize : tileCount hand + 3 * fixed.length = 13 ∨
+      tileCount hand + 3 * fixed.length = 14)
     (hstate : state ∈ generalMentsuHandStates fixed hand) :
     ReachesCompletion fixed .mentsuHand hand state.missing := by
   obtain ⟨pair, melds, hlength, hcapacity, rfl⟩ :=
-    (mem_generalMentsuHandStates_iff h13.1 state).mp hstate
-  have hstanding : tileCount hand + 3 * hand.fixedMelds = 13 := by
-    rw [h13.1.1]
-    exact h13.2
-  have hsum := sum_countsOfTiles_mentsuHandTarget_of_thirteen_tile_count
-    hand hstanding pair melds hlength
-  exact reachesCompletion_of_one_more_target_tile hsum h13.1
+    (mem_generalMentsuHandStates_iff hvalid state).mp hstate
+  have hcomplete : Complete fixed .mentsuHand
+      (targetHand hand (countsOfTiles (mentsuHandTarget pair melds))) :=
     ⟨hcapacity, complete_mentsuHand_targetHand hand _ pair melds
       hcapacity.validCounts hlength (targetHand_hasTiles_countsOfTiles hand _)⟩
+  rcases hsize with h13 | h14
+  · have hstanding : tileCount hand + 3 * hand.fixedMelds = 13 := by
+      rw [hvalid.1]
+      exact h13
+    exact reachesCompletion_of_one_more_target_tile
+      (sum_countsOfTiles_mentsuHandTarget_of_thirteen_tile_count
+        hand hstanding pair melds hlength) hvalid hcomplete
+  · have hsum : (∑ tile : Tile, hand.counts tile) =
+        ∑ tile : Tile, countsOfTiles (mentsuHandTarget pair melds) tile := by
+      rw [countsOfTiles_sum_eq_card]
+      change tileCount hand = (pairTiles pair + meldsTiles melds).card
+      rw [Multiset.card_add, pairTiles_card, meldsTiles_card]
+      have := hvalid.1
+      omega
+    exact ⟨_, reachesHand_targetHand_of_equal_sum hsum hvalid hcapacity.2.2, hcomplete⟩
+
+lemma generalMentsuHandState_reaches (h13 : IsThirteenTileEquivalentHand fixed hand)
+    (hstate : state ∈ generalMentsuHandStates fixed hand) :
+    ReachesCompletion fixed .mentsuHand hand state.missing :=
+  generalMentsuHandState_reaches_of_size h13.1 (Or.inl h13.2) hstate
 
 lemma exists_state_of_reachesCompletion (hvalid : ValidHand fixed hand)
     (hreach : ReachesCompletion fixed .mentsuHand hand distance) :
@@ -92,7 +110,9 @@ lemma exists_state_of_reachesCompletion (hvalid : ValidHand fixed hand)
   rw [hcounts]
   exact hpath.deficit_le
 
-lemma exists_optimal_state (h13 : IsThirteenTileEquivalentHand fixed hand)
+lemma exists_optimal_state_of_size (hvalid : ValidHand fixed hand)
+    (hsize : tileCount hand + 3 * fixed.length = 13 ∨
+      tileCount hand + 3 * fixed.length = 14)
     (hnonempty : (generalMentsuHandStates fixed hand).Nonempty) :
     ∃ state ∈ generalMentsuHandStates fixed hand,
       generalMentsuHandMinimumSearch fixed hand = some ((state.missing : Int) - 1) ∧
@@ -109,12 +129,20 @@ lemma exists_optimal_state (h13 : IsThirteenTileEquivalentHand fixed hand)
     exact Finset.min'_le distances _ (Finset.mem_image.mpr ⟨other, hother, rfl⟩)
   have hshape : IsShapeShanten fixed hand .mentsuHand ((state.missing : Int) - 1) := by
     refine ⟨trivial, state.missing, by omega,
-      generalMentsuHandState_reaches h13 hstate, ?_⟩
+      generalMentsuHandState_reaches_of_size hvalid hsize hstate, ?_⟩
     intro smaller hsmaller hreach
-    obtain ⟨other, hother, hbound⟩ := exists_state_of_reachesCompletion h13.1 hreach
+    obtain ⟨other, hother, hbound⟩ := exists_state_of_reachesCompletion hvalid hreach
     have := hminimal other hother
     omega
   refine ⟨state, hstate, ?_, hshape, hminimal⟩
   simp [generalMentsuHandMinimumSearch, distances, hdistances, ← hminimum]
+
+lemma exists_optimal_state (h13 : IsThirteenTileEquivalentHand fixed hand)
+    (hnonempty : (generalMentsuHandStates fixed hand).Nonempty) :
+    ∃ state ∈ generalMentsuHandStates fixed hand,
+      generalMentsuHandMinimumSearch fixed hand = some ((state.missing : Int) - 1) ∧
+      IsShapeShanten fixed hand .mentsuHand ((state.missing : Int) - 1) ∧
+      ∀ other ∈ generalMentsuHandStates fixed hand, state.missing ≤ other.missing :=
+  exists_optimal_state_of_size h13.1 (Or.inl h13.2) hnonempty
 
 end Shanten.Capacity

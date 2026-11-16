@@ -179,12 +179,22 @@ bound when both values exist.
 `Shanten.Capacity.generalMentsuHandMinimumSearch fixed hand` reuses the existing
 block-search states, filters completed targets against fixed-tile capacity, and
 computes the minimum over the remaining targets. Correctness, totality, and an
-optimal-state witness are proved for every `IsThirteenTileEquivalentHand fixed hand`.
+optimal-state witness are proved for both `IsThirteenTileEquivalentHand fixed hand`
+and `IsFourteenTileEquivalentHand fixed hand`.
 The A/B acceptance proofs also compute the search results as `some 1` and `some 0`.
-With no fixed melds, results agree with the original abstract search, which remains
-available as `Shanten.generalMentsuHandMinimumSearch` for compatibility.
-Fourteen-tile-equivalent hands and correspondence with 37-kind Go inputs remain
-follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
+For thirteen-tile-equivalent hands without fixed melds, results agree with the
+original abstract search, which remains available as
+`Shanten.generalMentsuHandMinimumSearch` for compatibility.
+
+For fourteen-tile-equivalent hands, completion returns `some (-1)`. For a
+noncomplete hand, the same search result equals `minimumDiscardSearch`: the
+minimum thirteen-tile result over tile kinds actually present in the standing
+hand. `optimalDiscards` enumerates all attaining discards; it is nonempty for
+valid noncomplete fourteen-tile-equivalent hands. Check completion before using
+discard recommendations: discarding from a completed hand loses the `-1` value.
+Discards preserve fixed meld contents and capacity validity.
+General calculations for the special shapes and correspondence with 37-kind Go
+inputs remain follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
 
 [Shanten/MentsuHand.lean](./Shanten/MentsuHand.lean) is the stable import for
 mentsu-hand proofs. Its implementation is split under
