@@ -20,7 +20,10 @@
 | [Capacity.lean](../Shanten/Capacity.lean) | 固定面子の実牌内容を持つ容量付きモデルの公開入口。既存抽象モデルとは別の段階導入。 |
 | [Capacity/Basic.lean](../Shanten/Capacity/Basic.lean) | 槓を含む固定面子、残余容量、合算容量の有効性と保存。 |
 | [Capacity/Specification.lean](../Shanten/Capacity/Specification.lean) | 容量付き完成・遷移・最短距離仕様、旧モデルへの射影と固定面子なしでの同値。 |
-| [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/Bの正確な値1・0と、容量超過・槓の回帰例。 |
+| [Capacity/Reachability.lean](../Shanten/Capacity/Reachability.lean) | 共有の目標方向交換列を容量付き経路へ変換し、不足枚数で完成目標へ到達する。 |
+| [Capacity/Search.lean](../Shanten/Capacity/Search.lean) | 既存ブロック探索の容量フィルタ、完成形との対応、到達上界・下界、最小値証明。 |
+| [Capacity/Totality.lean](../Shanten/Capacity/Totality.lean) | 有効固定文脈の完成目標を構成し、13枚相当入力すべての全域性・仕様一致・最適状態を証明する。 |
+| [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/Bの正確な値1・0と実際の探索結果、容量超過・槓の回帰例。 |
 | [ProofChecks.lean](../Shanten/ProofChecks.lean) | 主要出口定理の推移的な `sorryAx` 依存を通常ビルドで拒否する。 |
 
 ## 七対子の構成と読む順序
@@ -85,8 +88,12 @@ MentsuHand.Targets -> MentsuHand.State, Exchange
 Bounds        -> SevenPairs
 Capacity.Basic -> Exchange
 Capacity.Specification -> Capacity.Basic
-Capacity.Examples -> Capacity.Specification
-Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Examples
+Capacity.Reachability -> Capacity.Specification
+Capacity.Search -> Capacity.Reachability, MentsuHand.Search.BlockSearch
+Capacity.Totality -> Capacity.Search
+Capacity.Examples -> Capacity.Totality
+Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Reachability,
+                 Capacity.Search, Capacity.Totality, Capacity.Examples
 ProofChecks   -> MentsuHand, ThirteenOrphans, Bounds, Capacity
 Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, MentsuHand, Bounds,
                  Capacity, ProofChecks

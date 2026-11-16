@@ -19,11 +19,12 @@ Leanで数学的仕様と計算可能な探索の一致を証明し、その仕�
 - 不正入力はエラーとし、対象外の形や失敗を成功値へ変換しない。
 - 結果は決定的で、入力を変更しない。
 
-既存の一般探索は34牌種に正規化済みの抽象モデルを使い、固定面子は個数だけを持つ。
+抽象版の一般探索は34牌種に正規化済みで、固定面子は個数だけを持つ。
 R2への段階導入として、固定面子の実牌内容と合算容量を保持する
 [容量付きモデル](../Shanten/Capacity.lean) を別層に追加した。
-既存探索の容量付き仕様への移行と37種入力との完全な対応は後続課題であり、
-契約全体を証明済みとは扱わない。
+このモデル上の `Capacity.generalMentsuHandMinimumSearch fixed hand` は、
+有効13枚相当手牌すべてで容量付き仕様との一致・全域性まで証明済み。
+14枚相当手牌・37種入力との対応は後続課題であり、契約全体を証明済みとは扱わない。
 
 ## ファイル構成と読む順序
 
@@ -41,7 +42,10 @@ R2への段階導入として、固定面子の実牌内容と合算容量を保
 容量付きモデルは [Capacity.lean](../Shanten/Capacity.lean) を入口とし、
 [Basic](../Shanten/Capacity/Basic.lean)（固定面子・残余容量）、
 [Specification](../Shanten/Capacity/Specification.lean)（容量付き仕様・旧仕様との対応）、
-[Examples](../Shanten/Capacity/Examples.lean)（R2のA/B受入例）の順に読む。
+[Reachability](../Shanten/Capacity/Reachability.lean)（容量を守る目標到達）、
+[Search](../Shanten/Capacity/Search.lean)（容量付き候補と最小値）、
+[Totality](../Shanten/Capacity/Totality.lean)（一般入力の全域性・仕様一致）、
+[Examples](../Shanten/Capacity/Examples.lean)（R2のA/B受入例・計算結果）の順に読む。
 既存の抽象仕様を置き換えるものではなく、名前空間 `Shanten.Capacity` で区別する。
 
 | 層 | モジュール | 責務 |
@@ -169,7 +173,7 @@ R2への段階導入として、固定面子の実牌内容と合算容量を保
 - `ReachesHand` は0手の場合も有効性を要求する。
   `ReachesCompletion` は容量付きの経路と完成先、
   `IsShapeShanten` はその最短距離から1を引いた値を表す。
-  値の一意性は証明済みだが、容量付きの一般計算器はまだ実装していない。
+  値の一意性に加え、以下の13枚相当の容量付き一般探索との一致も証明済み。
 
 [受入例](../Shanten/Capacity/Examples.lean) はレビューのA/Bについて、
 入力の有効性だけでなく最短距離を検査する。
@@ -189,10 +193,37 @@ Bは東を1枚引いて完成する。容量超過のドロー・交換、槓の
 | 最小値 | `IsShapeShanten.abstract_le` により、両モデルで値が存在すれば旧値は容量付き値の下界。固定面子があれば一般に等しくない。 |
 | 固定面子なし | `ValidHand [] hand` の下で `isShapeShanten_nil_iff` が3形すべての仕様一致を与える。既存の七対子・国士・面子手の値定理はこの条件で再利用できる。 |
 | 牌の算術 | `exchangeCounts_*` や不足枚数の下界は既存の演算・射影を通して再利用できる。 |
-| 一般探索 | 候補列挙・手牌消費のデータ層は再利用可能だが、容量フィルタ・被覆性・容量を守る経路構成・最小値一致・全域性の接続は後続。旧探索結果をそのまま容量付きの答えとして返さない。 |
+| 一般探索 | 候補列挙・手牌消費を再利用し、完成後の手元牌と固定牌の合算容量で候補をフィルタする。13枚相当の被覆性・経路構成・最小値一致・全域性は接続済み。旧探索の最小値をそのまま返すのではない。 |
+
+### 一般探索への接続（推奨順序4の冒頭・完了）
+
+`Capacity.generalMentsuHandMinimumSearch fixed hand` は、
+既存の `GeneralMentsuHandState` とブロック消費・不足枚数の計算を再利用する。
+全完成候補のうち `state.completed + fixedTiles fixed` が4枚制限を守るものだけを残し、
+残った候補の不足枚数の最小値から1を引く。
+容量判定は完成候補の段階で行い、枝刈り・性能最適化は今回の対象にしない。
+
+- `mem_generalMentsuHandStates_iff`：容量を守る全完成形と探索状態の対応を証明する。
+- `generalMentsuHandState_reaches`：各候補の不足枚数で容量を守る完成経路を構成する。
+  共有の `ReachesTargetExchange` に目標方向の交換列の構成を抽出し、
+  既存の抽象経路・新しい容量付き経路の双方へ、それぞれの有効性条件付きで変換する。
+- `exists_state_of_reachesCompletion`：任意の容量付き完成経路から、
+  その経路長以下の不足枚数を持つ探索状態を得る。
+- `exists_complete_target`：固定面子1組が占有する字牌は高々1種であることを使い、
+  未占有の字牌から必要な刻子と雀頭を構成する。入力に完成目標の存在を仮定しない。
+- `generalMentsuHandMinimumSearch_eq_some_iff` /
+  `generalMentsuHandMinimumSearch_exists_unique` /
+  `generalMentsuHandMinimumSearch_optimal`：
+  `IsThirteenTileEquivalentHand fixed hand` だけを条件に仕様一致・存在一意性・最適状態を証明する。
+- `generalMentsuHandMinimumSearch_nil`：固定面子なしの対象入力では抽象版の計算結果と一致する。
+
+R2の `inputA_search` / `inputB_search` は実際の探索を `decide` で計算し、
+結果がそれぞれ `some 1` / `some 0` であることを検査する。槓を含む計算例も検査済み。
+従来の `Shanten.generalMentsuHandMinimumSearch` は抽象版として維持し、
+固定面子の実牌容量を考慮する呼出側は `Shanten.Capacity` の関数へ固定文脈を渡す。
 
 37種の赤5を統合する前の容量検証・正規化の値保存やGo入力との対応は未証明。
-今回の完了範囲は正規化34牌種の容量付き仕様・対応定理・A/B受入例までとする。
+今回の完了範囲は正規化34牌種・13枚相当の容量付き仕様と一般探索までとする。
 
 ## 現在の作業で維持する境界
 
@@ -215,7 +246,6 @@ Bは東を1枚引いて完成する。容量超過のドロー・交換、槓の
 |---|---|
 | 入力枚数の拡張 | 14枚手の打牌選択を含む計算と仕様の対応。13枚相当の一般手牌は新探索で証明済み。 |
 | 総合値・上限 | 適用可能性に従う3形の最小値と一般到達上限の証明。数値目標と前提を別途確定する。 |
-| 容量付き探索 | 固定面子の実牌容量を使う一般探索と容量付き仕様の一致・全域性。仕様層とA/B例は段階導入済み。 |
 | 入力モデル | 37種の赤5正規化・統合前容量検証と、容量付き34種モデルとの対応。 |
 | Go実装・適合性 | Leanとの状態・遷移・評価の対応表、共有fixture、入力・エラー境界のテスト。 |
 | 最適化 | 基準探索・仕様との値一致を維持したキャッシュ・枝刈り等。 |

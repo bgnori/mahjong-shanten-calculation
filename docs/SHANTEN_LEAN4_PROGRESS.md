@@ -2,7 +2,7 @@
 
 **文書更新:** 2026-11-16
 
-**実装の確認基準:** R3の自動検証設定に続く、R2の容量付きモデルの段階導入とA/B受入証明（2026-11-16）
+**実装の確認基準:** 容量付きモデルの段階導入に続く、順序4冒頭の容量付き一般探索・仕様一致・全域性（2026-11-16）
 
 この台帳には現在の成果と未解決条件だけを記録する。作業範囲は
 [現行計画](./SHANTEN_LEAN4_PLAN.md)、判断の根拠は
@@ -19,11 +19,12 @@
 | 全ターゲットDP | 仕様一致は完了 | 有効カウントと `tileCount hand + 3 * hand.fixedMelds = 13` の下で `mentsuHandTargetMinimumSearch` と `IsShapeShanten` の一致を証明済み。 |
 | 牌種順グループ化 | データ層は完了 | 重複度を保つグループ化、残余列の空性、元の選択列との順列性を証明済み。 |
 | 与えられた分解のバッチ走査 | 完了 | `MentsuHandBlockDecomposition.exists_tileBatchScan_complete` が分解だけから34牌種順の走査と完了状態を構成する。レビューの東雀頭・12萬ターツ4組も具体例で検査済み。 |
-| 一般手牌のブロック探索 | 仕様一致・全域性は完了 | `ValidCounts hand` と `tileCount hand + 3 * hand.fixedMelds = 13` の下で、新しい `generalMentsuHandMinimumSearch` の結果の存在・一意性、探索の被覆性・最小値一致を証明済み。入力に分解は不要。 |
+| 抽象版の一般ブロック探索 | 仕様一致・全域性は完了 | `ValidCounts hand` と `tileCount hand + 3 * hand.fixedMelds = 13` の下で、`Shanten.generalMentsuHandMinimumSearch` の存在一意性・被覆性・最小値一致を証明済み。容量付き版の列挙・消費部品としても再利用する。 |
 | 総合値・上限 | 部分完了 | 定義・一意性・条件付き上限補題などはある。現在の狭い分解の列挙だけで全体完了とはしない。 |
 | 国士無双の最大値 | 有効13枚手で完了 | 仕様値の存在・上界13と、有効な中張牌のみの手牌が13を達成することを証明済み。閉形式との一般的一致・14枚手は対象外。 |
-| 容量付き仕様 | 段階導入完了 | R2のA/Bで最短距離2・1、値1・0を証明済み。旧仕様への射影・下界関係と固定面子なしでの仕様同値を証明。容量付き一般探索は後続。 |
-| 検証運用 | CI設定・成功確認済み | Go／Lean独立ジョブの成功を利用者が確認。主要23宣言の推移的な `sorryAx` 依存を通常ビルドで拒否する。R2追加分のGitHub上の実行はpush後。 |
+| 容量付き仕様 | 段階導入完了 | R2のA/Bで最短距離2・1、値1・0を証明済み。旧仕様への射影・下界関係と固定面子なしでの仕様同値を証明。 |
+| 容量付き一般探索 | 13枚相当で仕様一致・全域性完了 | `Capacity.generalMentsuHandMinimumSearch fixed hand` は固定牌込み容量を守る全候補を探索する。任意の有効13枚相当入力で結果の存在一意性・仕様一致・最適状態を証明し、A/Bの計算結果1・0も検査済み。 |
+| 検証運用 | CI設定・成功確認済み | Go／Lean独立ジョブの成功を利用者が確認。主要31宣言の推移的な `sorryAx` 依存を通常ビルドで拒否する。今回追加分のGitHub上の実行はpush後。 |
 | Go適合性 | 未着手 | Go計算器とLean仕様の値一致、共有fixtureは未実装。 |
 
 公開入口は [MentsuHand.lean](../Shanten/MentsuHand.lean)、
@@ -76,8 +77,37 @@
 
 [設計と再利用条件](./SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2) に、
 射影・下界関係・固定面子なしでの一致と、既存算術を再利用できる範囲を明記した。
-既存の一般探索の計算結果は変更していない。容量付きの一般探索・全域性の接続、
+抽象版の一般探索の計算結果は変更していない。
+容量付きの一般探索への接続は以下の順序4冒頭で完了した。
 37種の赤5統合前の容量検証とGo契約への対応は後続とする。
+
+## 順序4の冒頭：容量付き一般探索（13枚相当）
+
+既存のブロック列挙・手牌消費を再利用し、
+[Search.lean](../Shanten/Capacity/Search.lean) で固定牌込みの完成容量を満たす候補だけを残す。
+公開関数は `Capacity.generalMentsuHandMinimumSearch fixed hand`。
+旧関数の結果を補正する方式ではなく、容量を満たす候補集合から最小値を取り直す。
+
+- `mem_generalMentsuHandStates_iff`：容量を満たす全完成形候補の被覆性・健全性。
+- `generalMentsuHandState_reaches`：各候補まで不足枚数ちょうどで到達する容量付き経路を構成。
+- `exists_state_of_reachesCompletion`：任意の完成経路に対する不足枚数の下界。
+- [Totality.lean](../Shanten/Capacity/Totality.lean) の `exists_complete_target`：
+  固定面子が占有しない字牌から必要な刻子・雀頭を構成し、有効目標の存在を入力前提に残さない。
+- `generalMentsuHandMinimumSearch_eq_some_iff` /
+  `generalMentsuHandMinimumSearch_exists_unique` /
+  `generalMentsuHandMinimumSearch_optimal`：
+  `IsThirteenTileEquivalentHand fixed hand` から仕様一致・存在一意性・最適状態を得る。
+- `generalMentsuHandMinimumSearch_nil`：固定面子なしの対象入力で抽象版と計算結果が一致する。
+- `inputA_search` / `inputB_search`：実際の探索を `decide` で実行し、`some 1` / `some 0` を検査。
+  槓で東の残余容量が0でも、別種の雀頭で完成できる計算例も追加した。
+
+共有の [Exchange.lean](../Shanten/Exchange.lean) に
+目標方向の算術的交換列 `ReachesTargetExchange` を抽出した。
+同じ不足枚数の帰納構成を、旧経路・容量付き経路へそれぞれ有効性条件付きで変換する。
+旧 `reachesHand_targetHand_of_equal_sum` の型・保証は維持した。
+
+この完了範囲は正規化34牌種・13枚相当の面子手。
+14枚相当・七対子／国士の一般計算・総合値・37種入力／Go対応は、順序4の残作業として進める。
 
 ## レビューR3：自動検証
 
@@ -87,9 +117,9 @@ Leanは固定済みツールチェーンと依存manifestを使い、`lake updat
 import対象のMathlibキャッシュを取得して `lake build` を実行する。
 
 [ProofChecks.lean](../Shanten/ProofChecks.lean) は公開入口からimportされるため、
-ローカルの通常ビルドでも主要23宣言の推移的な `sorryAx` 依存を拒否する。
+ローカルの通常ビルドでも主要31宣言の推移的な `sorryAx` 依存を拒否する。
 検査対象はR1保存定理・共有到達・一般探索・バッチ走査・七対子上限・国士最大値に加え、
-R2の容量保存・旧仕様との対応・A/B受入証明。
+R2の容量保存・旧仕様との対応・A/B受入証明、容量付き一般探索の仕様一致・全域性・計算結果。
 Mathlib標準の `assert_no_sorry` を使用し、既存の `native_decide` 依存は許容する。
 通常の警告は一律エラー化しない。新たな主要出口定理は同じ検査一覧に追加する。
 
@@ -283,6 +313,15 @@ R3設定後のCI成功は利用者から確認済みとの報告を受けた。
   `sorryAx`・新規の `native_decide` 依存なし。
   公開入口からA/Bの値1・0の一意性の適用も検査した。
   既存の警告は残る。修正前の基準コミットはR3対応済みの `29235ad`。
+
+- 2026-11-16、順序4冒頭の容量付き一般探索接続後：
+  `lake build Shanten.Capacity` 成功（896 jobs）、
+  既存証明と主要31宣言の証明穴検査を含む `lake build` 成功（918 jobs）。
+  新たな主要8宣言を `#print axioms` で検査し、依存は
+  `propext`・`Classical.choice`・`Quot.sound` のみ。新たな `native_decide` 依存なし。
+  公開入口から、追加の目標存在仮定なしの全域性定理の適用と、
+  A/Bの探索結果から容量付き仕様値1・0への接続も検査した。
+  既存の警告は残る。修正前の基準コミットは `21c3043`。
 
 ## 旧計画コードの除去（2026-11-16）
 

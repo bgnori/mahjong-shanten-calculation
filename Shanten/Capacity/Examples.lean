@@ -1,4 +1,4 @@
-import Shanten.Capacity.Specification
+import Shanten.Capacity.Totality
 
 namespace Shanten.Capacity.Examples
 
@@ -112,6 +112,14 @@ theorem inputB_shanten : IsShapeShanten fixedB standing .mentsuHand 0 := by
   subst smaller
   exact not_complete fixedB (by decide) (reachesCompletion_zero_iff.mp hreach)
 
+set_option maxRecDepth 4096 in
+theorem inputA_search : generalMentsuHandMinimumSearch fixedA standing = some 1 := by
+  decide
+
+set_option maxRecDepth 4096 in
+theorem inputB_search : generalMentsuHandMinimumSearch fixedB standing = some 0 := by
+  decide
+
 def fixedKan : List FixedMeld := .kan east :: sequences
 
 example : fixedKan.length = 4 ∧ remainingCapacity fixedKan east = 0 := by
@@ -124,6 +132,11 @@ example : ¬ ValidHand fixedKan standing := by
 example : IsThirteenTileEquivalentHand fixedKan
     { counts := fun tile => if tile = white then 1 else 0, fixedMelds := 4 } := by
   unfold IsThirteenTileEquivalentHand ValidHand
+  decide
+
+set_option maxRecDepth 4096 in
+example : generalMentsuHandMinimumSearch fixedKan
+    { counts := fun tile => if tile = white then 1 else 0, fixedMelds := 4 } = some 0 := by
   decide
 
 example : ¬ ValidHand (List.replicate 2 (.kan east))

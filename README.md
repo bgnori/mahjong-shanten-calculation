@@ -174,9 +174,17 @@ Its [acceptance proofs](./Shanten/Capacity/Examples.lean) distinguish the review
 A/B inputs and establish exact shanten values 1 and 0, not just reachable bounds.
 For valid hands without fixed melds, its specification agrees with the existing
 abstract specification. With fixed melds, abstraction only provides a lower
-bound when both values exist. The existing general search still uses the
-abstract model; migration of that search and correspondence with 37-kind Go
-inputs remain follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
+bound when both values exist.
+
+`Shanten.Capacity.generalMentsuHandMinimumSearch fixed hand` reuses the existing
+block-search states, filters completed targets against fixed-tile capacity, and
+computes the minimum over the remaining targets. Correctness, totality, and an
+optimal-state witness are proved for every `IsThirteenTileEquivalentHand fixed hand`.
+The A/B acceptance proofs also compute the search results as `some 1` and `some 0`.
+With no fixed melds, results agree with the original abstract search, which remains
+available as `Shanten.generalMentsuHandMinimumSearch` for compatibility.
+Fourteen-tile-equivalent hands and correspondence with 37-kind Go inputs remain
+follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
 
 [Shanten/MentsuHand.lean](./Shanten/MentsuHand.lean) is the stable import for
 mentsu-hand proofs. Its implementation is split under

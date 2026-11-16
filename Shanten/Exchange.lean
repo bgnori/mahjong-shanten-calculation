@@ -184,6 +184,24 @@ lemma TargetExchange.handStep
   exact exchangeHand_step before discarded drawn hne (by omega)
     hvalid (lt_of_lt_of_le hdrawn (htarget drawn))
 
+/-- Target-directed arithmetic exchanges; legality follows from the count bounds. -/
+inductive ReachesTargetExchange (target : TileCounts) : Hand → Hand → Nat → Prop
+  | done {hand} : ReachesTargetExchange target hand hand 0
+  | step {hand next final distance} :
+      TargetExchange target hand next →
+      ReachesTargetExchange target next final distance →
+      ReachesTargetExchange target hand final (distance + 1)
+
+lemma ReachesTargetExchange.toReachesHand
+    (hreach : ReachesTargetExchange target before after distance)
+    (hvalid : ValidCounts before) (htarget : ∀ tile, target tile ≤ 4) :
+    ReachesHand before after distance := by
+  induction hreach with
+  | done => exact .done
+  | step hstep _ ih =>
+      have hlegal := hstep.handStep hvalid htarget
+      exact .step hlegal (ih hlegal.validCounts)
+
 lemma deficit_after_drawing
     (target : TileCounts) (hand : Hand) (discarded drawn : Tile)
     (hne : discarded ≠ drawn) (hdeficit : hand.counts drawn < target drawn) :
@@ -398,25 +416,23 @@ lemma countsOfTiles_sum_eq_card (tiles : Multiset Tile) :
   | @cons tile tiles ih =>
       simp [countsOfTiles, ih, Finset.sum_add_distrib]
 
-lemma reachesHand_targetHand_of_equal_sum
+lemma reachesTargetExchange_targetHand_of_equal_sum
     (before : Hand) (target : TileCounts)
     (hsum : (∑ tile : Tile, before.counts tile) =
-      ∑ tile : Tile, target tile)
-    (hbeforeValid : ValidCounts before) (htarget : ∀ tile, target tile ≤ 4) :
+      ∑ tile : Tile, target tile) :
     ∃ distance,
       distance = countDeficit before.counts target ∧
-      ReachesHand before (targetHand before target) distance := by
+      ReachesTargetExchange target before (targetHand before target) distance := by
   have aux : ∀ d : Nat, ∀ current : Hand,
       (∑ tile : Tile, current.counts tile) =
         ∑ tile : Tile, target tile →
-      ValidCounts current →
       countDeficit current.counts target = d →
       ∃ distance,
         distance = d ∧
-        ReachesHand current (targetHand current target) distance := by
+        ReachesTargetExchange target current (targetHand current target) distance := by
     intro d
     refine Nat.strong_induction_on d ?_
-    intro d ih current hsumCurrent hcurrentValid hmeasure
+    intro d ih current hsumCurrent hmeasure
     by_cases hd : d = 0
     · have hsumzero :
           (∑ tile : Tile, (target tile - current.counts tile)) = 0 := by
@@ -442,7 +458,7 @@ lemma reachesHand_targetHand_of_equal_sum
         funext tile
         exact heq tile (Finset.mem_univ tile)
       subst hcounts
-      refine ⟨0, ?_, ReachesHand.done⟩
+      refine ⟨0, ?_, ReachesTargetExchange.done⟩
       simp [countDeficit] at hmeasure
       omega
     · have hpositive : 0 < d := Nat.pos_of_ne_zero hd
@@ -454,9 +470,8 @@ lemma reachesHand_targetHand_of_equal_sum
       obtain ⟨discarded, drawn, hdrawn, hdiscarded, hneTiles⟩ :=
         exists_target_exchange_tiles current target hsumCurrent hne
       let next := exchangeHand current discarded drawn
-      have hstep : HandStep current next :=
-        exchangeHand_step current discarded drawn hneTiles (by omega)
-          hcurrentValid (lt_of_lt_of_le hdrawn (htarget drawn))
+      have hstep : TargetExchange target current next :=
+        ⟨discarded, drawn, hdrawn, hdiscarded, hneTiles, rfl⟩
       have hsumAfter :
           (∑ tile : Tile, next.counts tile) =
             ∑ tile : Tile, target tile := by
@@ -474,13 +489,25 @@ lemma reachesHand_targetHand_of_equal_sum
         omega
       obtain ⟨distance, hdistanceRest, hrest⟩ := ih
         (countDeficit next.counts target) hdefAfter next
-        hsumAfter hstep.validCounts rfl
+        hsumAfter rfl
       refine ⟨distance + 1, ?_, ?_⟩
       · omega
-      · apply ReachesHand.step
+      · apply ReachesTargetExchange.step
         · exact hstep
         · simpa [next, targetHand, exchangeHand] using hrest
-  exact aux (countDeficit before.counts target) before hsum hbeforeValid rfl
+  exact aux (countDeficit before.counts target) before hsum rfl
+
+lemma reachesHand_targetHand_of_equal_sum
+    (before : Hand) (target : TileCounts)
+    (hsum : (∑ tile : Tile, before.counts tile) =
+      ∑ tile : Tile, target tile)
+    (hbeforeValid : ValidCounts before) (htarget : ∀ tile, target tile ≤ 4) :
+    ∃ distance,
+      distance = countDeficit before.counts target ∧
+      ReachesHand before (targetHand before target) distance := by
+  obtain ⟨distance, hdistance, hreach⟩ :=
+    reachesTargetExchange_targetHand_of_equal_sum before target hsum
+  exact ⟨distance, hdistance, hreach.toReachesHand hbeforeValid htarget⟩
 
 lemma exists_complete_with_deficit_le
     (hreach : ReachesCompletion Complete shape before distance) :
