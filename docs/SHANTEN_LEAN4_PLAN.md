@@ -27,7 +27,14 @@ Leanで数学的仕様と計算可能な探索の一致を証明し、その仕�
 
 [MentsuHand.lean](../Shanten/MentsuHand.lean) は公開import用の入口に限定する。
 実装は [MentsuHand/](../Shanten/MentsuHand/) 以下の共通基盤・`Scan`・`Search` に分割した。
-名前空間 `Shanten` と公開定義・定理名は維持し、証明内容は変更していない。
+面子手の名前空間 `Shanten` と公開定義・定理名は維持し、証明内容は変更していない。
+
+[SevenPairs.lean](../Shanten/SevenPairs.lean) も公開import入口とし、
+[SevenPairs/](../Shanten/SevenPairs/) 以下を基本定義・カウント補題・完成形への接続・
+交換戦略・到達性に分割した。汎用の不足枚数と交換操作は
+[Exchange.lean](../Shanten/Exchange.lean) で面子手と共有する。
+七対子の読む順序と改名対応は [構造文書](./SHANTEN_LEAN_STRUCTURE.md#七対子の構成と読む順序)
+を参照する。以下は面子手の構成表である。
 
 | 層 | モジュール | 責務 |
 |---|---|---|

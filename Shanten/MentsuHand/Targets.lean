@@ -1,5 +1,5 @@
 import Shanten.MentsuHand.State
-import Shanten.SevenPairs
+import Shanten.Exchange
 
 /-!
 # Targets

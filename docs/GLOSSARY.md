@@ -316,11 +316,12 @@
 | `MentsuHandBlockSearch` | 面子＋搭子の合計4ブロック＋雀頭というブロック探索の完了条件。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
 | `MentsuHandBlockDecomposition` | 面子手を雀頭・完成面子・搭子へ分解した証明付き構造。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
 | `target` | 到達したい完成形の牌の多重集合。`mentsuHandTarget` などで構成する。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
-| `deficit` | 現在のカウントが目標に不足する枚数。必要な交換・ドローの下限に使う。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) / [`Shanten/SevenPairs.lean`](../Shanten/SevenPairs.lean) |
+| `deficit` | 現在のカウントが目標に不足する枚数。共有定義 `countDeficit` を必要な交換・ドローの下限に使う。 | [`Shanten/Exchange.lean`](../Shanten/Exchange.lean) |
 | `CompletionRespectsCopyLimit` | 搭子を補充して完成させても、各牌種4枚を超えないという述語。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
-| `ReachesExchange` | 交換操作を指定回数つないだ関係。七対子の構成的証明で使う。 | [`Shanten/SevenPairs.lean`](../Shanten/SevenPairs.lean) |
-| `PairingExchange` / `PairMakingExchange` | 既存の対を保ちながら、対を作るための交換の分類。 | [`Shanten/SevenPairs.lean`](../Shanten/SevenPairs.lean) |
-| `ProtectedPairMakingExchange` | 保護対象の牌種を残したまま対を作る交換の分類。 | [`Shanten/SevenPairs.lean`](../Shanten/SevenPairs.lean) |
+| `ReachesExchange` | `HandStep` を指定回数つないだ関係。面子手・七対子の構成的証明で共有する。 | [`Shanten/Exchange.lean`](../Shanten/Exchange.lean) |
+| `PairingExchange` / `PairMakingExchange` | 前者は2枚未満の牌種へ引く交換。後者は既存の対を保ちながら単独牌を対にする交換。 | [`SevenPairs/Exchange/Basic.lean`](../Shanten/SevenPairs/Exchange/Basic.lean) |
+| `IsPairPreservingDiscard` / `IsAbsentTileKind` | 対を残せる3枚以上の牌種／現在0枚の牌種という条件。 | [`SevenPairs/Exchange/Basic.lean`](../Shanten/SevenPairs/Exchange/Basic.lean) |
+| `ProtectedPairMakingExchange` | 保護対象の牌種を残したまま対を作る交換の分類。 | [`SevenPairs/Exchange/Basic.lean`](../Shanten/SevenPairs/Exchange/Basic.lean) |
 | `kokushiDistinctCount` / `kokushiPairCount` | 国士対象13種のうち、登場する種類数／2枚以上ある種類数。 | [`Shanten/Core.lean`](../Shanten/Core.lean) |
 
 ## 表記上のルール

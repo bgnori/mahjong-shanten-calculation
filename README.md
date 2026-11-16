@@ -158,5 +158,15 @@ correctness proofs in `Search/`, and regression proofs in `Examples.lean`.
 The former `GeneralMentsuHand.lean` is now
 [Search/BlockSearch.lean](./Shanten/MentsuHand/Search/BlockSearch.lean);
 public definition and theorem names are unchanged.
+
+[Shanten/SevenPairs.lean](./Shanten/SevenPairs.lean) is the stable import for
+seven-pairs proofs. Its implementation is split under
+[Shanten/SevenPairs/](./Shanten/SevenPairs/) into basic targets, counting lemmas,
+completion, one-step exchange strategies, and reachability.
+Shape-independent deficits and exchanges shared with mentsu-hand proofs live in
+[Shanten/Exchange.lean](./Shanten/Exchange.lean).
+Seven-pairs names now distinguish tenpai targets from completion counts and
+pair-preserving discards from other discards; see the
+[layout and rename map](./docs/SHANTEN_LEAN_STRUCTURE.md).
 See the [module map](./docs/SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序)
 for responsibilities and a suggested reading order.

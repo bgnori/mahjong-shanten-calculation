@@ -42,7 +42,7 @@ lemma reaches_sevenPairs_completion
     have hfinalDistinct :=
       ReachesPairMaking.distinctTileCount hpairing hmiddleDistinct
     have hfinalTenpai :=
-      isSevenPairsTenpai_of_terminal final hfinal13 hfinalDistinct
+      isSevenPairsTenpai_of_counts final hfinal13 hfinalDistinct
         (by simpa using hfinalPairs)
     have hdraw := reachesCompletion_of_sevenPairsTenpai final hfinal13
       hfinalTenpai
@@ -85,7 +85,7 @@ lemma reaches_sevenPairs_completion
           omega
         omega
       have hfinalTenpai :=
-        isSevenPairsTenpai_of_terminal final hfinal13 hfinalDistinct
+        isSevenPairsTenpai_of_counts final hfinal13 hfinalDistinct
           (by simpa using hfinalPairs)
       have hdraw := reachesCompletion_of_sevenPairsTenpai final hfinal13
         hfinalTenpai
@@ -107,7 +107,7 @@ lemma reaches_sevenPairs_completion
       have hfinalDistinct : distinctTileCount final = 7 := by
         exact ReachesPairMaking.distinctTileCount hpairing hdistinctEq
       have hfinalTenpai :=
-        isSevenPairsTenpai_of_terminal final hfinal13 hfinalDistinct
+        isSevenPairsTenpai_of_counts final hfinal13 hfinalDistinct
           (by simpa using hfinalPairs)
       have hdraw := reachesCompletion_of_sevenPairsTenpai final hfinal13
         hfinalTenpai
