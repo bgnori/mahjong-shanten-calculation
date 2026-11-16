@@ -1,0 +1,494 @@
+# シャンテン計算のLean4証明進捗（旧版・アーカイブ）
+
+> 2026-11-16に現行文書から分離した履歴資料。以下の計画・完了条件・更新ルールは
+> 当時の記録であり、現在の作業指示ではない。撤回済みの方針や古い評価を含む。
+> 現在の作業には [現行台帳](../SHANTEN_LEAN4_PROGRESS.md) と
+> [現行計画](../SHANTEN_LEAN4_PLAN.md) を参照する。
+
+この文書は、[Lean4正当化計画](./2026-11-15_SHANTEN_LEAN4_PLAN.md) に対して、実装・証明が
+どこまで進んでいるかを記録する進捗台帳である。作業を行うたびに、完了した補題、
+現在の課題、検証結果を更新する。
+
+## 現在の概要
+
+**最終更新:** 2026-11-15
+**現在の主対象:** 面子手の条件付きバッチ走査の境界整理と、一般探索との分離
+**総合ステータス:** 進行中（全ターゲットDPの仕様一致は完了、狭いブロック分解の
+牌種順バッチ完全性と一般手牌への被覆性は未完了）
+
+面子手については、牌姿を構成するブロック探索と、探索結果から
+`Complete .mentsuHand` および `IsShapeShanten` を導く補題まで実装済みである。
+一方、タイル順に進む制約付きブロック探索が任意の有効な分解を列挙することは、
+まだ完了していない。既存の一回走査関係は各牌種で高々一つのブロックしか選べないため、
+同じ牌種を共有するブロックを持つ分解を表せない。このため、局所構成の中間表現を
+「同一牌種で複数ブロックを連続適用できるバッチ走査」へ変更した。ただし、レビューで
+確認した通り、牌種順に並べ替えた列は元の `blockChoices` の部分列とは限らないため、
+この局所表現だけで一般完全性を主張しない。
+
+## 計画に対する進捗
+
+| 計画段階 | 内容 | 状態 | 現在の成果・残課題 |
+|---|---|---|---|
+| Phase 1 | 牌種、手牌、面子、完成形、入力不変条件 | 部分完了 | 34種正規化モデル、`ValidCounts`、`Complete`、`HandStep` を実装済み。固定面子は個数のみで、牌内容を保持する拡張は未着手。 |
+| Phase 2 | 七対子・国士無双・面子手の宣言的シャンテン関係 | 部分完了 | 七対子の到達補題と国士無双の閉形式補題を実装済み。面子手は仕様接続の補題を拡張中。 |
+| Phase 3 | 面子手の有限探索・DPと仕様の一致 | 進行中 | 全ターゲットを列挙するコストDPと `IsShapeShanten` の一致は完了。条件付きバッチ走査の局所補題は進展したが、牌種順再配置・旧探索との関係・一般手牌の被覆性は未完了。 |
+| Phase 4 | 3形の総合値と上限・適用可能性 | 部分完了 | `OverallShanten`、形ごとの一意性、総合値の上限補題を実装済み。面子手の一般到達性が揃った後に総合証明を完成させる。 |
+| Phase 5 | Go実装との適合性・共有fixture | 未着手 | Lean仕様と実行可能なGo計算器の値一致検証は未着手。 |
+
+## 面子手証明の現在地
+
+### 完了済み
+
+実装場所は [MentsuHand.lean](../../Shanten/MentsuHand.lean) である。
+
+- 面子・搭子・雀頭を選ぶ有限状態と遷移を定義した。
+- 探索状態が入力手牌の牌カウントを超えないことを証明した。
+- 4枚制限を満たす探索状態だけを扱う制約付き探索を定義した。
+- 完成したブロック探索状態から、`Complete .mentsuHand` を満たす完成形を構成した。
+- 完成形の不足枚数が1枚多い場合、1回の交換で完成形へ到達できることを証明した。
+- 上記から、制約付きブロック探索が完了すれば
+  `∃ value, IsShapeShanten hand .mentsuHand value` を導出できるようにした。
+- 全ターゲットを列挙する `mentsuHandTargetMinimumSearch` について、最小距離の検索結果が
+  `IsShapeShanten` と一致することを証明した。
+- 制約付きブロック探索の完成状態から、対応するターゲット距離が
+  `validMentsuHandTargetDistances` に含まれることを証明した
+  (`validMentsuHandTargetDistance_mem_of_constrainedBlockSearch`)。
+- 非 `skip` の面子・搭子・雀頭選択ごとに、`mentsuHandTileOrder` 上で
+  選択を処理できる代表牌が存在することを証明した
+  (`exists_tile_mem_mentsuHandTileOrder_of_choice`)。
+- 代表牌を `before ++ tile :: after` というタイル順の分割に変換する補題を追加した
+  (`exists_mentsuHandTileOrder_split_of_choice`)。
+- 分解の接頭辞と探索状態の `used` が一致する場合、次の選択が手牌カウント内に収まり、
+  完成後のコピー制限も維持する補題を追加した
+  (`nextChoice_count_le_hand`,
+  `nextChoice_completion_count_le_four`)。
+- 牌カウント以外の `melds`・`taatsu`・`pair` 条件を組み合わせて、
+  `ValidMentsuHandChoice` を構成する補題を追加した
+  (`valid_next_choice_of_prefix`)。
+- 選択列の `meld`・`taatsu` の個数を定義し、選択列を適用した後の探索状態の
+  `melds`・`taatsu` カウンタと一致することを証明した
+  (`AppliesMentsuHandChoices.melds_eq`,
+  `AppliesMentsuHandChoices.taatsu_eq`)。
+- 雀頭選択を適用した状態の `pair` が選択した牌になることを、
+  `applyMentsuHandChoice_pair_eq_some` として切り出した。
+- 既に雀頭がある状態では、雀頭以外の妥当な選択を適用しても `pair` が保持されることを、
+  `applyMentsuHandChoice_pair_eq_of_not_pair` として証明した。
+- 分解の `blockChoices` に含まれる面子・搭子選択数が、それぞれ元の `melds`・
+  `taatsus` のリスト長と一致することを証明した
+  (`blockChoices_meldCount`, `blockChoices_taatsuCount`)。
+- `blockChoices` の面子・搭子部分に含まれる選択は、必ず雀頭選択ではないことを
+  証明した (`blockChoices_tail_not_pair`)。
+- 分解選択列の接頭辞に対して、次の選択後も面子数・搭子数が4以下であることを
+  `blocks` 条件から導出する補題を追加した
+  (`nextChoice_melds_le_four`, `nextChoice_taatsu_le_four`)。
+- `used`・`melds`・`taatsu` の各接頭辞カウンタ一致と雀頭条件をまとめて受け取り、
+  `ValidMentsuHandChoice` を構成する補題を追加した
+  (`valid_next_choice_of_count_prefix`)。
+- 非空の選択接頭辞では次の選択が雀頭でないことを、`blockChoices` の構造から導出し、
+  空接頭辞での雀頭なし条件と合わせて妥当な選択を自動構成する補題を追加した
+  (`nextChoice_not_pair_of_nonempty_prefix`,
+  `valid_next_choice_of_count_prefix_of_pair`)。
+- 初期探索状態から選択列を適用した場合の `used`・`melds`・`taatsu` の一致を、
+  初期値を消去した簡約形として公開した
+  (`used_eq_from_initial`, `melds_eq_from_initial`,
+  `taatsu_eq_from_initial`)。
+- 上記3つの状態不変条件をまとめる `MentsuHandChoiceStateMatches` と、
+  初期状態からの選択列がこれを満たすことを示す
+  `AppliesMentsuHandChoices.state_matches_from_initial` を追加した。
+- 1回の妥当な選択遷移が、選択列を1要素延長した
+  `MentsuHandChoiceStateMatches` を保つことを証明した
+  (`applyMentsuHandChoice.state_matches_cons`)。
+- `skip` 遷移では `used`・`pair`・`melds`・`taatsu` がすべて保持されることを
+  証明した (`applyMentsuHandChoice_skip_fields`)。
+- `skip` 遷移が分解選択列を延長せずに
+  `MentsuHandChoiceStateMatches` を保持することを証明した
+  (`applyMentsuHandChoice.skip_state_matches`)。
+- 制約付き到達済み状態から `skip` 選択の妥当性を構成し、その後も
+  `MentsuHandChoiceStateMatches` を保持する補題を追加した
+  (`exists_skip_state_matches_of_reachable`)。
+- 状態に選択を適用した結果を、分解接頭辞の向きに合わせた
+  `choices ++ [choice]` 形式で表す補題を追加した
+  (`applyMentsuHandChoice.state_matches_append_single`)。
+- パッケージ化した `MentsuHandChoiceStateMatches` と雀頭条件から、
+  次の選択の `ValidMentsuHandChoice` を直接構成する補題を追加した
+  (`valid_next_choice_of_state_matches`)。
+- 分解接頭辞を左から右へ拡張する前向き選択列関係
+  `AppliesMentsuHandChoicesForward` と、初期状態からの状態不変条件補題
+  `AppliesMentsuHandChoicesForward.state_matches_from_initial` を追加した。
+- コピー制限を各遷移に保持する
+  `AppliesMentsuHandChoicesForwardWithCopyLimit` を追加した。
+- この関係から、選択列の長さを燃料とする
+  `reachableWithinWithCopyLimit` を導出する帰納補題を完成させた
+  (`reachableWithinWithCopyLimit_of_forward_choice_path`)。
+- コピー制限付き前向き選択列でも、初期状態から
+  `MentsuHandChoiceStateMatches` が成立することを証明した
+  (`AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_from_initial`)。
+- 選択列の搭子部分を抽出する `mentsuHandChoiceTaatsus` と、選択列の末尾追加に
+  対応する `mentsuHandChoiceTaatsus_append` を追加した。
+- 搭子列を選択へ写像した場合に、搭子抽出が元の搭子列を復元する
+  `mentsuHandChoiceTaatsus_map_taatsu` を追加した。
+- 搭子列の部分列に対する補完牌 Multiset の個数単調性
+  (`taatsuCompletionTiles_count_le_of_sublist`) を追加した。
+- 分解の接頭辞の牌数上限と、探索状態の搭子履歴が分解の搭子列の部分列であることから、
+  `CompletionRespectsCopyLimit` を構成する
+  (`MentsuHandBlockDecomposition.completion_respects_of_prefix`) 補題を追加した。
+- 選択列の搭子抽出列がブロック分解の搭子列の部分列になることを証明した
+  (`prefix_taatsus_sublist`)。
+- コピー制限付き前向き選択列と分解接頭辞から、
+  `CompletionRespectsCopyLimit` を構成する
+  (`AppliesMentsuHandChoicesForwardWithCopyLimit.completion_respects_from_prefix`)
+  補題を追加した。
+- ブロック分解の選択列に `skip` が含まれないことを示す
+  (`MentsuHandBlockDecomposition.blockChoices_ne_skip`) 補題を追加した。
+- タイルを `skip` しながら、選択列に対する
+  `MentsuHandChoiceStateMatches` を保持して到達性を延長する
+  (`reachableOnTilesFromWithCopyLimit_skips_state_matches`) 補題を追加した。
+- `skip` 列が探索状態の `pair` を変更しないことを追跡する
+  (`reachableOnTilesFromWithCopyLimit_skips_pair`) 補題を追加した。
+- `skip` 列について、状態不変条件と `pair` 保存を同じ最終状態に対して返す
+  (`reachableOnTilesFromWithCopyLimit_skips_state_matches_pair`) 補題を追加した。
+- 代表牌で1選択を適用した後、残りのタイル列を `skip` で進めても、
+  選択列の状態不変条件を保持する
+  (`reachableOnTilesFromWithCopyLimit_choice_then_skips_state_matches`) 補題を追加した。
+- 前方 `skip`・代表牌選択・後方 `skip` を結合し、状態不変条件付きでタイル順到達性を
+  構成する `reachableOnTilesFromWithCopyLimit_insert_choice_state_matches` を追加した。
+- `skip` 遷移で `taatsuHistory.reverse` が不変であることを証明し
+  (`applyMentsuHandChoice.skip_taatsuHistory_reverse`)、
+  タイル列全体の `skip` に対して履歴対応を保持する
+  (`reachableOnTilesFromWithCopyLimit_skips_taatsuHistory`) 補題を追加した。
+- `skip` 列について、状態不変条件・`pair` 保存・`taatsuHistory` 対応を同じ最終状態へ
+  統合する `reachableOnTilesFromWithCopyLimit_skips_invariants` を追加した。
+- 分解接頭辞の妥当性、搭子履歴、コピー制限を統合し、代表牌の前後の `skip` と選択を
+  結合する `MentsuHandBlockDecomposition.insert_choice_from_prefix` を追加した。
+- `skip` 列について、状態不変条件・`pair`・`taatsuHistory` を同一の最終状態へ統合する
+  `reachableOnTilesFromWithCopyLimit_skips_invariants` を実装し、分解接頭辞からの
+  コピー制限付き選択挿入を実際に構成できる状態にした。
+- ブロック選択が探索候補に属し、かつ `skip` ではないことを一つにまとめた
+  `MentsuHandBlockDecomposition.blockChoices_mem_all_and_ne_skip` を追加した。
+- 分解ブロック選択から、探索候補所属・非 `skip`・代表牌を含む
+  `mentsuHandTileOrder` の分割を一括取得する
+  `exists_tile_order_split_of_blockChoice` を追加した。
+- 分解ブロック選択を指定するだけで上記の分割と状態不変条件付き挿入を呼び出せる
+  `MentsuHandBlockDecomposition.insert_blockChoice_from_prefix` を追加した。
+- 初期状態から分解の雀頭選択をタイル順探索へ挿入する基底補題
+  (`insert_pair_from_initial`) を追加した。
+- タイル列を一度だけ左から右へ走査し、各タイルで `skip` または高々一つの有効な選択を行う
+  `AppliesMentsuHandTileScan` を導入し、既存の
+  `reachableOnTilesFromWithCopyLimit` へ変換する
+  (`AppliesMentsuHandTileScan.to_reachable`) 補題を追加した。ただし、この関係は
+  同一牌種を共有する複数ブロックを表せないため、完全性の最終関係には採用しない。
+- 同一牌種で複数ブロックを連続適用する中間関係
+  `AppliesMentsuHandChoiceBatch` を追加した。これにより、牌種走査を進める前に
+  同一タイル位置で選択列を末尾追加できる形を用意した。今後はこの関係の状態不変量と、
+  バッチ走査を制約付き到達性へ接続する定理を実装する。
+- バッチ関係についても、選択列を末尾追加した後の
+  `MentsuHandChoiceStateMatches` を保持する
+  `AppliesMentsuHandChoiceBatch.state_matches_append` を証明した。
+- 同じバッチ内で複数選択を適用した場合にも、
+  `taatsuHistory.reverse` が選択列から抽出した搭子列へ対応する
+  `AppliesMentsuHandChoiceBatch.taatsuHistory_reverse_append` を証明した。
+- バッチ内の各選択が持つコピー制限を使い、バッチ全体を選択数分の
+  `reachableWithinWithCopyLimit` へ変換する
+  `reachableWithinWithCopyLimit_of_choice_batch` を追加した。
+- 牌種列の各位置でバッチを一度処理してから次の牌種へ進む
+  `AppliesMentsuHandTileBatchScan` を定義し、同関係の全体に対する
+  `MentsuHandChoiceStateMatches` の追跡
+  (`AppliesMentsuHandTileBatchScan.state_matches_append`) を証明した。
+- バッチ牌種走査全体で `taatsuHistory.reverse` を選択列へ対応付ける
+  `AppliesMentsuHandTileBatchScan.taatsuHistory_reverse_append` を証明した。
+- バッチ牌種走査を、選択列の長さを燃料とする制約付き到達性へ変換する
+  `reachableWithinWithCopyLimit_of_tile_batch_scan` を追加した。
+- 同一牌種位置で構成した2つのバッチを選択列の連結として結合する
+  `AppliesMentsuHandChoiceBatch.append` を追加した。
+- 前向きなコピー制限付き選択列について、すべての選択が同じ牌種を含むなら
+  `AppliesMentsuHandChoiceBatch.of_forward` により同一牌種バッチへ変換できることを証明した。
+- 牌種ごとのバッチ走査区間を、選択列を連結しながら結合する
+  `AppliesMentsuHandTileBatchScan.append` を追加した。
+- 1牌種のバッチを1要素の牌種走査区間へ埋め込む
+  `AppliesMentsuHandTileBatchScan.single` を追加した。
+- 初期状態からのバッチについて、状態不変量と搭子履歴対応を直接取り出す
+  `AppliesMentsuHandChoiceBatch.state_matches_from_initial`,
+  `AppliesMentsuHandChoiceBatch.taatsuHistory_reverse_from_initial` を追加した。
+- 選択列の部分列に対する面子数・搭子数カウンタの単調性
+  (`mentsuHandChoiceMeldCount_le_of_sublist`,
+  `mentsuHandChoiceTaatsuCount_le_of_sublist`) を証明した。
+- 分解の `blockChoices` に対する任意の部分列から、次の選択の牌数上限、
+  面子数・搭子数上限を導く補題
+  (`nextChoice_count_le_hand_of_sublist`,
+  `nextChoice_melds_le_four_of_sublist`,
+  `nextChoice_taatsu_le_four_of_sublist`) を追加し、
+  `valid_next_choice_of_sublist` で `ValidMentsuHandChoice` を構成できるようにした。
+- 一回走査関係の `skip`・`choose` 帰納に対して、選択列接頭辞と探索状態の
+  `MentsuHandChoiceStateMatches` を最後まで保持する
+  (`AppliesMentsuHandTileScan.state_matches_append`,
+  `AppliesMentsuHandTileScan.state_matches_from_initial`) 補題を追加した。
+- 任意の到達済み状態からタイル列全体を `skip` だけで一度走査し、
+  `AppliesMentsuHandTileScan`・状態不変条件・雀頭保存を同時に得る
+  (`AppliesMentsuHandTileScan.skips_state_matches`) 補題を追加した。
+- 代表牌を選択した直後に残りのタイル列を一度だけ `skip` 走査し、
+  `AppliesMentsuHandTileScan` と接頭辞状態不変条件を接続する
+  (`AppliesMentsuHandTileScan.choose_then_skips_state_matches`) 補題を追加した。
+- `skip` のみの走査と代表牌選択後の走査を連結し、任意の分解接頭辞から
+  代表牌を一度だけ選ぶ一回走査を構成する
+  (`AppliesMentsuHandTileScan.append_skips`,
+  `MentsuHandBlockDecomposition.insert_choice_scan_from_prefix`) 補題を追加した。
+- 分解の雀頭選択についても、初期状態から代表牌を選び残りを一回走査する
+  (`MentsuHandBlockDecomposition.insert_pair_scan_from_initial`) 基底補題を追加した。
+- 一回走査関係の前方区間と後方区間を、選択列を連結しながら結合する一般補題
+  (`AppliesMentsuHandTileScan.append`) を追加した。
+- 既に処理済みの一回走査区間へ、分解接頭辞の次のブロック選択を連結する
+  (`MentsuHandBlockDecomposition.append_choice_scan_from_prefix`) 補題を追加した。
+- タイル順に選択した結果、分解の選択列と順序が異なる場合に備え、
+  `List.Perm` による選択列の順序変更が `used`・面子数・搭子数の
+  `MentsuHandChoiceStateMatches` を保持する補題
+  (`mentsuHandChoiceStateMatches_of_perm`) を追加した。
+- 搭子の選択順序を並べ替えても補完牌の Multiset が変わらないことを
+  (`taatsuCompletionTiles_of_perm`) として証明し、タイル順走査でのコピー制限の
+  順序依存性を除去する基礎を追加した。
+- 搭子履歴が順序変更された場合でも、既存のコピー制限を新しい履歴へ移送する
+  (`completionRespectsCopyLimit_of_history_perm`) 補題を追加した。
+- 一回走査関係の `skip`・`choose` 列全体について、搭子履歴の逆順を走査前の
+  履歴と選択列の連結へ対応付ける
+  (`AppliesMentsuHandTileScan.taatsuHistory_reverse_append`) 補題を追加した。
+- タイル順に選択された列が分解列の接頭辞でなくても、`List.Sublist` による
+  使用牌数と搭子履歴の包含からコピー制限を導く
+  (`mentsuHandChoiceTiles_count_le_of_sublist`,
+  `MentsuHandBlockDecomposition.completion_respects_of_sublist`) 補題を追加した。
+- コピー制限付き前向き選択列の `taatsuHistory.reverse` が、選択列から抽出した
+  搭子列と一致することを証明した
+  (`AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_from_initial`)。
+- 既存の制約付き到達状態に、妥当性とコピー制限を満たす選択を1つ追加して
+  `reachableWithinWithCopyLimit` を得る補題を追加した
+  (`reachableWithinWithCopyLimit_append_choice`)。
+- 選択列の搭子抽出列が部分列関係を保つ
+  (`mentsuHandChoiceTaatsus_sublist_of_sublist`) ことを証明した。
+- 初期状態から同一牌種のバッチを適用した選択列が `blockChoices` の部分列なら、
+  状態不変量と搭子履歴の部分列関係からコピー制限を導出する
+  (`MentsuHandBlockDecomposition.completion_respects_of_choice_batch`) 補題を追加した。
+  これにより、バッチ走査の各区間でコピー制限を検証する基盤ができた。
+- さらに、既に処理済みの選択接頭辞を持つ状態へバッチを追加する一般形
+  (`MentsuHandBlockDecomposition.completion_respects_of_choice_batch_append`) を追加した。
+  これにより、牌種バッチを連結する帰納構成でも、連結後の選択列全体に対する
+  コピー制限を直接供給できる。
+- 同じ接続を牌種バッチ走査全体へ拡張する
+  (`MentsuHandBlockDecomposition.completion_respects_of_tile_batch_scan_append`)
+  補題を追加した。走査の状態不変量と搭子履歴対応を利用し、走査後の選択列が
+  `blockChoices` の部分列である限り、走査後状態のコピー制限を得られる。
+- 選択列の順序を牌種走査順に並べ替えるための基礎として、
+  `List.Perm` に対する使用牌 Multiset の不変性
+  (`mentsuHandChoiceTiles_of_perm`) を公開補題として追加した。
+- 使用牌 Multiset と搭子履歴の両方について `List.Perm` 不変性を組み合わせ、
+  牌種順に並べ替えた選択列からコピー制限を導出する
+  (`MentsuHandBlockDecomposition.completion_respects_of_perm`) 補題を追加した。
+- 並べ替え後の状態不変量を構成するため、選択列の面子数・搭子数カウンタも
+  `List.Perm` で不変であることを
+  (`mentsuHandChoiceMeldCount_of_perm`,
+   `mentsuHandChoiceTaatsuCount_of_perm`) として公開した。
+- 既存の `mentsuHandChoiceStateMatches_of_perm` を上記の公開補題から構成する形へ
+ 整理し、牌種順への並べ替え後も状態一致を直接再利用できるようにした。
+- 各選択へ代表牌を割り当てる
+ `mentsuHandChoiceRepresentative` を定義し、`skip` 以外の代表牌が必ず
+ `choiceTiles` に含まれることを
+ (`mentsuHandChoiceRepresentative_mem`) として証明した。これは選択列を
+ 牌種ごとに分割する際の重複割当を避けるために用いる。
+- 指定した代表牌を持つ選択だけを抽出する
+ `mentsuHandChoicesForTile` と、その抽出列が元の選択列の部分列であることを
+ (`mentsuHandChoicesForTile_sublist`) として追加した。
+- 抽出列に含まれるすべての選択が指定牌種を代表牌として持つことを
+ (`mentsuHandChoicesForTile_representative`) として証明した。これにより、
+ 抽出列全体を同一牌種の `AppliesMentsuHandChoiceBatch` へ変換する前提が揃った。
+- 代表牌抽出列上のコピー制限付き前向き選択列を、同一牌種のバッチへ変換する
+ (`AppliesMentsuHandChoiceBatch.of_forward_for_representative_tile`) ラッパーを追加した。
+- 代表牌による抽出列の各要素が指定牌種を持つことを利用し、抽出列上の前向き
+ 選択列を同一牌種バッチへ変換する前提を明示する補題を追加した。
+- コピー制限付き前向き選択列を選択列の連結に沿って結合する
+ (`AppliesMentsuHandChoicesForwardWithCopyLimit.append`) 補題を追加した。
+ これにより、牌種ごとに構成した前向き経路を全体の経路へ連結できる。
+- コピー制限付き前向き経路について、処理済み接頭辞からの状態一致と搭子履歴対応を
+ 連結後の選択列へ伝播する
+ (`AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_append`,
+  `AppliesMentsuHandChoicesForwardWithCopyLimit.taatsuHistory_reverse_append`)
+ 補題を追加した。
+- 初期状態から構成した代表牌グループの前向き経路が、そのグループの
+ `blockChoices` 部分列性を満たすならコピー制限を満たすことを
+ (`MentsuHandBlockDecomposition.completion_respects_of_forward_group`)
+ として接続した。
+- `pre ++ choice :: suffix` の部分列性から `pre ++ [choice]` を抽出する
+ (`list_sublist_append_single_of_sublist`) 補題と、それを利用して次の選択の
+ `ValidMentsuHandChoice` を構成する
+ (`MentsuHandBlockDecomposition.valid_next_choice_of_sublist_append`) 補題を追加した。
+- 部分列・状態一致・搭子履歴対応・非雀頭条件を受け取り、選択列全体を
+ `AppliesMentsuHandChoicesForwardWithCopyLimit` として構成する
+ (`MentsuHandBlockDecomposition.forward_of_sublist`) 補題を追加した。
+ 各選択後のコピー制限も分解の部分列補題から自動的に供給される。
+- `forward_of_sublist` の結果に代表牌条件を適用し、代表牌抽出列を直接
+ `AppliesMentsuHandChoiceBatch` へ変換する
+ (`MentsuHandBlockDecomposition.batch_of_representative_group`) 補題を追加した。
+
+関連する主な補題:
+
+- `complete_mentsuHand_of_constrainedBlockSearch`
+- `exists_isShapeShanten_mentsuHand_of_constrainedBlockSearch`
+- `exists_isShapeShanten_mentsuHand_of_constrainedBlockSearchOnTileOrder`
+
+### レビュー後の軌道修正
+
+2026-11-15 のレビューを受け、局所補題の追加を続ける前に、次の境界を明示した。
+
+- 牌種順に並べ替えた選択列は、元の `blockChoices` の `List.Sublist` とは限らない。
+  `List.Perm` と走査途中の重複度付き状態を別に追跡する必要がある。
+- `AppliesMentsuHandTileScan` は各牌種で一選択しか処理できず、同じ牌種を共有する
+  複数ブロックを表現できない。`AppliesMentsuHandTileBatchScan` を正式な中間関係と
+  して扱い、旧探索との単純な同値は目標から外した。
+- `MentsuHandBlockDecomposition` は雀頭・4ブロック・完成後4枚制限を既に満たす
+  分解だけを表現する。雀頭なし、孤立牌、ブロック不足を含む一般の13枚手を
+  この構造の完全性だけでカバーすることはできない。
+- `forward_of_sublist` と `batch_of_representative_group` は全選択を非雀頭とする
+  条件を要求するため、雀頭を含む牌種グループへそのまま適用できない。
+
+今回の実装では、`MentsuHandChoiceSubmultiset` を導入した。これは選択列を
+`Multiset` の順序で比較し、`List.Sublist` と異なり牌種順の再グループ化を
+許しつつ、同一選択の重複度を保持する。反射・推移・順列不変性・連結・
+部分列からの変換、および代表牌グループへの適用を証明済みである。
+さらに、代表牌に一致するグループと一致しない残りを分割する
+`mentsuHandChoicesForTile_partition` を追加し、グループを取り出しても
+選択列全体の順列を失わないことを証明した。牌種列に対してこの分割を
+反復する `mentsuHandChoicesGroupedByTiles_perm_append` も追加し、代表牌が
+与えられた牌種列に含まれる選択列について、グループ列と残余列の順列性を
+証明した。さらに、この順列性から使用牌・面子数・搭子数をまとめた
+`MentsuHandChoiceStateMatches` を、グループ列と残余列へ移送する補題を追加した。
+全選択の代表牌が対象牌種列に含まれる場合の残余列の空性と、
+グループ列全体の `List.Perm` を証明した。各グループを実際のバッチ走査へ
+変換するため、`mentsuHandChoicesForTile` 上の前向き経路を
+`AppliesMentsuHandChoiceBatch` へ変換する補題を追加した。複数グループを
+状態をつないだ `AppliesMentsuHandGroupedTileBatches` を追加し、
+それを `AppliesMentsuHandTileBatchScan` へ変換する定理を証明した。
+さらに各グループの前向き経路をこの中間関係の1ステップへ注入する補題を追加した。
+この中間関係を実際に全牌種について構成するための前向き経路と、
+雀頭・コピー制限を含む完全性接続は未完了である。
+ただし、これだけでは牌種順バッチ走査の完全性や雀頭状態の追跡はまだ解決しない。
+
+### 次に必要な証明（レビュー後）
+
+1. **条件付きバッチ走査の出口を再設計する**
+   - 以下の旧項目は、牌種順の `List.Perm` と途中状態の設計が未完了であるため、
+     一般完全性の完了条件としては扱わない。
+   - 現在の分解構造についての定理を完成させる場合も、「全13枚手の完全性」ではなく
+     「与えられた分解の構成」として報告する。
+2. **制約付きブロック探索の完全性 (`searchResult_complete`)**
+   - `MentsuHandBlockDecomposition` の任意の有効な分解が、
+     同一牌種で複数選択を許すバッチ走査のいずれかの枝で生成されること。
+   - 各ブロックの代表牌を `mentsuHandTileOrder` に挿入する際の、接頭辞状態の
+     `ValidMentsuHandChoice` のうち、牌カウントと完成後コピー制限は完了。
+   - 呼び出し側から探索状態の面子数・搭子数・雀頭状態を供給して妥当な選択を構成する補題は完了。
+   - バッチ走査の状態不変条件を、分解選択列の接頭辞から自動的に構成することが残っている。
+   - その後、既存の一選択走査・`reachableOnTilesFromWithCopyLimit` と同値な探索関係へ
+     接続できるかを確認する（単純な同値が成立しない場合は探索定義自体を更新する）。
+2. **探索結果とターゲットDPの接続**
+   - 制約付きブロック探索からターゲット距離集合への健全性接続は完了。
+   - 残りは、タイル順探索の完全性を示して逆方向の包含を得ること。
+3. **13枚手に対する一様な到達上限**
+   - 任意の有効な13枚手について、面子手の完成形へ7手以内（固定面子を含む場合は
+     状態に応じた上限）で到達できることを、完全性から構成すること。
+4. **総合シャンテン値への接続**
+   - 面子手・七対子・国士無双の値を、適用可能性に従って最小化する証明を完成させること。
+
+## 直近の作業履歴
+
+| 日付 | 変更 | 意味 |
+|---|---|---|
+| 2026-11-15 | `MentsuHandChoiceSubmultiset`, `mentsuHandChoicesForTile_partition`, `mentsuHandChoicesGroupedByTiles_perm_append`, `mentsuHandChoicesGroupedByTiles_perm`, `mentsuHandChoiceStateMatches_of_groupedByTiles`, `AppliesMentsuHandChoiceBatch.of_forward_for_tile_filter`, `AppliesMentsuHandGroupedTileBatches.step_of_forward`, `AppliesMentsuHandGroupedTileBatches.to_scan` | 牌種順の再グループ化に向け、順序を固定せず重複度を保持する選択列包含を導入。代表牌グループの反復分割、残余列の空性、グループ列の順列性、状態不変量の移送、牌種フィルタからバッチ、前向き経路から複数バッチ、複数バッチからタイル走査への変換を証明。 |
+| 2026-11-15 | レビュー後の軌道修正 | 牌種順バッチ走査を正式な中間関係として扱い、条件付き分解の健全性と全13枚手の一般完全性を分離。順序依存・雀頭グループ・一般探索の未完了範囲を明記。 |
+| 2026-11-15 | `af52253` `proof: derive completion reachability from block decomposition` | ブロック分解から面子手完成形への到達性を導出する補題を追加。 |
+| 2026-11-15 | `acb37c9` `Reduce Lean build memory with focused mathlib imports` | Leanビルドのメモリ使用量を抑えるため import を整理。 |
+| 2026-11-14 | `32b1b36` `proof: connect constrained block search to shanten` | 制約付きブロック探索を面子手シャンテン仕様へ接続。 |
+| 2026-11-14 | `8144828` `proof: expose mentsu search correctness for thirteen-tile hands` | 13枚手に対する面子手探索の正当性補題を公開。 |
+| 2026-11-14 | `4e5e5d8` `Connect recursive meld cost DP to shanten search` | 再帰的な面子コストDPとシャンテン探索を接続。 |
+| 2026-11-15 | `MentsuHand.lean` の既存補題を確認 | 全ターゲット列挙DPの最小値と `IsShapeShanten` の一致が既に証明済みであることを進捗へ反映。 |
+| 2026-11-15 | `validMentsuHandTargetDistance_mem_of_constrainedBlockSearch` | 制約付きブロック探索の結果を、仕様一致済みのターゲット距離集合へ接続。 |
+| 2026-11-15 | `exists_tile_mem_mentsuHandTileOrder_of_choice` | 各ブロック選択をタイル順探索へ挿入するための代表牌の存在を証明。 |
+| 2026-11-15 | `valid_next_choice_of_prefix` | 接頭辞条件から `ValidMentsuHandChoice` を構成。 |
+| 2026-11-15 | `AppliesMentsuHandChoices.melds_eq`, `AppliesMentsuHandChoices.taatsu_eq` | 選択列の面子・搭子個数と探索状態カウンタを対応付け。 |
+| 2026-11-15 | `applyMentsuHandChoice_pair_eq_some` | 雀頭選択後の `pair` 状態を確定する遷移補題を追加。 |
+| 2026-11-15 | `applyMentsuHandChoice_pair_eq_of_not_pair` | 雀頭以外の選択後に既存の `pair` が保持されることを証明。 |
+| 2026-11-15 | `blockChoices_meldCount`, `blockChoices_taatsuCount` | ブロック選択列の面子・搭子数を分解リスト長へ対応付け。 |
+| 2026-11-15 | `blockChoices_tail_not_pair` | 面子・搭子部分に雀頭選択が含まれないことを証明。 |
+| 2026-11-15 | `nextChoice_melds_le_four`, `nextChoice_taatsu_le_four` | 接頭辞から次選択後の面子・搭子上限を導出。 |
+| 2026-11-15 | `valid_next_choice_of_count_prefix` | 接頭辞カウンタ条件から次の選択の妥当性を一括構成。 |
+| 2026-11-15 | `nextChoice_not_pair_of_nonempty_prefix`, `valid_next_choice_of_count_prefix_of_pair` | 接頭辞の空・非空から雀頭条件を導出し、妥当な選択を構成。 |
+| 2026-11-15 | `used_eq_from_initial`, `melds_eq_from_initial`, `taatsu_eq_from_initial` | 初期状態からの選択列に対する状態不変条件の簡約形を追加。 |
+| 2026-11-15 | `MentsuHandChoiceStateMatches`, `state_matches_from_initial` | 状態不変条件を一つの述語へパッケージ化。 |
+| 2026-11-15 | `applyMentsuHandChoice.state_matches_cons` | 1回の選択遷移に対する状態不変条件の保存を証明。 |
+| 2026-11-15 | `applyMentsuHandChoice_skip_fields` | タイル順探索の `skip` 遷移がブロック状態を保持することを証明。 |
+| 2026-11-15 | `applyMentsuHandChoice.skip_state_matches` | `skip` 後も同じ分解接頭辞との状態対応を保持することを証明。 |
+| 2026-11-15 | `exists_skip_state_matches_of_reachable` | 到達済み状態での `skip` 妥当性と状態不変条件を接続。 |
+| 2026-11-15 | `applyMentsuHandChoice.state_matches_append_single` | 状態不変条件を接頭辞の末尾追加形式へ変換。 |
+| 2026-11-15 | `valid_next_choice_of_state_matches` | パッケージ化した状態不変条件を選択妥当性へ接続。 |
+| 2026-11-15 | `AppliesMentsuHandChoicesForward`, `state_matches_from_initial` | 接頭辞を左から右へ処理する前向き選択列関係を追加。 |
+| 2026-11-15 | `AppliesMentsuHandChoicesForwardWithCopyLimit` | コピー制限付きの前向き選択列関係を追加。 |
+| 2026-11-15 | `reachableWithinWithCopyLimit_of_forward_choice_path` | コピー制限付き前向き選択列を制約付き到達性へ変換。 |
+| 2026-11-15 | `AppliesMentsuHandChoicesForwardWithCopyLimit.state_matches_from_initial` | コピー制限付き選択列の状態不変条件を証明。 |
+| 2026-11-15 | `reachableWithinWithCopyLimit_append_choice` | 妥当な選択を制約付き到達性へ接続。 |
+| 2026-11-15 | `mentsuHandChoiceTaatsus`, `taatsuHistory_reverse_from_initial` | 選択列の搭子列と探索状態の `taatsuHistory` を対応付け。 |
+| 2026-11-15 | `prefix_taatsus_sublist`, `completion_respects_from_prefix` | 分解接頭辞からコピー制限付き前向き選択列の妥当性を構成。 |
+| 2026-11-15 | `blockChoices_ne_skip` | タイル順探索への挿入対象がすべて非 `skip` であることを証明。 |
+| 2026-11-15 | `skips_state_matches` | `skip` 列を状態不変条件付きのタイル順到達性へ拡張。 |
+| 2026-11-15 | `skips_pair` | `skip` 列で雀頭状態が保持されることを証明。 |
+| 2026-11-15 | `choice_then_skips_state_matches` | 選択適用後の残りタイル列でも状態不変条件を保持。 |
+| 2026-11-15 | `insert_choice_state_matches` | 前後の `skip` と代表牌選択を結合してタイル順到達性を構成。 |
+| 2026-11-15 | `skips_taatsuHistory` | `skip` 列で搭子履歴対応を保持。 |
+| 2026-11-15 | `skips_invariants`, `insert_choice_from_prefix` | 3つの不変条件を統合し、分解接頭辞から代表牌選択を挿入。 |
+| 2026-11-15 | `AppliesMentsuHandTileScan.state_matches_append`, `state_matches_from_initial` | 一回走査関係の依存帰納を修正し、状態不変条件を初期状態から最終状態まで接続。 |
+| 2026-11-15 | `AppliesMentsuHandTileScan.skips_state_matches` | 到達済み状態からの全 `skip` 走査を一回走査関係へ持ち上げ、状態不変条件と雀頭保存を接続。 |
+| 2026-11-15 | `AppliesMentsuHandTileScan.choose_then_skips_state_matches` | 代表牌選択と後続 `skip` 走査を結合し、一回走査の選択分岐を構成。 |
+| 2026-11-15 | `AppliesMentsuHandTileScan.append_skips`, `insert_choice_scan_from_prefix` | 分解接頭辞の代表牌選択を前後の `skip` と連結し、一回走査へ持ち上げ。 |
+| 2026-11-15 | `insert_blockChoice_scan_from_prefix`, `insert_pair_scan_from_initial` | 分解ブロック選択の一回走査版と、雀頭選択の初期状態基底を追加。 |
+| 2026-11-15 | `AppliesMentsuHandTileScan.append` | 一回走査区間を一般化して連結し、選択列も連結する補題を追加。 |
+| 2026-11-15 | `append_choice_scan_from_prefix` | 処理済み選択列の走査へ、次の分解ブロック選択を連結する補題を追加。 |
+| 2026-11-15 | `mentsuHandChoiceStateMatches_of_perm` | 選択列の順序変更に対する状態カウンタ不変性を追加。 |
+| 2026-11-15 | `taatsuCompletionTiles_of_perm` | 搭子列の順序変更に対する補完牌 Multiset の不変性を追加。 |
+| 2026-11-15 | `completionRespectsCopyLimit_of_history_perm` | 搭子履歴の順序変更後もコピー制限を保持する補題を追加。 |
+| 2026-11-15 | `mentsuHandChoiceTaatsus_sublist_of_sublist`, `completion_respects_of_choice_batch` | 選択列部分列から搭子履歴部分列を導き、初期状態からのバッチ適用にコピー制限を接続。 |
+| 2026-11-15 | `completion_respects_of_choice_batch_append` | 処理済み接頭辞を持つ状態へのバッチ追加にコピー制限を接続。 |
+| 2026-11-15 | `completion_respects_of_tile_batch_scan_append` | 牌種バッチ走査区間全体へコピー制限の接続を拡張。 |
+| 2026-11-15 | `mentsuHandChoiceTiles_of_perm` | 選択列の順序変更に対する使用牌 Multiset の不変性を追加。 |
+| 2026-11-15 | `completion_respects_of_perm` | 選択列の並べ替え後も使用牌・搭子補完のコピー制限を保持。 |
+| 2026-11-15 | `mentsuHandChoiceMeldCount_of_perm`, `mentsuHandChoiceTaatsuCount_of_perm` | 並べ替え後の状態カウンタ不変性を追加。 |
+| 2026-11-15 | `mentsuHandChoiceStateMatches_of_perm` の整理 | 公開した順序不変性補題を状態一致の証明へ接続。 |
+| 2026-11-15 | `mentsuHandChoiceRepresentative`, `mentsuHandChoiceRepresentative_mem` | 各非 `skip` 選択の代表牌割当と、選択牌への所属を追加。 |
+| 2026-11-15 | `mentsuHandChoicesForTile`, `mentsuHandChoicesForTile_sublist` | 代表牌による牌種別選択列の抽出と部分列性を追加。 |
+| 2026-11-15 | `mentsuHandChoicesForTile_representative` | 牌種別抽出列の各選択が指定牌種を代表することを証明。 |
+| 2026-11-15 | `of_forward_for_representative_tile` | 代表牌が一定の選択列を同一牌種バッチへ変換。 |
+| 2026-11-15 | `AppliesMentsuHandChoicesForwardWithCopyLimit.append` | 牌種別のコピー制限付き前向き経路を連結。 |
+| 2026-11-15 | `ForwardWithCopyLimit.state_matches_append`, `ForwardWithCopyLimit.taatsuHistory_reverse_append` | 前向き経路の連結後に状態・搭子履歴対応を伝播。 |
+| 2026-11-15 | `completion_respects_of_forward_group` | 代表牌グループの前向き経路を分解のコピー制限へ接続。 |
+| 2026-11-15 | `list_sublist_append_single_of_sublist`, `valid_next_choice_of_sublist_append` | 選択列部分列から次選択の妥当性を構成。 |
+| 2026-11-15 | `MentsuHandBlockDecomposition.forward_of_sublist` | 部分列選択列をコピー制限付き前向き経路へ構成。 |
+| 2026-11-15 | `MentsuHandBlockDecomposition.batch_of_representative_group` | 代表牌グループを前向き経路経由で同一牌種バッチへ変換。 |
+| 2026-11-15 | `AppliesMentsuHandTileScan.taatsuHistory_reverse_append` | 一回走査全体の搭子履歴と選択列の対応を証明。 |
+| 2026-11-15 | `completion_respects_of_sublist` | 分解接頭辞に限定せず、選択列の部分列からコピー制限を導出。 |
+| 2026-11-15 | `exists_mentsuHandTileOrder_split_of_choice` | 代表牌をタイル順の前後リスト分割へ変換。 |
+| 2026-11-15 | `nextChoice_count_le_hand`, `nextChoice_completion_count_le_four` | 接頭辞状態から次の選択の牌カウントとコピー制限を導出。 |
+| 2026-11-15 | `b5e3bf1`, `622fd10`, `d6547eb`, `5ea7f63`, `0638aad`, `4c4bc5a`, `7ac5ac4`, `15bfbf3`, `a1768b9`, `3d36f53`, `88a565b`, `0130af5` / バッチ走査・部分列不変量 | 同一牌種を共有する複数ブロックをバッチ処理する中間関係、状態不変量、搭子履歴対応、制約付き到達性、牌種走査全体の状態追跡、バッチ連結、前向き選択列からのバッチ構成、走査区間連結、単一牌種区間の基底、初期状態ラッパー、部分列カウンタ単調性、部分列からの次選択妥当性を証明。既存の一選択走査だけでは表せない分解を明示化。 |
+
+## 検証状況
+
+最終更新時点で次の検証が成功している。
+
+```text
+lake build Shanten
+Build completed successfully (880 jobs).
+```
+
+警告は残っているが、ビルドを失敗させるエラーはない。証明の意味論上の未完了項目は、
+ビルド成功とは別に、上記の「次に必要な証明」で管理する。
+
+## 更新ルール
+
+今後の作業では、少なくとも次をこの文書に反映する。
+
+1. 完了した補題または定義を「計画に対する進捗」と「面子手証明の現在地」に追加する。
+2. 未完了の最重要課題を「次に必要な証明」に残し、完了したら削除または完了済みに移す。
+3. 変更日、コミット、検証コマンドと結果を「直近の作業履歴」「検証状況」に記録する。
+4. モデル上の制約変更があった場合は、[SHANTEN_LEAN4_PLAN.md](./2026-11-15_SHANTEN_LEAN4_PLAN.md)
+   の計画とこの進捗台帳の両方を更新する。

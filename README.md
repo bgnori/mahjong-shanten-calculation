@@ -9,8 +9,10 @@ The Lean4-first verification and Go implementation plan is documented in
 [docs/SHANTEN_LEAN4_PLAN.md](docs/SHANTEN_LEAN4_PLAN.md).
 The current proof progress is tracked in
 [docs/SHANTEN_LEAN4_PROGRESS.md](docs/SHANTEN_LEAN4_PROGRESS.md).
-The planned Lean source decomposition is documented in
+The current Lean source layout is documented in
 [docs/SHANTEN_LEAN_STRUCTURE.md](docs/SHANTEN_LEAN_STRUCTURE.md).
+Superseded plans and detailed proof history are preserved in
+[docs/archive/](docs/archive/README.md); they are not current work instructions.
 Terminology shared by the Go contract, Mahjong model, and Lean proofs is documented
 in [docs/GLOSSARY.md](docs/GLOSSARY.md).
 Potentially misleading terminology and proposed wording changes are documented in
