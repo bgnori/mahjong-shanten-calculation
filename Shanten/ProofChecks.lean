@@ -1,0 +1,30 @@
+import Shanten.MentsuHand
+import Shanten.ThirteenOrphans
+import Shanten.Bounds
+import Mathlib.Util.AssertNoSorry
+
+/-!
+# Proof checks
+
+Reject transitive `sorryAx` dependencies in the main exit theorems.
+Existing `native_decide` dependencies are permitted.
+-/
+
+namespace Shanten
+
+assert_no_sorry HandStep.validCounts
+assert_no_sorry ReachesHand.validCounts
+assert_no_sorry ReachesCompletion.exists_reachesHand
+assert_no_sorry ReachesCompletion.exists_valid_completion
+assert_no_sorry exchangeHand_step
+assert_no_sorry reachesHand_targetHand_of_equal_sum
+assert_no_sorry reachesCompletion_of_one_more_target_tile
+assert_no_sorry generalMentsuHandMinimumSearch_eq_some_iff
+assert_no_sorry generalMentsuHandMinimumSearch_exists_unique
+assert_no_sorry generalMentsuHandMinimumSearch_optimal
+assert_no_sorry MentsuHandBlockDecomposition.exists_tileBatchScan_complete
+assert_no_sorry reaches_sevenPairs_completion
+assert_no_sorry overallShanten_le_six_of_thirteenTileHand
+assert_no_sorry thirteenOrphansShanten_maximum
+
+end Shanten

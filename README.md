@@ -112,6 +112,19 @@ go vet ./...
 These compile/check the contract only; numerical conformance tests belong to a
 future calculator or adapter implementation.
 
+[GitHub Actions](.github/workflows/checks.yml) runs these Go checks and `lake build`
+on every push and pull request, and supports manual runs. The Go job installs the
+version from `go.mod`; the Lean job uses `lean-toolchain` and the committed
+`lake-manifest.json`, without running `lake update`.
+
+The default Lean build imports [Shanten/ProofChecks.lean](Shanten/ProofChecks.lean).
+Its `assert_no_sorry` checks reject transitive `sorryAx` dependencies in the main
+exit theorems, including the shared validity proofs, general search correctness
+and totality, batch scans, seven-pairs bounds, and the thirteen-orphans maximum.
+Existing `native_decide` dependencies remain permitted; ordinary warnings are
+not treated as errors. Add new exit theorems to this check list when extending
+the proof surface.
+
 ## Development container
 
 Two Dev Container configurations are available; both are limited to 2 CPUs:

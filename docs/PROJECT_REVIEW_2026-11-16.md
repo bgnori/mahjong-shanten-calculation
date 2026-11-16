@@ -5,6 +5,7 @@
 **対象コミット:** `f3f49369dffb45c3ca04f89571471b2c122ee6cc`
 
 **対応状況（2026-11-16追記）:** R1は修正・保存定理・回帰検査を追加済み。
+R3は自動検証を追加。R4は利用者側で仕様を整理して返す方針のため **Pending** とする。
 以下の評価と反例の成立は対象コミット時点の記録であり、現在の遷移は5枚目を拒否する。
 
 **対象:** Go契約、Leanソース35ファイル、依存・開発環境設定、現行計画・台帳・関連文書。
@@ -148,7 +149,25 @@ Leanの回帰例は [Examples](../Shanten/MentsuHand/Examples.lean) に存在し
 
 **受入条件:** 変更時に自動実行され、壊れたimport・証明・Go契約と証明穴を検出できること。
 
+### R3対応内容（2026-11-16）
+
+- [GitHub Actions](../.github/workflows/checks.yml) で、push・pull request・手動実行時に
+  GoとLeanの独立ジョブを実行する。Goは `go.mod` のバージョンを明示的に導入し、
+  `go test ./...` / `go vet ./...` を実行する。開発コンテナは変更しない。
+- Leanは `lean-toolchain` と `lake-manifest.json` を使用し、`lake update` せずに
+  import対象のMathlibキャッシュを取得して `lake build` を実行する。
+- [ProofChecks.lean](../Shanten/ProofChecks.lean) を公開入口からimportし、
+  主要14宣言にMathlibの `assert_no_sorry` を適用する。
+  間接的な `sorryAx` 依存もビルド失敗にする。既存の `native_decide` 依存は許容し、
+  通常の警告は一律エラー化しない。
+- branch protection・必須チェック指定など、GitHub側の設定は今回の変更には含めない。
+- ローカルでGo 1.26.4の両検査、`lake build`（911 jobs）、`actionlint` v1.7.12の検証が成功。
+  一時的なLean入力によって間接的な `sorryAx` 依存が非ゼロ終了で拒否されることも確認した。
+  GitHubホスト上のワークフロー実行はpush後に確認する。
+
 ## R4：開発コンテナとGo要件が不一致
+
+**状態:** Pending。利用者側で仕様を整理して返す方針につき、今回のR3対応では変更しない。
 
 **根拠:** [go.mod](../go.mod#L3) は `go 1.26.4`。
 一方、[dev用Dockerfile](../.devcontainer/dev/Dockerfile#L1) と
@@ -227,7 +246,8 @@ Leanの回帰例は [Examples](../Shanten/MentsuHand/Examples.lean) に存在し
 ## 推奨する次の順序
 
 1. **対応済み:** R1の共有遷移の有効性を整理し、保存定理と反例の回帰検査を追加する。
-2. R3の自動検証とR4のGo環境整合を、小さな独立変更で整える。
+2. **R3対応済み／R4 Pending:** R3の自動検証を独立変更で整備。
+   R4のGo環境整合は利用者側からの仕様を待つ。
 3. R2の容量付きモデルを設計し、上記A/Bの差を受入例にする。
 4. 14枚相当・七対子／国士の一般計算・総合値・Go対応を、対象条件付きで順に接続する。
 5. 正しさの基準を維持したまま性能測定・枝刈り・メモ化へ進む。
