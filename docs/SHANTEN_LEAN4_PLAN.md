@@ -42,7 +42,7 @@ Leanで数学的仕様と計算可能な探索の一致を証明し、その仕�
 | 共通 | [ChoiceGrouping](../Shanten/MentsuHand/ChoiceGrouping.lean) | 代表牌による選択列の分類と重複度を保つ順列性。 |
 | 共通 | [State](../Shanten/MentsuHand/State.lean) | 遷移、履歴不変条件、到達関係、34牌種順。 |
 | 共通 | [Targets](../Shanten/MentsuHand/Targets.lean) | 完成目標と探索状態の対応。 |
-| 共通 | [Exchange](../Shanten/MentsuHand/Exchange.lean) | 不足枚数、交換操作、固定目標への到達。 |
+| 共通 | [Exchange](../Shanten/MentsuHand/Exchange.lean) | 共有の交換・到達補題の面子手完成形への特殊化。 |
 | 共通 | [Decomposition](../Shanten/MentsuHand/Decomposition.lean) | 雀頭＋4ブロック分解、選択列、完成後4枚制限。 |
 | 牌種順走査 | [Scan/Basic](../Shanten/MentsuHand/Scan/Basic.lean) | 枚数制限付き遷移とバッチ走査の関係。 |
 | 牌種順走査 | [Scan/Paths](../Shanten/MentsuHand/Scan/Paths.lean) | 前向き経路、不変条件、バッチとの接続。 |
@@ -66,6 +66,18 @@ Leanで数学的仕様と計算可能な探索の一致を証明し、その仕�
 旧 `GeneralMentsuHand.lean` は探索方式に合わせて `Search/BlockSearch.lean` へ移動した。
 直接importしていた場合は `Shanten.MentsuHand.Search.BlockSearch` または公開入口
 `Shanten.MentsuHand` に置き換える。`generalMentsuHand...` 等の公開名は互換性のため維持する。
+
+## 完了した目標：国士無双の最大シャンテン数13
+
+[ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) で、固定面子なしの有効な13枚手
+すべてに国士無双の仕様値が存在して13以下となることと、その上界を達成する手牌の
+存在を証明した。出口定理は `thirteenOrphansShanten_maximum`、
+値の存在は `thirteenOrphansShanten_exists`。
+
+既存の閉形式 `kokushiShanten` の算術的上界だけではなく、
+`IsShapeShanten` の最短到達距離を使う。任意の完成目標まで不足牌数だけの手順で到達し、
+中張牌だけの具体例では完成に必要な14枚すべてが不足することから最短距離14を示す。
+閉形式と仕様値の一般的な一致や14枚手への拡張は、この成果には含めない。
 
 ## 完了した中間目標：与えられた分解のバッチ走査
 

@@ -163,10 +163,15 @@ public definition and theorem names are unchanged.
 seven-pairs proofs. Its implementation is split under
 [Shanten/SevenPairs/](./Shanten/SevenPairs/) into basic targets, counting lemmas,
 completion, one-step exchange strategies, and reachability.
-Shape-independent deficits and exchanges shared with mentsu-hand proofs live in
+Shape-independent deficits, exchanges, and fixed-target reachability proofs live in
 [Shanten/Exchange.lean](./Shanten/Exchange.lean).
 Seven-pairs names now distinguish tenpai targets from completion counts and
 pair-preserving discards from other discards; see the
 [layout and rename map](./docs/SHANTEN_LEAN_STRUCTURE.md).
+
+[Shanten/ThirteenOrphans.lean](./Shanten/ThirteenOrphans.lean) proves that the
+maximum thirteen-orphans shanten number on valid concealed thirteen-tile hands is
+exactly 13, using the completion-distance specification. Every such hand has a
+finite value at most 13, and `kokushiWorstCase` attains 13.
 See the [module map](./docs/SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序)
 for responsibilities and a suggested reading order.

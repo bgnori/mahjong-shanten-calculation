@@ -2,7 +2,7 @@
 
 **文書更新:** 2026-11-16
 
-**実装の確認基準:** `e7f741a` を基点とする七対子証明のモジュール分割・改名（2026-11-16）
+**実装の確認基準:** 七対子証明のモジュール分割・改名に続く国士無双の最大値13の仕様上の証明（2026-11-16）
 
 この台帳には現在の成果と未解決条件だけを記録する。作業範囲は
 [現行計画](./SHANTEN_LEAN4_PLAN.md)、判断の根拠は
@@ -21,10 +21,12 @@
 | 与えられた分解のバッチ走査 | 完了 | `MentsuHandBlockDecomposition.exists_tileBatchScan_complete` が分解だけから34牌種順の走査と完了状態を構成する。レビューの東雀頭・12萬ターツ4組も具体例で検査済み。 |
 | 一般手牌のブロック探索 | 仕様一致・全域性は完了 | `ValidCounts hand` と `tileCount hand + 3 * hand.fixedMelds = 13` の下で、新しい `generalMentsuHandMinimumSearch` の結果の存在・一意性、探索の被覆性・最小値一致を証明済み。入力に分解は不要。 |
 | 総合値・上限 | 部分完了 | 定義・一意性・条件付き上限補題などはある。現在の狭い分解の列挙だけで全体完了とはしない。 |
+| 国士無双の最大値 | 有効13枚手で完了 | 仕様値の存在・上界13と、有効な中張牌のみの手牌が13を達成することを証明済み。閉形式との一般的一致・14枚手は対象外。 |
 | Go適合性 | 未着手 | Go計算器とLean仕様の値一致、共有fixtureは未実装。 |
 
-公開入口は [MentsuHand.lean](../Shanten/MentsuHand.lean) と
-[SevenPairs.lean](../Shanten/SevenPairs.lean)、
+公開入口は [MentsuHand.lean](../Shanten/MentsuHand.lean)、
+[SevenPairs.lean](../Shanten/SevenPairs.lean) と
+[ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean)、
 実装の配置と読む順序は[構成表](./SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序)を参照する。
 既存のターゲットDPの仕様一致は、新しいバッチ走査の成果とは別に数える。
 手牌消費付きブロック探索は
@@ -49,6 +51,24 @@
   整理した。[改名表](./SHANTEN_LEAN_STRUCTURE.md#改名) の変更以外は公開名を維持する。
   `e7f741a` の92宣言すべてについて、改名後の宣言・命題・証明本文が移動先と一致し、
   未移動・重複した宣言がないことを機械照合した。到達上限などの証明範囲は拡張していない。
+
+## 国士無双：最大シャンテン数13
+
+[ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) を公開入口からimportした。
+対象は `IsThirteenTileHand` を満たす固定面子なしの有効な13枚手。
+
+- `reaches_thirteenOrphans_completion`：完成形への14手以内の到達を構成する。
+- `thirteenOrphansShanten_exists`：すべての対象手牌で仕様値が存在して13以下になる。
+- `kokushiWorstCase_isThirteenTileHand`：既存の中張牌13枚の具体例が有効である。
+- `kokushiWorstCase_completion_distance_ge_fourteen`：この具体例からどの国士完成形へも
+  最低14手が必要である。不足牌数は1手につき最大1しか減らないことを使う。
+- `kokushiWorstCase_shapeShanten`：具体例の仕様値が `some 13` となる。
+- `thirteenOrphansShanten_maximum`：上界13とその達成をまとめた定理。
+
+面子手にあった汎用の交換・目標到達補題12宣言を共有の
+[Exchange.lean](../Shanten/Exchange.lean) へ移動し、完成形への到達と不足数の下界を
+形に依存しない形へ一般化した。既存の面子手補題の名前・型は維持した。
+`kokushiShanten` と仕様値の一般的一致、14枚手、Go実装は証明したとは扱わない。
 
 ## 一般手牌のブロック探索：完成した範囲
 
@@ -118,6 +138,15 @@
 旧計画の数値上限や実装順序を、そのまま現在の作業へ戻さない。
 
 ## 検証記録
+
+- 2026-11-16、国士無双の最大値13：
+  `lake build Shanten` 成功（909 jobs）。既存・移動済みコードの警告と
+  Mathlib import形式の警告は残る。
+  `lake env lean --stdin` で公開入口からの仕様値の存在・上界の利用、
+  具体例の `some 13`、13手では和了できないことを検査した。
+  最大値・値の存在・具体例の仕様値・共有の到達定理・不足数の下界の5定理に
+  `#print axioms` を実行し、依存は `propext`・`Classical.choice`・`Quot.sound` のみで、
+  `sorryAx` や `native_decide` の公理への依存がないことを確認した。
 
 - 2026-11-15、`f79ed59`：追補レビューで
   `lake env lean Shanten/MentsuHand.lean` 成功（約21.3秒、警告83件）。

@@ -12,10 +12,11 @@
 | [Shanten.lean](../Shanten.lean) | 主要モジュールをまとめる公開入口（直接importは下記参照）。 |
 | [Core.lean](../Shanten/Core.lean) | 牌・手牌・面子の基礎モデル、カウントや基本述語。 |
 | [Specification.lean](../Shanten/Specification.lean) | 形、完成形、到達関係、形シャンテンと総合値の宣言的仕様。 |
-| [Exchange.lean](../Shanten/Exchange.lean) | 形に依存しない不足枚数、交換操作、固定目標への交換、交換列とその連結。 |
+| [Exchange.lean](../Shanten/Exchange.lean) | 形に依存しない不足枚数、交換操作、固定目標への到達、到達距離の下界。 |
 | [SevenPairs.lean](../Shanten/SevenPairs.lean) | 七対子の公開import入口。実装は下表のモジュールに分割。 |
+| [ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) | 有効13枚手の国士無双の仕様値の存在・上界13と、最大値を達成する具体例。 |
 | [MentsuHand.lean](../Shanten/MentsuHand.lean) | 面子手のターゲットDP、選択列・バッチ走査、仕様への接続。 |
-| [Bounds.lean](../Shanten/Bounds.lean) | 到達性からの上界、国士無双の直接計算などの上位補題。 |
+| [Bounds.lean](../Shanten/Bounds.lean) | 到達性からの条件付き上界、国士無双の閉形式の直接計算などの上位補題。 |
 
 ## 七対子の構成と読む順序
 
@@ -63,6 +64,7 @@
 ```text
 Specification -> Core
 Exchange      -> Specification
+ThirteenOrphans -> Exchange
 SevenPairs.Basic -> Exchange
 SevenPairs.Counting -> Specification
 SevenPairs.Completion -> SevenPairs.Basic
@@ -73,10 +75,15 @@ SevenPairs.Reachability -> SevenPairs.Exchange.{Distinctness,PairMaking,Protecte
 SevenPairs    -> SevenPairs.Completion, SevenPairs.Reachability
 MentsuHand.Targets -> MentsuHand.State, Exchange
 Bounds        -> SevenPairs
-Shanten       -> Core, Specification, SevenPairs, MentsuHand, Bounds
+Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, MentsuHand, Bounds
 ```
 
 上表はプロジェクト内の依存を示す（Mathlibのimportは省略）。
 面子手内部の詳細は [計画の構成表](./SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序) を参照する。
 共有定義は既存の提供元を再利用し、循環importを作らない。
 構造変更が必要になった場合も、宣言・命題の意味の変更とは分離して検証する。
+
+国士無双の追加時に、面子手の `Exchange` にあった汎用の目標カウント・不足数・
+交換列の補題を共有の [Exchange.lean](../Shanten/Exchange.lean) へ移動した。
+既存の公開名・型を維持し、完成形への到達と不足数による下界を形に依存しない補題へ
+一般化した。面子手の既存補題はその特殊化として利用する。
