@@ -121,7 +121,8 @@ The default Lean build imports [Shanten/ProofChecks.lean](Shanten/ProofChecks.le
 Its `assert_no_sorry` checks reject transitive `sorryAx` dependencies in the main
 exit theorems, including the shared validity proofs, general search correctness
 and totality, batch scans, seven-pairs bounds, and the thirteen-orphans maximum.
-It also checks the capacity-model correspondence and the R2 acceptance proofs.
+It also checks the capacity-model correspondence, the R2 acceptance proofs, and
+the general seven-pairs and thirteen-orphans formula correctness.
 Existing `native_decide` dependencies remain permitted; ordinary warnings are
 not treated as errors. Add new exit theorems to this check list when extending
 the proof surface.
@@ -193,8 +194,21 @@ hand. `optimalDiscards` enumerates all attaining discards; it is nonempty for
 valid noncomplete fourteen-tile-equivalent hands. Check completion before using
 discard recommendations: discarding from a completed hand loses the `-1` value.
 Discards preserve fixed meld contents and capacity validity.
-General calculations for the special shapes and correspondence with 37-kind Go
-inputs remain follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
+
+[Shanten/Special.lean](./Shanten/Special.lean) proves that the computable formulas
+`sevenPairsShanten` and `kokushiShanten` equal the minimum completion distance
+minus one for every valid concealed thirteen- or fourteen-tile hand.
+Seven pairs counts a quad as one pair kind and accounts for missing distinct
+kinds; thirteen orphans counts pairs only among terminal and honor kinds.
+[Shanten/Capacity/Special.lean](./Shanten/Capacity/Special.lean) exposes
+`sevenPairsSearch hand` and `thirteenOrphansSearch hand`. They return `some value`
+exactly for the corresponding capacity-aware specification on valid
+thirteen- or fourteen-tile-equivalent inputs, and `none` exactly when fixed
+melds make the shape inapplicable (including ankan).
+As with mentsu search, input validation is a separate prerequisite; these are
+not validators for arbitrary hands.
+Overall three-shape integration and correspondence with 37-kind Go inputs
+remain follow-up work. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
 
 [Shanten/MentsuHand.lean](./Shanten/MentsuHand.lean) is the stable import for
 mentsu-hand proofs. Its implementation is split under

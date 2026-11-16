@@ -1,4 +1,5 @@
 import Shanten.Capacity.Discard
+import Shanten.Capacity.Special
 
 namespace Shanten.Capacity.Examples
 
@@ -206,6 +207,102 @@ example :
     IsFourteenTileEquivalentHand fixedKan hand ∧
       generalMentsuHandMinimumSearch fixedKan hand = some (-1) := by
   unfold IsFourteenTileEquivalentHand ValidHand
+  decide
+
+def sevenPairsReady : Hand :=
+  { counts := fun tile => match tile with
+      | .honor rank => if rank.val = 6 then 1 else 2
+      | .suited _ _ => 0
+    fixedMelds := 0 }
+
+def sevenPairsQuads : Hand :=
+  { counts := fun tile => match tile with
+      | .honor rank => if rank.val < 3 then 4 else if rank.val = 3 then 1 else 0
+      | .suited _ _ => 0
+    fixedMelds := 0 }
+
+theorem sevenPairsFormula_search :
+    IsThirteenTileEquivalentHand [] sevenPairsReady ∧
+      sevenPairsSearch sevenPairsReady = some 0 ∧
+      IsFourteenTileEquivalentHand [] (drawHand sevenPairsReady (.honor ⟨6, by omega⟩)) ∧
+      sevenPairsSearch (drawHand sevenPairsReady (.honor ⟨6, by omega⟩)) = some (-1) := by
+  unfold IsThirteenTileEquivalentHand IsFourteenTileEquivalentHand ValidHand
+  decide
+
+theorem sevenPairsQuads_search :
+    IsThirteenTileEquivalentHand [] sevenPairsQuads ∧
+      sevenPairsSearch sevenPairsQuads = some 6 ∧
+      IsFourteenTileEquivalentHand [] (drawHand sevenPairsQuads (.honor ⟨3, by omega⟩)) ∧
+      sevenPairsSearch (drawHand sevenPairsQuads (.honor ⟨3, by omega⟩)) = some 5 := by
+  unfold IsThirteenTileEquivalentHand IsFourteenTileEquivalentHand ValidHand
+  decide
+
+example : IsShapeShanten [] sevenPairsQuads .sevenPairs 6 :=
+  (sevenPairsSearch_eq_some_iff sevenPairsQuads_search.1.1
+    (Or.inl sevenPairsQuads_search.1.2)).mp sevenPairsQuads_search.2.1
+
+example : IsShapeShanten [] (drawHand sevenPairsQuads (.honor ⟨3, by omega⟩))
+    .sevenPairs 5 :=
+  (sevenPairsSearch_eq_some_iff sevenPairsQuads_search.2.2.1.1
+    (Or.inr sevenPairsQuads_search.2.2.1.2)).mp sevenPairsQuads_search.2.2.2
+
+def kokushiReady : Hand :=
+  { counts := fun tile => if tile ∈ kokushiKinds then 1 else 0
+    fixedMelds := 0 }
+
+def kokushiTriple : Hand :=
+  { counts := fun tile =>
+      if tile = east then 3
+      else if tile ∈ kokushiKinds ∧ tile ≠ south then 1 else 0
+    fixedMelds := 0 }
+
+def kokushiNonOrphanPair : Hand :=
+  { counts := fun tile =>
+      if tile = .suited .man ⟨1, by omega⟩ then 2
+      else if tile ∈ kokushiKinds ∧ tile ≠ east ∧ tile ≠ south then 1 else 0
+    fixedMelds := 0 }
+
+theorem kokushiFormula_search :
+    IsThirteenTileEquivalentHand [] kokushiReady ∧
+      thirteenOrphansSearch kokushiReady = some 0 ∧
+      IsFourteenTileEquivalentHand [] (drawHand kokushiReady east) ∧
+      thirteenOrphansSearch (drawHand kokushiReady east) = some (-1) ∧
+      IsFourteenTileEquivalentHand [] kokushiTriple ∧
+      thirteenOrphansSearch kokushiTriple = some 0 := by
+  unfold IsThirteenTileEquivalentHand IsFourteenTileEquivalentHand ValidHand
+  decide
+
+theorem kokushiNonOrphanPair_search :
+    IsThirteenTileEquivalentHand [] kokushiNonOrphanPair ∧
+      thirteenOrphansSearch kokushiNonOrphanPair = some 2 ∧
+      thirteenOrphansSearch kokushiWorstCase = some 13 ∧
+      IsFourteenTileEquivalentHand []
+        (drawHand kokushiWorstCase (.suited .man ⟨1, by omega⟩)) ∧
+      thirteenOrphansSearch
+        (drawHand kokushiWorstCase (.suited .man ⟨1, by omega⟩)) = some 13 := by
+  unfold IsThirteenTileEquivalentHand IsFourteenTileEquivalentHand ValidHand
+  decide
+
+example : IsShapeShanten [] kokushiNonOrphanPair .thirteenOrphans 2 :=
+  (thirteenOrphansSearch_eq_some_iff kokushiNonOrphanPair_search.1.1
+    (Or.inl kokushiNonOrphanPair_search.1.2)).mp kokushiNonOrphanPair_search.2.1
+
+example : IsShapeShanten [] (drawHand kokushiReady east) .thirteenOrphans (-1) :=
+  (thirteenOrphansSearch_eq_some_iff kokushiFormula_search.2.2.1.1
+    (Or.inr kokushiFormula_search.2.2.1.2)).mp kokushiFormula_search.2.2.2.1
+
+def specialKanStanding : Hand :=
+  { counts := fun tile =>
+      if tile = south ∨ tile = .honor ⟨2, by omega⟩ then 4
+      else if tile = .honor ⟨3, by omega⟩ then 2 else 0
+    fixedMelds := 1 }
+
+example :
+    sevenPairsSearch standing = none ∧ thirteenOrphansSearch standing = none ∧
+      IsThirteenTileEquivalentHand [.kan east] specialKanStanding ∧
+      sevenPairsSearch specialKanStanding = none ∧
+      thirteenOrphansSearch specialKanStanding = none := by
+  unfold IsThirteenTileEquivalentHand ValidHand
   decide
 
 end Shanten.Capacity.Examples

@@ -15,6 +15,7 @@
 | [Exchange.lean](../Shanten/Exchange.lean) | 形に依存しない不足枚数、交換操作、固定目標への到達、到達距離の下界。 |
 | [SevenPairs.lean](../Shanten/SevenPairs.lean) | 七対子の公開import入口。実装は下表のモジュールに分割。 |
 | [ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) | 有効13枚手の国士無双の仕様値の存在・上界13と、最大値を達成する具体例。 |
+| [Special.lean](../Shanten/Special.lean) | 七対子・国士無双の閉形式と最短完成距離仕様の一致。有効な固定面子なし13・14枚手を対象とする。 |
 | [MentsuHand.lean](../Shanten/MentsuHand.lean) | 面子手のターゲットDP、選択列・バッチ走査、仕様への接続。 |
 | [Bounds.lean](../Shanten/Bounds.lean) | 到達性からの条件付き上界、国士無双の閉形式の直接計算などの上位補題。 |
 | [Capacity.lean](../Shanten/Capacity.lean) | 固定面子の実牌内容を持つ容量付きモデルの公開入口。既存抽象モデルとは別の段階導入。 |
@@ -25,7 +26,8 @@
 | [Capacity/Totality.lean](../Shanten/Capacity/Totality.lean) | 有効固定文脈の完成目標を構成し、13枚相当入力すべての全域性・仕様一致・最適状態を証明する。 |
 | [Capacity/Fourteen.lean](../Shanten/Capacity/Fourteen.lean) | 14枚相当の全域性・仕様一致・最適状態、完成と値−1の同値。 |
 | [Capacity/Discard.lean](../Shanten/Capacity/Discard.lean) | 合法打牌後の13枚相当入力、打牌結果・最適打牌列挙、未完成14枚相当の値と打牌後最小値の一致。 |
-| [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/Bの値1・0と探索結果、14枚相当の完成値・最適打牌、容量超過・槓の回帰例。 |
+| [Capacity/Special.lean](../Shanten/Capacity/Special.lean) | 特殊形の計算API、13・14枚相当の容量付き仕様一致、固定面子による適用除外。 |
+| [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/B、14枚相当の最適打牌、特殊形の閉形式、容量超過・槓の回帰例。 |
 | [ProofChecks.lean](../Shanten/ProofChecks.lean) | 主要出口定理の推移的な `sorryAx` 依存を通常ビルドで拒否する。 |
 
 ## 七対子の構成と読む順序
@@ -88,6 +90,7 @@ SevenPairs.Reachability -> SevenPairs.Exchange.{Distinctness,PairMaking,Protecte
 SevenPairs    -> SevenPairs.Completion, SevenPairs.Reachability
 MentsuHand.Targets -> MentsuHand.State, Exchange
 Bounds        -> SevenPairs
+Special       -> SevenPairs.Completion, SevenPairs.Counting, ThirteenOrphans
 Capacity.Basic -> Exchange
 Capacity.Specification -> Capacity.Basic
 Capacity.Reachability -> Capacity.Specification
@@ -95,12 +98,13 @@ Capacity.Search -> Capacity.Reachability, MentsuHand.Search.BlockSearch
 Capacity.Totality -> Capacity.Search
 Capacity.Fourteen -> Capacity.Totality
 Capacity.Discard -> Capacity.Fourteen
-Capacity.Examples -> Capacity.Discard
+Capacity.Special -> Capacity.Specification, Special
+Capacity.Examples -> Capacity.Discard, Capacity.Special
 Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Reachability,
                  Capacity.Search, Capacity.Totality, Capacity.Fourteen,
-                 Capacity.Discard, Capacity.Examples
+                 Capacity.Discard, Capacity.Special, Capacity.Examples
 ProofChecks   -> MentsuHand, ThirteenOrphans, Bounds, Capacity
-Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, MentsuHand, Bounds,
+Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, Special, MentsuHand, Bounds,
                  Capacity, ProofChecks
 ```
 

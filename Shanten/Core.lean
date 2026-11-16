@@ -135,6 +135,10 @@ def pairCount (hand : Hand) : Nat :=
 def distinctTileCount (hand : Hand) : Nat :=
   (Finset.univ.filter fun tile => 0 < hand.counts tile).card
 
+/-- Quads count as one pair kind; missing kinds must be introduced separately. -/
+def sevenPairsShanten (hand : Hand) : Int :=
+  6 - (pairCount hand : Int) + ((7 - distinctTileCount hand : Nat) : Int)
+
 def presentTiles (hand : Hand) : Finset Tile :=
   Finset.univ.filter fun tile => 0 < hand.counts tile
 

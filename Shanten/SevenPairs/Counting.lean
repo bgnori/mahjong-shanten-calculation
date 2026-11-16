@@ -135,22 +135,24 @@ lemma exists_surplus_kind_for_pairMaking
   have hbound := tileCount_le_distinct_add_pairCount hand hsmall
   omega
 
-lemma pairCount_le_six_of_thirteen
-    (hand : Hand) (h13 : IsThirteenTileHand hand) :
-    pairCount hand ≤ 6 := by
+lemma two_mul_pairCount_le_tileCount (hand : Hand) :
+    2 * pairCount hand ≤ tileCount hand := by
   have hpoint : ∀ tile, (if 2 ≤ hand.counts tile then 2 else 0) ≤
       hand.counts tile := by
     intro tile
     by_cases hpair : 2 ≤ hand.counts tile <;> simp [hpair] <;> omega
   have hsum := Finset.sum_le_sum (s := Finset.univ) (fun tile _ => hpoint tile)
-  have hbound :
-      2 * pairCount hand ≤ tileCount hand := by
-    calc
-      2 * pairCount hand =
-          ∑ tile : Tile, (if 2 ≤ hand.counts tile then 2 else 0) := by
-            rw [← Finset.sum_filter]
-            simp [pairCount, Nat.mul_comm]
-      _ ≤ tileCount hand := hsum
+  calc
+    2 * pairCount hand =
+        ∑ tile : Tile, (if 2 ≤ hand.counts tile then 2 else 0) := by
+          rw [← Finset.sum_filter]
+          simp [pairCount, Nat.mul_comm]
+    _ ≤ tileCount hand := hsum
+
+lemma pairCount_le_six_of_thirteen
+    (hand : Hand) (h13 : IsThirteenTileHand hand) :
+    pairCount hand ≤ 6 := by
+  have hbound := two_mul_pairCount_le_tileCount hand
   have hcount := h13.2.1
   omega
 
