@@ -40,7 +40,8 @@ lemma Complete.validCounts (hcomplete : Complete shape hand) : ValidCounts hand 
 
 /--
 One improvement step either draws one tile or exchanges one standing tile for
-a different kind. The number of fixed melds is unchanged.
+a different kind. Both branches require valid resulting counts, and the number
+of fixed melds is unchanged.
 -/
 def HandStep (before after : Hand) : Prop :=
   before.fixedMelds = after.fixedMelds ∧
@@ -48,9 +49,15 @@ def HandStep (before after : Hand) : Prop :=
           after.counts tile =
             before.counts tile + (if tile = drawn then 1 else 0)) ∨
       (∃ discarded drawn, discarded ≠ drawn ∧ before.counts discarded > 0 ∧
+          ValidCounts after ∧
           ∀ tile,
             after.counts tile + (if tile = discarded then 1 else 0) =
               before.counts tile + (if tile = drawn then 1 else 0)))
+
+lemma HandStep.validCounts (hstep : HandStep before after) : ValidCounts after := by
+  rcases hstep.2 with ⟨_, hvalid, _⟩ | ⟨_, _, _, _, hvalid, _⟩
+  · exact hvalid
+  · exact hvalid
 
 /-- Reaching a complete hand in exactly `distance` improvement steps. -/
 inductive ReachesCompletion (complete : Shape → Hand → Prop) (shape : Shape) :

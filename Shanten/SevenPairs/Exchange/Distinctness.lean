@@ -78,11 +78,12 @@ lemma exists_distinctnessExchange
   exact ⟨discarded, drawn, hdiscarded, hdrawn, hne, rfl⟩
 
 lemma DistinctnessExchange.handStep
-    (h : DistinctnessExchange before after) : HandStep before after := by
+    (h : DistinctnessExchange before after) (hvalid : ValidCounts before) :
+    HandStep before after := by
   rcases h with ⟨discarded, drawn, hdiscarded, hdrawn, hne, rfl⟩
   exact exchangeHand_step before discarded drawn hne (by
     unfold IsPairPreservingDiscard at hdiscarded
-    omega)
+    omega) hvalid (by unfold IsAbsentTileKind at hdrawn; omega)
 
 lemma DistinctnessExchange.filter_conditions
     (h : DistinctnessExchange before after) :

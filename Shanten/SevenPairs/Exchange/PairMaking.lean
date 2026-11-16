@@ -63,11 +63,12 @@ lemma PairMakingExchange.isThirteenTileHand
         · exact hdrawn'
 
 lemma PairMakingExchange.handStep
-    (h : PairMakingExchange before after) : HandStep before after := by
+    (h : PairMakingExchange before after) (hvalid : ValidCounts before) :
+    HandStep before after := by
   rcases h with ⟨discarded, drawn, hdrawn, hdiscarded, hne, rfl⟩
   exact exchangeHand_step before discarded drawn hne (by
     unfold IsPairPreservingDiscard at hdiscarded
-    omega)
+    omega) hvalid (by omega)
 
 lemma PairMakingExchange.filter_conditions
     (h : PairMakingExchange before after) :

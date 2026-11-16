@@ -80,22 +80,24 @@ lemma mentsuHandTargetExchange_handStep
     (target : TileCounts) (before : Hand) (discarded drawn : Tile)
     (hdrawn : target drawn > before.counts drawn)
     (hdiscarded : before.counts discarded > target discarded)
-    (hne : discarded ≠ drawn) :
+    (hne : discarded ≠ drawn)
+    (hvalid : ValidCounts before) (htarget : ∀ tile, target tile ≤ 4) :
     HandStep before (exchangeHand before discarded drawn) := by
-  apply TargetExchange.handStep
-  exact ⟨discarded, drawn, hdrawn, hdiscarded, hne, rfl⟩
+  exact TargetExchange.handStep
+    ⟨discarded, drawn, hdrawn, hdiscarded, hne, rfl⟩ hvalid htarget
 
 lemma reachesExchange_of_targetExchange
     (target : TileCounts) (before : Hand) (discarded drawn : Tile)
     (hdrawn : target drawn > before.counts drawn)
     (hdiscarded : before.counts discarded > target discarded)
     (hne : discarded ≠ drawn)
+    (hvalid : ValidCounts before) (htarget : ∀ tile, target tile ≤ 4)
     (hrest :
       ReachesHand (exchangeHand before discarded drawn) after distance) :
     ReachesHand before after (distance + 1) := by
   apply ReachesHand.step
     (mentsuHandTargetExchange_handStep target before discarded drawn
-      hdrawn hdiscarded hne)
+      hdrawn hdiscarded hne hvalid htarget)
   exact hrest
 
 lemma exchangeHand_fixedMelds

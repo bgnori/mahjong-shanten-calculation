@@ -46,9 +46,9 @@ lemma reaches_sevenPairs_completion
     have hdraw := reachesCompletion_of_sevenPairsTenpai final hfinal13
       hfinalTenpai
     have hexchanges :=
-      ReachesDistinctness.toReachesHand hdistinctness
+      ReachesDistinctness.toReachesHand hdistinctness h13.2.2
     have hpexchanges :=
-      ReachesPairMaking.toReachesHand hpairing
+      ReachesPairMaking.toReachesHand hpairing hmiddle13.2.2
     have hcombined := ReachesHand.append hexchanges hpexchanges
     have hcombined' := ReachesHand.toReachesCompletion hcombined hdraw
     have hlower := seven_le_distinct_add_pairCount_of_thirteen hand h13
@@ -89,7 +89,7 @@ lemma reaches_sevenPairs_completion
       have hdraw := reachesCompletion_of_sevenPairsTenpai final hfinal13
         hfinalTenpai
       have hpexchanges :=
-        ReachesProtectedPairMaking.toReachesHand hpairing
+        ReachesProtectedPairMaking.toReachesHand hpairing h13.2.2
       have hcombined' := ReachesHand.toReachesCompletion hpexchanges hdraw
       refine ⟨_, ?_, hcombined'⟩
       omega
@@ -111,7 +111,7 @@ lemma reaches_sevenPairs_completion
       have hdraw := reachesCompletion_of_sevenPairsTenpai final hfinal13
         hfinalTenpai
       have hpexchanges :=
-        ReachesPairMaking.toReachesHand hpairing
+        ReachesPairMaking.toReachesHand hpairing h13.2.2
       have hcombined' := ReachesHand.toReachesCompletion hpexchanges hdraw
       refine ⟨1, by omega, ?_⟩
       convert hcombined' using 1 <;> omega

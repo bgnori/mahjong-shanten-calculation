@@ -27,12 +27,14 @@ lemma isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance
             (targetHand before
               (countsOfTiles (mentsuHandTarget otherPair otherMelds))) →
           mentsuHandTargetDistance before pair melds ≤
-            mentsuHandTargetDistance before otherPair otherMelds) :
+            mentsuHandTargetDistance before otherPair otherMelds)
+    (hbeforeValid : ValidCounts before) :
     IsShapeShanten before .mentsuHand ((distance : Int) - 1) := by
   apply isShapeShanten_mentsuHand_of_mentsuHandTarget_distance
     distance before pair melds hdistance hsum hvalid hmelds
-  exact no_shorter_mentsuHand_completion_of_minimal_mentsuHandTargetDistance
-    before pair melds distance hdistance hminimalTarget
+  · exact no_shorter_mentsuHand_completion_of_minimal_mentsuHandTargetDistance
+      before pair melds distance hdistance hminimalTarget
+  · exact hbeforeValid
 
 lemma isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance_one_more
     (distance : Nat)
@@ -92,7 +94,7 @@ private lemma nat_find_le_of_mem
 
 set_option maxHeartbeats 1000000 in
 lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget
-    (before : Hand)
+    (before : Hand) (hbeforeValid : ValidCounts before)
     (hcandidate :
       ∃ pair melds,
         melds.length + before.fixedMelds = 4 ∧
@@ -157,7 +159,7 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget
   have hshape :
       IsShapeShanten before .mentsuHand ((distance : Int) - 1) :=
     isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance
-      distance before pair melds hdistance hsum hvalid hmelds hminimalTarget
+      distance before pair melds hdistance hsum hvalid hmelds hminimalTarget hbeforeValid
   exact ⟨(distance : Int) - 1, hshape⟩
 
 set_option maxHeartbeats 1000000 in

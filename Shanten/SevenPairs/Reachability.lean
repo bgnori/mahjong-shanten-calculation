@@ -20,13 +20,16 @@ inductive ReachesPairing : Hand → Hand → Nat → Prop
 
 lemma ReachesPairing.toReachesHand :
     ReachesPairing before after distance →
-      ReachesHand before after distance := by
+      ValidCounts before → ReachesHand before after distance := by
   intro h
   induction h with
   | done =>
+      intro _
       exact .done
   | step hstep hrest ih =>
-      exact .step hstep.handStep ih
+      intro hvalid
+      have hhandStep := hstep.handStep hvalid
+      exact .step hhandStep (ih hhandStep.validCounts)
 
 /-- Repeated exchanges that introduce previously absent tile kinds. -/
 inductive ReachesDistinctness : Hand → Hand → Nat → Prop
@@ -38,13 +41,16 @@ inductive ReachesDistinctness : Hand → Hand → Nat → Prop
 
 lemma ReachesDistinctness.toReachesHand :
     ReachesDistinctness before after distance →
-      ReachesHand before after distance := by
+      ValidCounts before → ReachesHand before after distance := by
   intro h
   induction h with
   | done =>
+      intro _
       exact .done
   | step hstep hrest ih =>
-      exact .step hstep.handStep ih
+      intro hvalid
+      have hhandStep := hstep.handStep hvalid
+      exact .step hhandStep (ih hhandStep.validCounts)
 
 lemma ReachesDistinctness.pairCount
     (h : ReachesDistinctness before after distance)
@@ -118,13 +124,16 @@ inductive ReachesPairMaking : Hand → Hand → Nat → Prop
 
 lemma ReachesPairMaking.toReachesHand :
     ReachesPairMaking before after distance →
-      ReachesHand before after distance := by
+      ValidCounts before → ReachesHand before after distance := by
   intro h
   induction h with
   | done =>
+      intro _
       exact .done
   | step hstep hrest ih =>
-      exact .step hstep.handStep ih
+      intro hvalid
+      have hhandStep := hstep.handStep hvalid
+      exact .step hhandStep (ih hhandStep.validCounts)
 
 lemma ReachesPairMaking.isThirteenTileHand
     (h : ReachesPairMaking before after distance)
@@ -206,13 +215,16 @@ inductive ReachesProtectedPairMaking
 
 lemma ReachesProtectedPairMaking.toReachesHand :
     ReachesProtectedPairMaking protectedTiles before after distance →
-      ReachesHand before after distance := by
+      ValidCounts before → ReachesHand before after distance := by
   intro h
   induction h with
   | done =>
+      intro _
       exact .done
   | step hstep hrest ih =>
-      exact .step hstep.handStep ih
+      intro hvalid
+      have hhandStep := hstep.handStep hvalid
+      exact .step hhandStep (ih hhandStep.validCounts)
 
 lemma ReachesProtectedPairMaking.isThirteenTileHand
     (h : ReachesProtectedPairMaking protectedTiles before after distance)

@@ -56,13 +56,6 @@ lemma exchangeCounts_step
       simp [exchangeCounts, hdiscard]
     · simp [exchangeCounts, hdiscard, hdrawn]
 
-lemma exchangeHand_step
-    (hand : Hand) (discarded drawn : Tile)
-    (hne : discarded ≠ drawn) (hdiscarded : hand.counts discarded > 0) :
-    HandStep hand (exchangeHand hand discarded drawn) := by
-  refine ⟨rfl, Or.inr ⟨discarded, drawn, hne, hdiscarded, ?_⟩⟩
-  exact exchangeCounts_step hand discarded drawn hne hdiscarded
-
 lemma exchangeCounts_drawn
     (hand : Hand) (discarded drawn : Tile) (hne : discarded ≠ drawn) :
     exchangeCounts hand discarded drawn drawn = hand.counts drawn + 1 := by
@@ -106,6 +99,15 @@ lemma validCounts_exchangeHand
       · exact hdiscarded'
       · exact hdrawn'
 
+lemma exchangeHand_step
+    (hand : Hand) (discarded drawn : Tile)
+    (hne : discarded ≠ drawn) (hdiscarded : hand.counts discarded > 0)
+    (hvalid : ValidCounts hand) (hdrawn : hand.counts drawn < 4) :
+    HandStep hand (exchangeHand hand discarded drawn) := by
+  refine ⟨rfl, Or.inr ⟨discarded, drawn, hne, hdiscarded,
+    validCounts_exchangeHand hvalid hdrawn hne hdiscarded, ?_⟩⟩
+  exact exchangeCounts_step hand discarded drawn hne hdiscarded
+
 /-- Exactly the given number of draws or exchanges, ending at a fixed hand. -/
 inductive ReachesHand : Hand → Hand → Nat → Prop
   | done {hand} : ReachesHand hand hand 0
@@ -113,6 +115,30 @@ inductive ReachesHand : Hand → Hand → Nat → Prop
       HandStep hand next →
       ReachesHand next target distance →
       ReachesHand hand target (distance + 1)
+
+lemma ReachesHand.validCounts
+    (hreach : ReachesHand before after distance) (hvalid : ValidCounts before) :
+    ValidCounts after := by
+  induction hreach with
+  | done => exact hvalid
+  | step hstep _ ih => exact ih hstep.validCounts
+
+lemma ReachesCompletion.exists_reachesHand
+    (hreach : ReachesCompletion complete shape before distance) :
+    ∃ after, ReachesHand before after distance ∧ complete shape after := by
+  induction hreach with
+  | done hcomplete => exact ⟨_, .done, hcomplete⟩
+  | step hstep _ ih =>
+      obtain ⟨after, hrest, hcomplete⟩ := ih
+      exact ⟨after, .step hstep hrest, hcomplete⟩
+
+lemma ReachesCompletion.exists_valid_completion
+    (hreach : ReachesCompletion complete shape before distance)
+    (hvalid : ValidCounts before) :
+    ∃ after, ReachesHand before after distance ∧
+      complete shape after ∧ ValidCounts after := by
+  obtain ⟨after, hpath, hcomplete⟩ := hreach.exists_reachesHand
+  exact ⟨after, hpath, hcomplete, hpath.validCounts hvalid⟩
 
 lemma ReachesHand.append
     (hfirst : ReachesHand before middle distance₁)
@@ -151,9 +177,12 @@ def TargetExchange (target : TileCounts) (before after : Hand) : Prop :=
       after = exchangeHand before discarded drawn
 
 lemma TargetExchange.handStep
-    (h : TargetExchange target before after) : HandStep before after := by
+    (h : TargetExchange target before after)
+    (hvalid : ValidCounts before) (htarget : ∀ tile, target tile ≤ 4) :
+    HandStep before after := by
   rcases h with ⟨discarded, drawn, hdrawn, hdiscarded, hne, rfl⟩
   exact exchangeHand_step before discarded drawn hne (by omega)
+    hvalid (lt_of_lt_of_le hdrawn (htarget drawn))
 
 lemma deficit_after_drawing
     (target : TileCounts) (hand : Hand) (discarded drawn : Tile)
@@ -300,7 +329,7 @@ lemma countDeficit_handStep_le
       _ = countDeficit after.counts target + 1 := by
         simp [countDeficit, Finset.sum_add_distrib]
   rcases hstep.2 with ⟨drawn, _, hcounts⟩ |
-    ⟨discarded, drawn, hne, hpositive, hcounts⟩
+    ⟨discarded, drawn, hne, hpositive, _, hcounts⟩
   · apply finish drawn
     intro tile
     have hcount := hcounts tile
@@ -372,20 +401,22 @@ lemma countsOfTiles_sum_eq_card (tiles : Multiset Tile) :
 lemma reachesHand_targetHand_of_equal_sum
     (before : Hand) (target : TileCounts)
     (hsum : (∑ tile : Tile, before.counts tile) =
-      ∑ tile : Tile, target tile) :
+      ∑ tile : Tile, target tile)
+    (hbeforeValid : ValidCounts before) (htarget : ∀ tile, target tile ≤ 4) :
     ∃ distance,
       distance = countDeficit before.counts target ∧
       ReachesHand before (targetHand before target) distance := by
   have aux : ∀ d : Nat, ∀ current : Hand,
       (∑ tile : Tile, current.counts tile) =
         ∑ tile : Tile, target tile →
+      ValidCounts current →
       countDeficit current.counts target = d →
       ∃ distance,
         distance = d ∧
         ReachesHand current (targetHand current target) distance := by
     intro d
     refine Nat.strong_induction_on d ?_
-    intro d ih current hsumCurrent hmeasure
+    intro d ih current hsumCurrent hcurrentValid hmeasure
     by_cases hd : d = 0
     · have hsumzero :
           (∑ tile : Tile, (target tile - current.counts tile)) = 0 := by
@@ -423,6 +454,9 @@ lemma reachesHand_targetHand_of_equal_sum
       obtain ⟨discarded, drawn, hdrawn, hdiscarded, hneTiles⟩ :=
         exists_target_exchange_tiles current target hsumCurrent hne
       let next := exchangeHand current discarded drawn
+      have hstep : HandStep current next :=
+        exchangeHand_step current discarded drawn hneTiles (by omega)
+          hcurrentValid (lt_of_lt_of_le hdrawn (htarget drawn))
       have hsumAfter :
           (∑ tile : Tile, next.counts tile) =
             ∑ tile : Tile, target tile := by
@@ -440,13 +474,13 @@ lemma reachesHand_targetHand_of_equal_sum
         omega
       obtain ⟨distance, hdistanceRest, hrest⟩ := ih
         (countDeficit next.counts target) hdefAfter next
-        hsumAfter rfl
+        hsumAfter hstep.validCounts rfl
       refine ⟨distance + 1, ?_, ?_⟩
       · omega
       · apply ReachesHand.step
-        · exact exchangeHand_step current discarded drawn hneTiles (by omega)
+        · exact hstep
         · simpa [next, targetHand, exchangeHand] using hrest
-  exact aux (countDeficit before.counts target) before hsum rfl
+  exact aux (countDeficit before.counts target) before hsum hbeforeValid rfl
 
 lemma exists_complete_with_deficit_le
     (hreach : ReachesCompletion Complete shape before distance) :
@@ -497,7 +531,7 @@ lemma reachesCompletion_of_one_more_target_tile
       ∑ tile : Tile, target tile := by
     simpa [next, Finset.sum_add_distrib] using hsum.symm
   obtain ⟨distance, hdistance, hexchange⟩ :=
-    reachesHand_targetHand_of_equal_sum next target hsumNext
+    reachesHand_targetHand_of_equal_sum next target hsumNext hnextValid hvalid
   have hrest : ReachesCompletion Complete shape next distance := by
     simpa using hexchange.toReachesCompletion
       (ReachesCompletion.done (show Complete shape (targetHand next target) from

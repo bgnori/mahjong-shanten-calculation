@@ -4,6 +4,9 @@
 
 **対象コミット:** `f3f49369dffb45c3ca04f89571471b2c122ee6cc`
 
+**対応状況（2026-11-16追記）:** R1は修正・保存定理・回帰検査を追加済み。
+以下の評価と反例の成立は対象コミット時点の記録であり、現在の遷移は5枚目を拒否する。
+
 **対象:** Go契約、Leanソース35ファイル、依存・開発環境設定、現行計画・台帳・関連文書。
 添付された構造文書はリポジトリ版と内容が一致することを確認した。
 
@@ -70,6 +73,25 @@ Lean検査で裏付けた。全証明本文の独立した数学的再証明、�
 
 **受入条件:** 上記操作は有効遷移として構成できず、有効な開始手からの遷移・経路の
 有効性保存を証明できること。既存の探索一致・到達上限の定理も再検証すること。
+
+### R1対応結果（2026-11-16）
+
+- `HandStep` の交換分岐にも `ValidCounts after` を要求した。
+  `exchangeHand_step` は開始手の有効性と引く牌が4枚未満であることを受け取り、
+  `validCounts_exchangeHand` で終了手の有効性を構成する。
+- `HandStep.validCounts` と `ReachesHand.validCounts` により1手・経路の有効性保存を証明した。
+  完成経路も `ReachesCompletion.exists_reachesHand` で同じ到達関係へ接続し、
+  `ReachesCompletion.exists_valid_completion` で有効な完成先の存在を保証する。
+  任意の経路の接頭辞にも `ReachesHand.validCounts` を適用できるため、中間状態も有効となる。
+- 目標到達・七対子の共有遷移への変換補題には開始手の有効性を引き継ぎ、
+  目標に向かう交換には目標の牌種別4枚制限も要求した。
+  以前の、無効な開始手や無効な目標にも適用できた補題の型は意図的に制限している。
+  有効13枚相当手牌に対する一般探索の仕様一致・全域性の前提は変更していない。
+- [回帰検査](../Shanten/MentsuHand/Examples.lean) で、上記13枚手が有効であること、
+  東5枚への交換と任意長の経路が存在しないこと、有効な交換と逆向きの4枚目のドローを検査した。
+- `lake build Shanten` 成功（909 jobs）。保存定理・共有到達・一般探索・バッチ走査・
+  七対子上限・国士最大値の主要14宣言を `#print axioms` で検査し、`sorryAx` 依存なし。
+  既存の `native_decide` 依存と警告は残る。固定面子の実牌容量を扱うR2は対象外。
 
 ## R2：固定面子の個数だけでは契約の数値を保持できない
 
@@ -204,7 +226,7 @@ Leanの回帰例は [Examples](../Shanten/MentsuHand/Examples.lean) に存在し
 
 ## 推奨する次の順序
 
-1. R1の共有遷移の有効性を整理し、保存定理と反例の回帰検査を追加する。
+1. **対応済み:** R1の共有遷移の有効性を整理し、保存定理と反例の回帰検査を追加する。
 2. R3の自動検証とR4のGo環境整合を、小さな独立変更で整える。
 3. R2の容量付きモデルを設計し、上記A/Bの差を受入例にする。
 4. 14枚相当・七対子／国士の一般計算・総合値・Go対応を、対象条件付きで順に接続する。
@@ -213,9 +235,10 @@ Leanの回帰例は [Examples](../Shanten/MentsuHand/Examples.lean) に存在し
 既存の抽象モデルの成果は再利用可能であり、全面的な書き直しを勧めるものではない。
 重要なのは、証明した範囲とGo契約全体との間に必要な対応条件を明示して埋めることである。
 
-## 付録：R1の再現用Leanコード
+## 付録：R1修正後の拒否を確認するLeanコード
 
 以下を `lake env lean -j2 --stdin` へ入力して検査できる。
+対象コミットでは構成できた交換が、修正後は拒否されることを確認する。
 
 ```lean
 import Shanten
@@ -235,12 +258,7 @@ example : IsThirteenTileHand reviewBefore := by
   unfold IsThirteenTileHand ValidCounts
   decide
 
-example : HandStep reviewBefore
-    (exchangeHand reviewBefore reviewNorth reviewEast) :=
-  exchangeHand_step reviewBefore reviewNorth reviewEast
-    (by decide) (by decide)
-
-example : ¬ ValidCounts
+lemma reviewAfter_invalid : ¬ ValidCounts
     (exchangeHand reviewBefore reviewNorth reviewEast) := by
   intro h
   have hcount := h reviewEast
@@ -248,4 +266,9 @@ example : ¬ ValidCounts
   rw [exchangeCounts_drawn _ _ _ (by decide)] at hcount
   change 4 + 1 ≤ 4 at hcount
   omega
+
+example : ¬ HandStep reviewBefore
+    (exchangeHand reviewBefore reviewNorth reviewEast) := by
+  intro hstep
+  exact reviewAfter_invalid hstep.validCounts
 ```

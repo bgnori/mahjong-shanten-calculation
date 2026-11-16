@@ -135,7 +135,8 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget
       ValidCounts
         (targetHand before
           (countsOfTiles (mentsuHandTarget pair melds))))
-    (hmelds : melds.length + before.fixedMelds = 4) :
+    (hmelds : melds.length + before.fixedMelds = 4)
+    (hbeforeValid : ValidCounts before) :
     ReachesCompletion Complete .mentsuHand before
       (mentsuHandTargetDistance before pair melds) := by
   rw [mentsuHandTargetDistance_eq_countDeficit]
@@ -143,8 +144,9 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget
     before
     (countsOfTiles (mentsuHandTarget pair melds))
     pair melds hsum hvalid hmelds
-  exact targetHand_hasTiles_countsOfTiles before
-    (mentsuHandTarget pair melds)
+  · exact targetHand_hasTiles_countsOfTiles before
+      (mentsuHandTarget pair melds)
+  · exact hbeforeValid
 
 set_option maxHeartbeats 1000000 in
 lemma reachesCompletion_mentsuHand_of_blockDecomposition
@@ -317,7 +319,8 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
       ValidCounts
         (targetHand before
           (countsOfTiles (mentsuHandTarget pair melds))))
-    (hmelds : melds.length + before.fixedMelds = 4) :
+    (hmelds : melds.length + before.fixedMelds = 4)
+    (hbeforeValid : ValidCounts before) :
     ReachesCompletion Complete .mentsuHand before 1 := by
   obtain ⟨discarded, drawn, hdrawn, hdiscarded, hne, hdistanceNext⟩ :=
     exists_mentsuHandTarget_exchange_of_pos
@@ -387,7 +390,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
   apply ReachesCompletion.step
   · exact mentsuHandTargetExchange_handStep
       (countsOfTiles (mentsuHandTarget pair melds))
-      before discarded drawn hdrawn hdiscarded hne
+      before discarded drawn hdrawn hdiscarded hne hbeforeValid hvalid
   · exact ReachesCompletion.done hcomplete
 
 set_option maxHeartbeats 1000000 in
@@ -402,7 +405,8 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance
       ValidCounts
         (targetHand before
           (countsOfTiles (mentsuHandTarget pair melds))))
-    (hmelds : melds.length + before.fixedMelds = 4) :
+    (hmelds : melds.length + before.fixedMelds = 4)
+    (hbeforeValid : ValidCounts before) :
     ReachesCompletion Complete .mentsuHand before distance := by
   induction distance generalizing before with
   | zero =>
@@ -445,13 +449,14 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance
           mentsuHandTargetDistance
               (exchangeHand before discarded drawn) pair melds = distance := by
         omega
+      have hstep := mentsuHandTargetExchange_handStep
+        (countsOfTiles (mentsuHandTarget pair melds))
+        before discarded drawn hdrawn hdiscarded hne hbeforeValid hvalid
       have hrest :=
         ih (exchangeHand before discarded drawn)
-          hdistanceNext' hsumNext hvalidNext hmeldsNext
+          hdistanceNext' hsumNext hvalidNext hmeldsNext hstep.validCounts
       apply ReachesCompletion.step
-      · exact mentsuHandTargetExchange_handStep
-          (countsOfTiles (mentsuHandTarget pair melds))
-          before discarded drawn hdrawn hdiscarded hne
+      · exact hstep
       · exact hrest
 
 lemma isShapeShanten_mentsuHand_of_mentsuHandTarget_distance
@@ -468,12 +473,13 @@ lemma isShapeShanten_mentsuHand_of_mentsuHandTarget_distance
     (hmelds : melds.length + before.fixedMelds = 4)
     (hminimal :
       ∀ smaller : Nat, smaller < distance →
-        ¬ ReachesCompletion Complete .mentsuHand before smaller) :
+        ¬ ReachesCompletion Complete .mentsuHand before smaller)
+    (hbeforeValid : ValidCounts before) :
     IsShapeShanten before .mentsuHand ((distance : Int) - 1) := by
   have hreaches :
       ReachesCompletion Complete .mentsuHand before distance :=
     reachesCompletion_mentsuHand_of_mentsuHandTarget_distance
-      distance before pair melds hdistance hsum hvalid hmelds
+      distance before pair melds hdistance hsum hvalid hmelds hbeforeValid
   refine ⟨trivial, distance, ?_, hreaches, hminimal⟩
   omega
 

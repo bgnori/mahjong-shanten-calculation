@@ -81,10 +81,12 @@ def ProtectedPairMakingExchange
       discarded ≠ drawn ∧
       after = exchangeHand before discarded drawn
 
-/-- Every pairing exchange is an ordinary exchange step. -/
+/-- Every pairing exchange from valid counts is an ordinary exchange step. -/
 lemma PairingExchange.handStep
-    (h : PairingExchange before after) : HandStep before after := by
+    (h : PairingExchange before after) (hvalid : ValidCounts before) :
+    HandStep before after := by
   rcases h with ⟨discarded, drawn, hcandidate, hne, hdiscarded, rfl⟩
   exact exchangeHand_step before discarded drawn hne hdiscarded
+    hvalid (by unfold IsPairingCandidate at hcandidate; omega)
 
 end Shanten

@@ -9,12 +9,13 @@ Choosing seven protected kinds and making pairs while maintaining their invarian
 
 namespace Shanten
 
-/-- Every protected pair-making exchange is an ordinary hand step. -/
+/-- Every protected pair-making exchange from valid counts is an ordinary hand step. -/
 lemma ProtectedPairMakingExchange.handStep
-        (h : ProtectedPairMakingExchange protectedTiles before after) :
+        (h : ProtectedPairMakingExchange protectedTiles before after)
+        (hvalid : ValidCounts before) :
         HandStep before after := by
   rcases h with ⟨discarded, drawn, hprotected, hdrawn, hdiscarded, hne, rfl⟩
-  refine exchangeHand_step before discarded drawn hne ?_
+  refine exchangeHand_step before discarded drawn hne ?_ hvalid (by omega)
   rcases hdiscarded with hsurplus | ⟨hsingleton, _⟩
   · omega
   · omega

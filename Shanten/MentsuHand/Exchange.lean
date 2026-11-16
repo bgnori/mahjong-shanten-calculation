@@ -41,11 +41,12 @@ lemma reachesCompletion_mentsuHand_of_equal_sum
     (hmelds : melds.length + before.fixedMelds = 4)
     (htiles :
       HasTiles (targetHand before target)
-        (pairTiles pair + meldsTiles melds)) :
+        (pairTiles pair + meldsTiles melds))
+    (hbeforeValid : ValidCounts before) :
     ReachesCompletion Complete .mentsuHand before
       (countDeficit before.counts target) := by
   obtain ⟨distance, hdistance, hexchange⟩ :=
-    reachesHand_targetHand_of_equal_sum before target hsum
+    reachesHand_targetHand_of_equal_sum before target hsum hbeforeValid hvalid
   have hcomplete :
       Complete .mentsuHand (targetHand before target) :=
     complete_mentsuHand_targetHand before target pair melds

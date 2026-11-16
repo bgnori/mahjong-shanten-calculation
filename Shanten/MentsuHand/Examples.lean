@@ -18,6 +18,53 @@ private def reviewExampleMan1 : Tile :=
 private def reviewExampleMan2 : Tile :=
   .suited .man ⟨1, by omega⟩
 
+private def reviewCopyLimitNorth : Tile :=
+  .honor ⟨3, by omega⟩
+
+private def reviewCopyLimitHand : Hand :=
+  { counts := fun tile =>
+      if tile = reviewExampleEast ∨ tile = .honor ⟨1, by omega⟩ ∨
+        tile = .honor ⟨2, by omega⟩ then 4
+      else if tile = reviewCopyLimitNorth then 1 else 0
+    fixedMelds := 0 }
+
+private lemma reviewCopyLimitHand_thirteen : IsThirteenTileHand reviewCopyLimitHand := by
+  unfold IsThirteenTileHand ValidCounts
+  decide
+
+private lemma reviewCopyLimitHand_fifth_invalid :
+    ¬ ValidCounts
+      (exchangeHand reviewCopyLimitHand reviewCopyLimitNorth reviewExampleEast) := by
+  intro hvalid
+  have hcount := hvalid reviewExampleEast
+  change exchangeCounts reviewCopyLimitHand reviewCopyLimitNorth
+    reviewExampleEast reviewExampleEast ≤ 4 at hcount
+  rw [exchangeCounts_drawn _ _ _ (by decide)] at hcount
+  change 4 + 1 ≤ 4 at hcount
+  omega
+
+example : ¬ HandStep reviewCopyLimitHand
+    (exchangeHand reviewCopyLimitHand reviewCopyLimitNorth reviewExampleEast) := by
+  intro hstep
+  exact reviewCopyLimitHand_fifth_invalid hstep.validCounts
+
+example : ¬ ReachesHand reviewCopyLimitHand
+    (exchangeHand reviewCopyLimitHand reviewCopyLimitNorth reviewExampleEast) distance := by
+  intro hreach
+  exact reviewCopyLimitHand_fifth_invalid
+    (hreach.validCounts reviewCopyLimitHand_thirteen.2.2)
+
+example :
+    let next := exchangeHand reviewCopyLimitHand reviewExampleEast reviewCopyLimitNorth
+    HandStep reviewCopyLimitHand next ∧
+      HandStep next (exchangeHand next reviewCopyLimitNorth reviewExampleEast) := by
+  dsimp only
+  have hstep := exchangeHand_step reviewCopyLimitHand reviewExampleEast
+    reviewCopyLimitNorth (by decide) (by decide)
+    reviewCopyLimitHand_thirteen.2.2 (by decide)
+  exact ⟨hstep, exchangeHand_step _ _ _ (by decide) (by decide)
+    hstep.validCounts (by decide)⟩
+
 private def reviewExampleTaatsu : Taatsu :=
   .sequence .man ⟨0, by omega⟩
 
