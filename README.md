@@ -20,6 +20,9 @@ Potentially misleading terminology and proposed wording changes are documented i
 The repository-wide review of the Lean model, Go contract, and verification
 environment is recorded in
 [docs/PROJECT_REVIEW_2026-11-16.md](docs/PROJECT_REVIEW_2026-11-16.md).
+The comparison with mahjong-formalization and recommendations for a shared
+domain core are recorded in
+[docs/MAHJONG_FORMALIZATION_REUSE_REVIEW_2026-11-16.md](docs/MAHJONG_FORMALIZATION_REUSE_REVIEW_2026-11-16.md).
 
 ## Input
 
