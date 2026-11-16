@@ -1,17 +1,13 @@
-import Shanten.MentsuHand
+import Shanten.MentsuHand.Search.Totality
 import Mathlib.Data.Multiset.UnionInter
 
-namespace Shanten
-
 /-!
-# General mentsu-hand block search
+# Search / BlockSearch
 
-Each step chooses a completed pair or meld, consumes as many of its tiles as
-remain in the hand, and charges for the missing tiles. The retained part may
-be empty, a singleton, or a gapped sequence. Unused hand tiles are discards.
-Unlike `MentsuHandBlockDecomposition`, no existing pair or four-block
-decomposition is required.
+Completed-block search with hand-tile consumption and missing-tile costs.
 -/
+
+namespace Shanten
 
 def mentsuHandSupply (hand : Hand) : Multiset Tile :=
   ∑ tile : Tile, Multiset.replicate (hand.counts tile) tile
@@ -283,84 +279,5 @@ theorem generalMentsuHandMinimumSearch_optimal
   · exact (generalMentsuHandMinimumSearch_eq_some_iff hand hvalid hstanding _).mpr hshape
   · intro other hother
     exact hminimal _ (Finset.mem_image.mpr ⟨other, hother, rfl⟩)
-
-/-! Regression cases for hands not covered by the old decomposition premise. -/
-
-private def isolatedMentsuHand : Hand :=
-  { counts := fun tile => if tile ∈ kokushiKinds then 1 else 0
-    fixedMelds := 0 }
-
-private lemma isolatedMentsuHand_thirteen : IsThirteenTileHand isolatedMentsuHand := by
-  refine ⟨rfl, ?_, ?_⟩
-  · change (∑ tile : Tile, if tile ∈ kokushiKinds then 1 else 0) = 13
-    simp only [Finset.sum_boole, Finset.filter_mem_eq_inter, Finset.univ_inter]
-    decide
-  · intro tile
-    change (if tile ∈ kokushiKinds then 1 else 0) ≤ 4
-    split <;> omega
-
-example : ¬ Nonempty (MentsuHandBlockDecomposition isolatedMentsuHand) := by
-  rintro ⟨decomposition⟩
-  have hcount := decomposition.targetWithinHand decomposition.pair
-  have hone : isolatedMentsuHand.counts decomposition.pair ≤ 1 := by
-    change (if decomposition.pair ∈ kokushiKinds then 1 else 0) ≤ 1
-    split <;> omega
-  simp only [mentsuHandTargetWithTaatsu, mentsuHandTarget, Multiset.count_add,
-    pairTiles, Multiset.count_replicate_self] at hcount
-  omega
-
-example :
-    ∃! value : Int,
-      generalMentsuHandMinimumSearch isolatedMentsuHand = some value ∧
-      IsShapeShanten isolatedMentsuHand .mentsuHand value :=
-  generalMentsuHandMinimumSearch_exists_unique isolatedMentsuHand
-    isolatedMentsuHand_thirteen.2.2 (by
-      have hcount := isolatedMentsuHand_thirteen.2.1
-      simpa [isolatedMentsuHand] using hcount)
-
-example :
-    let head := generalMentsuHandAddBlock isolatedMentsuHand initialGeneralMentsuHandState
-      (pairTiles (.suited .man ⟨4, by omega⟩))
-    let meld := generalMentsuHandAddBlock isolatedMentsuHand head
-      (meldTiles (.sequence .man ⟨3, by omega⟩))
-    head.used.card = 0 ∧ head.missing = 2 ∧
-      meld.used.card = 0 ∧ meld.missing = 5 := by
-  decide
-
-private def missingHeadMentsuHand : Hand :=
-  { counts := fun tile => if tile = .honor ⟨0, by omega⟩ then 1 else 0
-    fixedMelds := 4 }
-
-set_option maxRecDepth 4096 in
-example : generalMentsuHandMinimumSearch missingHeadMentsuHand = some 0 := by
-  decide
-
-private def gappedMentsuHand : Hand :=
-  { counts := fun tile =>
-      if tile = .suited .man ⟨0, by omega⟩ ∨
-        tile = .suited .man ⟨2, by omega⟩ then 1 else 0
-    fixedMelds := 0 }
-
-example :
-    let state := generalMentsuHandAddBlock gappedMentsuHand initialGeneralMentsuHandState
-      (meldTiles (.sequence .man ⟨0, by omega⟩))
-    state.used.card = 2 ∧ state.missing = 1 := by
-  decide
-
-example :
-    let first := generalMentsuHandAddBlock gappedMentsuHand initialGeneralMentsuHandState
-      (meldTiles (.sequence .man ⟨0, by omega⟩))
-    let second := generalMentsuHandAddBlock gappedMentsuHand first
-      (meldTiles (.sequence .man ⟨0, by omega⟩))
-    second.used.card = 2 ∧ second.missing = 4 := by
-  decide
-
-example :
-    let first := generalMentsuHandAddBlock missingHeadMentsuHand initialGeneralMentsuHandState
-      (pairTiles (.honor ⟨0, by omega⟩))
-    let second := generalMentsuHandAddBlock missingHeadMentsuHand first
-      (meldTiles (.triplet (.honor ⟨0, by omega⟩)))
-    validTileMultisetBool second.completed = false := by
-  decide
 
 end Shanten

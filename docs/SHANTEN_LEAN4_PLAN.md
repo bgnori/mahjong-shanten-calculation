@@ -23,6 +23,43 @@ Leanで数学的仕様と計算可能な探索の一致を証明し、その仕�
 固定面子の牌内容込みの容量検証や37種入力との完全な対応は後続課題であり、
 現行モデルだけで契約全体を証明済みとは扱わない。
 
+## ファイル構成と読む順序
+
+[MentsuHand.lean](../Shanten/MentsuHand.lean) は公開import用の入口に限定する。
+実装は [MentsuHand/](../Shanten/MentsuHand/) 以下の共通基盤・`Scan`・`Search` に分割した。
+名前空間 `Shanten` と公開定義・定理名は維持し、証明内容は変更していない。
+
+| 層 | モジュール | 責務 |
+|---|---|---|
+| 共通 | [Basic](../Shanten/MentsuHand/Basic.lean) | ターツ、状態・選択の型、選択が使う牌。 |
+| 共通 | [ChoiceGrouping](../Shanten/MentsuHand/ChoiceGrouping.lean) | 代表牌による選択列の分類と重複度を保つ順列性。 |
+| 共通 | [State](../Shanten/MentsuHand/State.lean) | 遷移、履歴不変条件、到達関係、34牌種順。 |
+| 共通 | [Targets](../Shanten/MentsuHand/Targets.lean) | 完成目標と探索状態の対応。 |
+| 共通 | [Exchange](../Shanten/MentsuHand/Exchange.lean) | 不足枚数、交換操作、固定目標への到達。 |
+| 共通 | [Decomposition](../Shanten/MentsuHand/Decomposition.lean) | 雀頭＋4ブロック分解、選択列、完成後4枚制限。 |
+| 牌種順走査 | [Scan/Basic](../Shanten/MentsuHand/Scan/Basic.lean) | 枚数制限付き遷移とバッチ走査の関係。 |
+| 牌種順走査 | [Scan/Paths](../Shanten/MentsuHand/Scan/Paths.lean) | 前向き経路、不変条件、バッチとの接続。 |
+| 牌種順走査 | [Scan/DecompositionPaths](../Shanten/MentsuHand/Scan/DecompositionPaths.lean) | 分解の任意の順列から合法な経路を構成。 |
+| 牌種順走査 | [Scan/Grouping](../Shanten/MentsuHand/Scan/Grouping.lean) | 分解から34牌種順バッチ走査と完了状態を構成。 |
+| 牌種順走査 | [Scan/Completion](../Shanten/MentsuHand/Scan/Completion.lean) | 走査状態から完成目標・シャンテン仕様への条件付き接続。 |
+| 完成形探索 | [Search/Enumeration](../Shanten/MentsuHand/Search/Enumeration.lean) | 完成形候補の列挙、牌集合DP、妥当性判定。 |
+| 完成形探索 | [Search/TargetDP](../Shanten/MentsuHand/Search/TargetDP.lean) | 不足数を累積する完成形DPと所属の特徴付け。 |
+| 完成形探索 | [Search/Minimum](../Shanten/MentsuHand/Search/Minimum.lean) | 最小目標距離と到達距離の下界。 |
+| 完成形探索 | [Search/Reachability](../Shanten/MentsuHand/Search/Reachability.lean) | 目標距離を実現する引牌・交換列の構成。 |
+| 完成形探索 | [Search/Correctness](../Shanten/MentsuHand/Search/Correctness.lean) | 最小目標距離と数学的シャンテン仕様の対応。 |
+| 完成形探索 | [Search/Totality](../Shanten/MentsuHand/Search/Totality.lean) | 一般13枚相当手牌の全域性とターゲットDPの仕様一致。 |
+| 完成形探索 | [Search/BlockSearch](../Shanten/MentsuHand/Search/BlockSearch.lean) | 手牌消費・不足数を持つブロック探索と仕様一致。 |
+| 検証例 | [Examples](../Shanten/MentsuHand/Examples.lean) | 重複ターツ、雀頭なし、孤立牌、嵌張、4枚制限の回帰証明。 |
+
+一般手牌の計算を読む場合は共通基盤から `Search` を表の順に読む。
+与えられた分解の牌種順走査を読む場合は、共通基盤から `Scan` を表の順に読む。
+`Scan/Completion` は仕様への接続に `Search/Totality` も利用するが、`Search` は
+`Scan` に依存しない。`Examples` は両方をimportし、公開入口のビルドで検証する。
+
+旧 `GeneralMentsuHand.lean` は探索方式に合わせて `Search/BlockSearch.lean` へ移動した。
+直接importしていた場合は `Shanten.MentsuHand.Search.BlockSearch` または公開入口
+`Shanten.MentsuHand` に置き換える。`generalMentsuHand...` 等の公開名は互換性のため維持する。
+
 ## 完了した中間目標：与えられた分解のバッチ走査
 
 `MentsuHandBlockDecomposition hand` が与えられた場合に、その全選択を
@@ -58,7 +95,8 @@ Leanで数学的仕様と計算可能な探索の一致を証明し、その仕�
 入力は `ValidCounts hand` と `tileCount hand + 3 * hand.fixedMelds = 13` を満たす
 任意の手牌。雀頭なし・孤立牌・ブロック不足も含め、分解の存在を要求しない。
 
-[GeneralMentsuHand.lean](../Shanten/GeneralMentsuHand.lean) に、次の有限探索を実装した。
+[Search/BlockSearch.lean](../Shanten/MentsuHand/Search/BlockSearch.lean) に、
+次の有限探索を実装した。
 
 1. 完成後の雀頭候補と `4 - hand.fixedMelds` 個の面子候補を順に選ぶ。
 2. ブロックごとに、まだ使っていない手牌から一致する牌を消費し、不足牌数を加算する。

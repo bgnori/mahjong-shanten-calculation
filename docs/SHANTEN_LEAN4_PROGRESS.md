@@ -2,7 +2,7 @@
 
 **文書更新:** 2026-11-16
 
-**実装の確認基準:** `5899c5e` を基点とする一般面子手ブロック探索の追加（2026-11-16）
+**実装の確認基準:** `6fa7d3c` を基点とする面子手証明のモジュール分割（2026-11-16）
 
 この台帳には現在の成果と未解決条件だけを記録する。作業範囲は
 [現行計画](./SHANTEN_LEAN4_PLAN.md)、判断の根拠は
@@ -23,10 +23,23 @@
 | 総合値・上限 | 部分完了 | 定義・一意性・条件付き上限補題などはある。現在の狭い分解の列挙だけで全体完了とはしない。 |
 | Go適合性 | 未着手 | Go計算器とLean仕様の値一致、共有fixtureは未実装。 |
 
-実装は [MentsuHand.lean](../Shanten/MentsuHand.lean) を参照する。
+公開入口は [MentsuHand.lean](../Shanten/MentsuHand.lean)、
+実装の配置と読む順序は[構成表](./SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序)を参照する。
 既存のターゲットDPの仕様一致は、新しいバッチ走査の成果とは別に数える。
-一般ブロック探索は [GeneralMentsuHand.lean](../Shanten/GeneralMentsuHand.lean) に分離し、
+手牌消費付きブロック探索は
+[Search/BlockSearch.lean](../Shanten/MentsuHand/Search/BlockSearch.lean) に配置し、
 公開入口 [Shanten.lean](../Shanten.lean) からimportする。
+
+## モジュール整理
+
+- 旧5,755行の `MentsuHand.lean` は15行の公開入口にし、面子手の実装は
+  共通基盤6・`Scan` 5・`Search` 7・検証例1の計19モジュールへ分割した。最大589行。
+- `GeneralMentsuHand.lean` の内容は、役割を表す `Search/BlockSearch.lean` と
+  `Examples.lean` へ移動した。公開名前空間・定義・定理名は変更していない。
+- `6fa7d3c` の2ファイルを基準に、全宣言・属性・証明本文がコメント・空白を除いて
+  移動後と一致し、未移動・重複したコードがないことを機械照合した。
+- Mathlibキャッシュの取得はサブディレクトリも走査するよう、READMEと両devcontainer設定を
+  更新した。JSON構文と、必要な12 importを漏れなく取得対象にすることも検査済み。
 
 ## 一般手牌のブロック探索：完成した範囲
 
@@ -126,6 +139,11 @@
   遷移不変条件・被覆性・距離集合一致・仕様一致・存在一意性・最適状態の6定理について
   `#print axioms` を実行し、依存は `propext`・`Classical.choice`・`Quot.sound` のみで、
   `sorryAx` がないことを確認した。
+- 2026-11-16、モジュール分割後：`lake build Shanten` 成功（899 jobs）。
+  `Shanten.MentsuHand` だけをimportする検査で、一般手牌の全域性定理の適用と、
+  牌種順走査・ターゲットDP・手牌消費付き探索の主要8定理に `sorryAx` がないことを確認。
+  旧走査には従来から `tile_mem_mentsuHandTileOrder` の `native_decide` 依存があり、
+  今回も変更していない。Mathlib import形式・既存の証明スタイルに関する警告は残る。
 
 ## 旧計画コードの除去（2026-11-16）
 

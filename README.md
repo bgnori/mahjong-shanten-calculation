@@ -137,7 +137,7 @@ automatically fetching all of mathlib. After updating dependencies or adding
 imports, fetch only the required cache with:
 
 ```sh
-lake exe cache get $(sed -n 's/^import \(Mathlib\..*\)$/\1/p' Shanten/*.lean)
+lake exe cache get $(find Shanten -name '*.lean' -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
 ```
 
 Build the Lean project in `dev` with:
@@ -147,3 +147,16 @@ lake build
 ```
 
 `Shanten` is the default build target; `lake build Shanten` is equivalent.
+
+### Lean proof layout
+
+[Shanten/MentsuHand.lean](./Shanten/MentsuHand.lean) is the stable import for
+mentsu-hand proofs. Its implementation is split under
+[Shanten/MentsuHand/](./Shanten/MentsuHand/): shared models at the top level,
+tile-order decomposition scans in `Scan/`, completion searches and their
+correctness proofs in `Search/`, and regression proofs in `Examples.lean`.
+The former `GeneralMentsuHand.lean` is now
+[Search/BlockSearch.lean](./Shanten/MentsuHand/Search/BlockSearch.lean);
+public definition and theorem names are unchanged.
+See the [module map](./docs/SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序)
+for responsibilities and a suggested reading order.
