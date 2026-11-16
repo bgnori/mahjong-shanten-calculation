@@ -91,9 +91,9 @@ lemma reachesExchange_of_targetExchange
     (hdiscarded : before.counts discarded > target discarded)
     (hne : discarded ≠ drawn)
     (hrest :
-      ReachesExchange (exchangeHand before discarded drawn) after distance) :
-    ReachesExchange before after (distance + 1) := by
-  apply ReachesExchange.step
+      ReachesHand (exchangeHand before discarded drawn) after distance) :
+    ReachesHand before after (distance + 1) := by
+  apply ReachesHand.step
     (mentsuHandTargetExchange_handStep target before discarded drawn
       hdrawn hdiscarded hne)
   exact hrest

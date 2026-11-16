@@ -1,5 +1,4 @@
 import Shanten.SevenPairs
-import Mathlib.Data.Nat.Find
 import Mathlib.Tactic.Convert
 
 namespace Shanten
@@ -47,11 +46,11 @@ lemma reaches_sevenPairs_completion
     have hdraw := reachesCompletion_of_sevenPairsTenpai final hfinal13
       hfinalTenpai
     have hexchanges :=
-      ReachesDistinctness.toReachesExchange hdistinctness
+      ReachesDistinctness.toReachesHand hdistinctness
     have hpexchanges :=
-      ReachesPairMaking.toReachesExchange hpairing
-    have hcombined := ReachesExchange.append hexchanges hpexchanges
-    have hcombined' := ReachesExchange.toReachesCompletion hcombined hdraw
+      ReachesPairMaking.toReachesHand hpairing
+    have hcombined := ReachesHand.append hexchanges hpexchanges
+    have hcombined' := ReachesHand.toReachesCompletion hcombined hdraw
     have hlower := seven_le_distinct_add_pairCount_of_thirteen hand h13
     have hlower' : 7 ≤ distinctTileCount hand + pairCount middle := by
       omega
@@ -90,8 +89,8 @@ lemma reaches_sevenPairs_completion
       have hdraw := reachesCompletion_of_sevenPairsTenpai final hfinal13
         hfinalTenpai
       have hpexchanges :=
-        ReachesProtectedPairMaking.toReachesExchange hpairing
-      have hcombined' := ReachesExchange.toReachesCompletion hpexchanges hdraw
+        ReachesProtectedPairMaking.toReachesHand hpairing
+      have hcombined' := ReachesHand.toReachesCompletion hpexchanges hdraw
       refine ⟨_, ?_, hcombined'⟩
       omega
     · have hpairsEq : pairCount hand = 6 := by omega
@@ -112,8 +111,8 @@ lemma reaches_sevenPairs_completion
       have hdraw := reachesCompletion_of_sevenPairsTenpai final hfinal13
         hfinalTenpai
       have hpexchanges :=
-        ReachesPairMaking.toReachesExchange hpairing
-      have hcombined' := ReachesExchange.toReachesCompletion hpexchanges hdraw
+        ReachesPairMaking.toReachesHand hpairing
+      have hcombined' := ReachesHand.toReachesCompletion hpexchanges hdraw
       refine ⟨1, by omega, ?_⟩
       convert hcombined' using 1 <;> omega
 
@@ -123,40 +122,19 @@ seven-pairs argument, the relevant witness is a completion reachable in
 distance seven: six exchanges create six pairs, and one final draw creates
 the seventh pair.  Since shanten is distance minus one, this gives `6`.
 
-This is the combinatorial bound for the three hand shapes specified above.
-Its proof is intentionally left as an interface theorem: the definitions in
-this file specify completion and shanten, but do not implement the finite
-enumeration needed to establish the bound.
+The seven-pairs construction supplies the bound regardless of the other shapes.
 -/
 theorem overallShanten_le_six_of_thirteenTileHand
     (h13 : IsThirteenTileHand hand)
     (value : Int)
     (hvalue : IsOverallShanten hand value) :
     value ≤ 6 := by
-  classical
   obtain ⟨bound, hbound, hreachable⟩ :=
     reaches_sevenPairs_completion hand h13
-  let reachable : Nat → Prop :=
-    fun distance => ReachesCompletion Complete .sevenPairs hand distance
-  have hexists : ∃ distance, reachable distance :=
-    ⟨bound, hreachable⟩
-  let distance := Nat.find hexists
-  have hdistance : reachable distance :=
-    Nat.find_spec hexists
-  have hminimal : ∀ smaller, smaller < distance → ¬ reachable smaller := by
-    intro smaller hsmaller
-    exact Nat.find_min hexists hsmaller
-  have hdistance_le : distance ≤ 7 := by
-    exact le_trans
-      (Nat.find_min' hexists (show reachable bound from hreachable)) hbound
-  have hshape :
-      IsShapeShanten hand .sevenPairs ((distance : Int) - 1) := by
-    refine ⟨h13.1, distance, ?_, hdistance, ?_⟩
-    · omega
-    · intro smaller hsmaller
-      exact hminimal smaller hsmaller
+  obtain ⟨sevenPairsValue, hshape, hsevenPairsBound⟩ :=
+    exists_isShapeShanten_of_reachesCompletion hreachable h13.1
   have hseven :
-      ShapeShanten hand .sevenPairs = some ((distance : Int) - 1) :=
+      ShapeShanten hand .sevenPairs = some sevenPairsValue :=
     (shapeShanten_eq_some_iff).2 hshape
   have hvalue' : OverallShanten hand = some value := hvalue
   unfold OverallShanten at hvalue'
@@ -166,17 +144,17 @@ theorem overallShanten_le_six_of_thirteenTileHand
   case none.none =>
     omega
   case none.some =>
-    have hle : value ≤ (distance : Int) - 1 := by
+    have hle : value ≤ sevenPairsValue := by
       rw [← hvalue']
       exact min_le_left _ _
     omega
   case some.none =>
-    have hle : value ≤ (distance : Int) - 1 := by
+    have hle : value ≤ sevenPairsValue := by
       rw [← hvalue']
       exact min_le_right _ _
     omega
   case some.some =>
-    have hle : value ≤ (distance : Int) - 1 := by
+    have hle : value ≤ sevenPairsValue := by
       rw [← hvalue']
       exact le_trans (min_le_right _ _) (min_le_left _ _)
     omega
@@ -188,36 +166,13 @@ by the three hand-shape arguments below; it does not use any comparison
 between the three shapes.
 -/
 theorem shapeShanten_le_six_of_completion_bound
-    (happlicable : Applicable shape hand)
+    (_happlicable : Applicable shape hand)
     (hbound : ∃ distance : Nat, distance ≤ 7 ∧
       ReachesCompletion Complete shape hand distance)
     (value : Int)
     (hvalue : IsShapeShanten hand shape value) :
     value ≤ 6 := by
-  classical
-  obtain ⟨bound, hbound', hreachable⟩ := hbound
-  let reachable : Nat → Prop :=
-    fun distance => ReachesCompletion Complete shape hand distance
-  have hexists : ∃ distance, reachable distance :=
-    ⟨bound, hreachable⟩
-  let distance := Nat.find hexists
-  have hdistance : reachable distance :=
-    Nat.find_spec hexists
-  have hminimal : ∀ smaller, smaller < distance → ¬ reachable smaller := by
-    intro smaller hsmaller
-    exact Nat.find_min hexists (by simpa [distance] using hsmaller)
-  have hdistance_le : distance ≤ 7 := by
-    exact le_trans
-      (Nat.find_min' hexists (show reachable bound from hreachable)) hbound'
-  have hshape :
-      IsShapeShanten hand shape ((distance : Int) - 1) := by
-    refine ⟨happlicable, distance, by omega, hdistance, ?_⟩
-    intro smaller hsmaller hsmall
-    exact hminimal smaller hsmaller hsmall
-  have heq :
-      value = (distance : Int) - 1 :=
-    isShapeShanten_unique hvalue hshape
-  omega
+  simpa using hvalue.le_of_completion_bound hbound
 
 /--
 If a shape has a completion reachable in at most nine steps, then its
@@ -232,30 +187,7 @@ theorem mentsuHandShanten_le_eight_of_completion_bound
     (value : Int)
     (hvalue : IsShapeShanten hand .mentsuHand value) :
     value ≤ 8 := by
-  classical
-  obtain ⟨bound, hbound', hreachable⟩ := hbound
-  let reachable : Nat → Prop :=
-    fun distance => ReachesCompletion Complete .mentsuHand hand distance
-  have hexists : ∃ distance, reachable distance :=
-    ⟨bound, hreachable⟩
-  let distance := Nat.find hexists
-  have hdistance : reachable distance :=
-    Nat.find_spec hexists
-  have hminimal : ∀ smaller, smaller < distance → ¬ reachable smaller := by
-    intro smaller hsmaller
-    exact Nat.find_min hexists (by simpa [distance] using hsmaller)
-  have hdistance_le : distance ≤ 9 := by
-    exact le_trans
-      (Nat.find_min' hexists (show reachable bound from hreachable)) hbound'
-  have hshape :
-      IsShapeShanten hand .mentsuHand ((distance : Int) - 1) := by
-    refine ⟨hvalue.1, distance, by omega, hdistance, ?_⟩
-    intro smaller hsmaller hsmall
-    exact hminimal smaller hsmaller hsmall
-  have heq :
-      value = (distance : Int) - 1 :=
-    isShapeShanten_unique hvalue hshape
-  omega
+  simpa using hvalue.le_of_completion_bound hbound
 
 /-- With a fixed meld, only the mentsuHand shape contributes to overall shanten. -/
 theorem overallShanten_le_eight_of_fixedMelds

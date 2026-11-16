@@ -13,6 +13,15 @@ namespace Shanten
 def countDeficit (current target : TileCounts) : Nat :=
   ∑ tile : Tile, (target tile - current tile)
 
+private lemma countDeficit_eq_succ_of_pointwise
+    (current next target : TileCounts) (drawn : Tile)
+    (hpoint : ∀ tile, target tile - current tile =
+      target tile - next tile + (if tile = drawn then 1 else 0)) :
+    countDeficit current target = countDeficit next target + 1 := by
+  unfold countDeficit
+  simp_rw [hpoint]
+  simp [Finset.sum_add_distrib]
+
 /--
 For count vectors with the same total, `countDeficit` is exactly the number
 of exchanges needed when each exchange replaces one tile kind by another.
@@ -97,28 +106,28 @@ lemma validCounts_exchangeHand
       · exact hdiscarded'
       · exact hdrawn'
 
-/-- A chain consisting only of draw-and-discard exchanges. -/
-inductive ReachesExchange : Hand → Hand → Nat → Prop
-  | done {hand} : ReachesExchange hand hand 0
+/-- Exactly the given number of draws or exchanges, ending at a fixed hand. -/
+inductive ReachesHand : Hand → Hand → Nat → Prop
+  | done {hand} : ReachesHand hand hand 0
   | step {hand next target distance} :
       HandStep hand next →
-      ReachesExchange next target distance →
-      ReachesExchange hand target (distance + 1)
+      ReachesHand next target distance →
+      ReachesHand hand target (distance + 1)
 
-lemma ReachesExchange.append
-    (hfirst : ReachesExchange before middle distance₁)
-    (hsecond : ReachesExchange middle after distance₂) :
-    ReachesExchange before after (distance₁ + distance₂) := by
+lemma ReachesHand.append
+    (hfirst : ReachesHand before middle distance₁)
+    (hsecond : ReachesHand middle after distance₂) :
+    ReachesHand before after (distance₁ + distance₂) := by
   induction hfirst with
   | done =>
       simpa using hsecond
   | step hstep hrest ih =>
       have hcombined := ih hsecond
       simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
-        ReachesExchange.step hstep hcombined
+        ReachesHand.step hstep hcombined
 
-lemma ReachesExchange.toReachesCompletion
-    (hfirst : ReachesExchange before middle distance₁)
+lemma ReachesHand.toReachesCompletion
+    (hfirst : ReachesHand before middle distance₁)
     (hsecond : ReachesCompletion complete shape middle distance₂) :
     ReachesCompletion complete shape before (distance₁ + distance₂) := by
   induction hfirst with
@@ -130,8 +139,9 @@ lemma ReachesExchange.toReachesCompletion
         ReachesCompletion.step hstep hcombined
 
 /--
-An exchange directed at a fixed target count vector.  The drawn kind is
-deficient at the target, while the discarded kind is strictly in surplus.
+An exchange directed at a fixed target count vector. The drawn kind is
+deficient in the current hand relative to the target, while the discarded
+kind is strictly in surplus.
 -/
 def TargetExchange (target : TileCounts) (before after : Hand) : Prop :=
   ∃ discarded drawn,
@@ -246,57 +256,26 @@ lemma countDeficit_exchange
     (hne : discarded ≠ drawn) :
     countDeficit (exchangeHand before discarded drawn).counts target =
       countDeficit before.counts target - 1 := by
-  let deficit : Tile → Nat := fun tile => target tile - before.counts tile
-  let afterDeficit : Tile → Nat :=
-    fun tile => target tile - (exchangeHand before discarded drawn).counts tile
-  have hdrawn' :
-      afterDeficit drawn = deficit drawn - 1 := by
-    change target drawn - exchangeCounts before discarded drawn drawn =
-      target drawn - before.counts drawn - 1
-    exact deficit_after_drawing target before discarded drawn hne hdrawn
-  have hdiscarded' :
-      afterDeficit discarded = deficit discarded := by
-    change target discarded - exchangeCounts before discarded drawn discarded =
-      target discarded - before.counts discarded
-    exact deficit_after_discarding target before discarded drawn hne hdiscarded
-  have hother (tile : Tile) (htileDiscarded : tile ≠ discarded)
-      (htileDrawn : tile ≠ drawn) :
-      afterDeficit tile = deficit tile := by
-    change target tile - exchangeCounts before discarded drawn tile =
-      target tile - before.counts tile
-    exact deficit_unchanged target before discarded drawn tile
-      htileDiscarded htileDrawn
-  have hdiscarded_zero : deficit discarded = 0 := by
-    dsimp [deficit]
-    omega
-  have hdrawn_deficit :
-      deficit drawn = target drawn - before.counts drawn := by
-    rfl
-  have hsum :
-      (∑ tile : Tile, afterDeficit tile) =
-        (∑ tile : Tile, deficit tile) - 1 := by
-    rw [← Finset.sum_erase_add (Finset.univ : Finset Tile)
-      afterDeficit (Finset.mem_univ drawn)]
-    rw [← Finset.sum_erase_add (Finset.univ.erase drawn)
-      afterDeficit (Finset.mem_erase.mpr ⟨hne, Finset.mem_univ discarded⟩)]
-    rw [← Finset.sum_erase_add (Finset.univ : Finset Tile)
-      deficit (Finset.mem_univ drawn)]
-    rw [← Finset.sum_erase_add (Finset.univ.erase drawn)
-      deficit (Finset.mem_erase.mpr ⟨hne, Finset.mem_univ discarded⟩)]
-    have hrest :
-        (∑ tile ∈ (Finset.univ.erase drawn).erase discarded, afterDeficit tile) =
-          ∑ tile ∈ (Finset.univ.erase drawn).erase discarded, deficit tile := by
-      apply Finset.sum_congr rfl
-      intro tile htile
-      exact hother tile
-        (Finset.mem_erase.mp htile).1
-        (Finset.mem_erase.mp (Finset.mem_erase.mp htile).2).1
-    rw [hrest, hdiscarded', hdrawn', hdiscarded_zero]
-    rw [hdrawn_deficit]
-    omega
-  change (∑ tile : Tile, afterDeficit tile) =
-    (∑ tile : Tile, deficit tile) - 1
-  exact hsum
+  have hdecrease : countDeficit before.counts target =
+      countDeficit (exchangeHand before discarded drawn).counts target + 1 := by
+    apply countDeficit_eq_succ_of_pointwise (drawn := drawn)
+    intro tile
+    change target tile - before.counts tile =
+      target tile - exchangeCounts before discarded drawn tile +
+        (if tile = drawn then 1 else 0)
+    by_cases htileDrawn : tile = drawn
+    · subst tile
+      rw [deficit_after_drawing target before discarded drawn hne hdrawn]
+      simp
+      omega
+    · simp only [if_neg htileDrawn, Nat.add_zero]
+      by_cases htileDiscarded : tile = discarded
+      · subst tile
+        exact (deficit_after_discarding target before discarded drawn
+          hne hdiscarded).symm
+      · exact (deficit_unchanged target before discarded drawn tile
+          htileDiscarded htileDrawn).symm
+  omega
 
 lemma countDeficit_handStep_le
     (before after : Hand) (target : TileCounts)
@@ -367,40 +346,14 @@ lemma countDeficit_draw
           before.counts tile + (if tile = drawn then 1 else 0))
         target + 1 =
       countDeficit before.counts target := by
-  let deficit : Tile → Nat :=
-    fun tile => target tile - before.counts tile
-  let afterDeficit : Tile → Nat :=
-    fun tile =>
-      target tile -
-        (before.counts tile + (if tile = drawn then 1 else 0))
-  have hdrawn' : afterDeficit drawn + 1 = deficit drawn := by
-    simp [afterDeficit, deficit]
+  symm
+  apply countDeficit_eq_succ_of_pointwise (drawn := drawn)
+  intro tile
+  by_cases htile : tile = drawn
+  · subst tile
+    simp
     omega
-  have hother (tile : Tile) (htile : tile ≠ drawn) :
-      afterDeficit tile = deficit tile := by
-    simp [afterDeficit, deficit, htile]
-  have hpoint (tile : Tile) :
-      afterDeficit tile + (if tile = drawn then 1 else 0) =
-        deficit tile := by
-    by_cases htile : tile = drawn
-    · subst tile
-      simpa using hdrawn'
-    · simp [htile, hother tile htile]
-  have hsum :
-      (∑ tile : Tile, afterDeficit tile) + 1 =
-        ∑ tile : Tile, deficit tile := by
-    calc
-      (∑ tile : Tile, afterDeficit tile) + 1 =
-          ∑ tile : Tile,
-            (afterDeficit tile + (if tile = drawn then 1 else 0)) := by
-        simp [Finset.sum_add_distrib]
-      _ = ∑ tile : Tile, deficit tile := by
-        apply Finset.sum_congr rfl
-        intro tile _
-        exact hpoint tile
-  change (∑ tile : Tile, afterDeficit tile) + 1 =
-    ∑ tile : Tile, deficit tile
-  exact hsum
+  · simp [htile]
 
 lemma targetHand_hasTiles_countsOfTiles
     (before : Hand) (tiles : Multiset Tile) :
@@ -416,20 +369,20 @@ lemma countsOfTiles_sum_eq_card (tiles : Multiset Tile) :
   | @cons tile tiles ih =>
       simp [countsOfTiles, ih, Finset.sum_add_distrib]
 
-lemma reachesExchange_targetHand_of_equal_sum
+lemma reachesHand_targetHand_of_equal_sum
     (before : Hand) (target : TileCounts)
     (hsum : (∑ tile : Tile, before.counts tile) =
       ∑ tile : Tile, target tile) :
     ∃ distance,
       distance = countDeficit before.counts target ∧
-      ReachesExchange before (targetHand before target) distance := by
+      ReachesHand before (targetHand before target) distance := by
   have aux : ∀ d : Nat, ∀ current : Hand,
       (∑ tile : Tile, current.counts tile) =
         ∑ tile : Tile, target tile →
       countDeficit current.counts target = d →
       ∃ distance,
         distance = d ∧
-        ReachesExchange current (targetHand current target) distance := by
+        ReachesHand current (targetHand current target) distance := by
     intro d
     refine Nat.strong_induction_on d ?_
     intro d ih current hsumCurrent hmeasure
@@ -458,7 +411,7 @@ lemma reachesExchange_targetHand_of_equal_sum
         funext tile
         exact heq tile (Finset.mem_univ tile)
       subst hcounts
-      refine ⟨0, ?_, ReachesExchange.done⟩
+      refine ⟨0, ?_, ReachesHand.done⟩
       simp [countDeficit] at hmeasure
       omega
     · have hpositive : 0 < d := Nat.pos_of_ne_zero hd
@@ -490,7 +443,7 @@ lemma reachesExchange_targetHand_of_equal_sum
         hsumAfter rfl
       refine ⟨distance + 1, ?_, ?_⟩
       · omega
-      · apply ReachesExchange.step
+      · apply ReachesHand.step
         · exact exchangeHand_step current discarded drawn hneTiles (by omega)
         · simpa [next, targetHand, exchangeHand] using hrest
   exact aux (countDeficit before.counts target) before hsum rfl
@@ -518,8 +471,7 @@ lemma reachesCompletion_of_one_more_target_tile
     (hcomplete : Complete shape (targetHand before target)) :
     ReachesCompletion Complete shape before
       (countDeficit before.counts target) := by
-  have hvalid : ∀ tile, target tile ≤ 4 := by
-    cases shape <;> exact hcomplete.1
+  have hvalid : ∀ tile, target tile ≤ 4 := hcomplete.validCounts
   have hdrawnExists : ∃ drawn, before.counts drawn < target drawn := by
     by_contra hnone
     push Not at hnone
@@ -545,7 +497,7 @@ lemma reachesCompletion_of_one_more_target_tile
       ∑ tile : Tile, target tile := by
     simpa [next, Finset.sum_add_distrib] using hsum.symm
   obtain ⟨distance, hdistance, hexchange⟩ :=
-    reachesExchange_targetHand_of_equal_sum next target hsumNext
+    reachesHand_targetHand_of_equal_sum next target hsumNext
   have hrest : ReachesCompletion Complete shape next distance := by
     simpa using hexchange.toReachesCompletion
       (ReachesCompletion.done (show Complete shape (targetHand next target) from

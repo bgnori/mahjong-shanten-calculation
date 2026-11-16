@@ -1,5 +1,4 @@
 import Shanten.Exchange
-import Mathlib.Data.Nat.Find
 import Mathlib.Tactic.FinCases
 
 /-!
@@ -88,24 +87,16 @@ theorem thirteenOrphansShanten_le_thirteen
     (h13 : IsThirteenTileHand hand)
     (hvalue : IsShapeShanten hand .thirteenOrphans value) :
     value ≤ 13 := by
-  obtain ⟨bound, hbound, hreach⟩ := reaches_thirteenOrphans_completion hand h13
-  obtain ⟨_, distance, hvalue, _, hminimal⟩ := hvalue
-  have : distance ≤ bound := by
-    by_contra h
-    exact hminimal bound (by omega) hreach
-  omega
+  simpa using hvalue.le_of_completion_bound
+    (reaches_thirteenOrphans_completion hand h13)
 
 theorem thirteenOrphansShanten_exists
     (h13 : IsThirteenTileHand hand) :
     ∃ value : Int, IsShapeShanten hand .thirteenOrphans value ∧ value ≤ 13 := by
-  classical
-  obtain ⟨bound, _, hreach⟩ := reaches_thirteenOrphans_completion hand h13
-  have hexists : ∃ distance, ReachesCompletion Complete .thirteenOrphans hand distance :=
-    ⟨bound, hreach⟩
-  have hvalue : IsShapeShanten hand .thirteenOrphans ((Nat.find hexists : Int) - 1) :=
-    ⟨h13.1, Nat.find hexists, by omega, Nat.find_spec hexists,
-      fun smaller hsmaller => Nat.find_min hexists hsmaller⟩
-  exact ⟨_, hvalue, thirteenOrphansShanten_le_thirteen h13 hvalue⟩
+  obtain ⟨bound, hbound, hreach⟩ := reaches_thirteenOrphans_completion hand h13
+  obtain ⟨value, hvalue, hvalueBound⟩ :=
+    exists_isShapeShanten_of_reachesCompletion hreach h13.1
+  exact ⟨value, hvalue, by omega⟩
 
 lemma kokushiWorstCase_isThirteenTileHand : IsThirteenTileHand kokushiWorstCase := by
   refine ⟨rfl, ?_, ?_⟩

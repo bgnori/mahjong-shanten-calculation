@@ -45,7 +45,7 @@ lemma reachesCompletion_mentsuHand_of_equal_sum
     ReachesCompletion Complete .mentsuHand before
       (countDeficit before.counts target) := by
   obtain ⟨distance, hdistance, hexchange⟩ :=
-    reachesExchange_targetHand_of_equal_sum before target hsum
+    reachesHand_targetHand_of_equal_sum before target hsum
   have hcomplete :
       Complete .mentsuHand (targetHand before target) :=
     complete_mentsuHand_targetHand before target pair melds
@@ -55,7 +55,7 @@ lemma reachesCompletion_mentsuHand_of_equal_sum
         (targetHand before target) 0 :=
     ReachesCompletion.done hcomplete
   simpa only [Nat.add_zero, hdistance] using
-    ReachesExchange.toReachesCompletion hexchange hdone
+    ReachesHand.toReachesCompletion hexchange hdone
 
 lemma reachesCompletion_mentsuHand_of_one_more_target_tile
     (before : Hand) (target : TileCounts)

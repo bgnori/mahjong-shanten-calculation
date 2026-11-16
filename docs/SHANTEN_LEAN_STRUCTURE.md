@@ -11,7 +11,7 @@
 |---|---|
 | [Shanten.lean](../Shanten.lean) | 主要モジュールをまとめる公開入口（直接importは下記参照）。 |
 | [Core.lean](../Shanten/Core.lean) | 牌・手牌・面子の基礎モデル、カウントや基本述語。 |
-| [Specification.lean](../Shanten/Specification.lean) | 形、完成形、到達関係、形シャンテンと総合値の宣言的仕様。 |
+| [Specification.lean](../Shanten/Specification.lean) | 形、完成形、到達関係、形シャンテンと総合値の宣言的仕様。到達性からの値の存在・上界の共通証明。 |
 | [Exchange.lean](../Shanten/Exchange.lean) | 形に依存しない不足枚数、交換操作、固定目標への到達、到達距離の下界。 |
 | [SevenPairs.lean](../Shanten/SevenPairs.lean) | 七対子の公開import入口。実装は下表のモジュールに分割。 |
 | [ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) | 有効13枚手の国士無双の仕様値の存在・上界13と、最大値を達成する具体例。 |
@@ -39,9 +39,9 @@
 `Reachability` を読む。`Completion` は交換戦略に依存しない。
 `Reachability` と `Completion` を組み合わせる上界定理は、従来どおり
 [Bounds.lean](../Shanten/Bounds.lean) に置く。
-面子手も使う `countDeficit`・`exchangeHand`・`TargetExchange`・`ReachesExchange`
+面子手も使う `countDeficit`・`exchangeHand`・`TargetExchange`・`ReachesHand`
 などは [Exchange.lean](../Shanten/Exchange.lean) に移し、面子手から七対子への依存を外した。
-これらの共有宣言名と型は維持した。
+`ReachesHand` の改名前後の対応は下記参照。
 
 ### 改名
 
@@ -58,6 +58,9 @@
 | `IsPreservingDiscard` | `IsPairPreservingDiscard` | 保存する対象が対であることを明示する。 |
 | `IntroducesNewKind` | `IsAbsentTileKind` | 操作ではなく、現在のカウントが0という条件を表す。 |
 | `exists_nonPair_kind` | `exists_singleton_kind_of_seven_kinds_lt_six_pairs` | 0枚の牌種ではなく単独牌の存在を、前提とともに示す。 |
+| `ReachesExchange` | `ReachesHand` | 実際の遷移は `HandStep` であり、交換に加えてドローも許すことを明確にする。 |
+| `*.toReachesExchange` | `*.toReachesHand` | 各七対子交換列から共有到達関係への変換も改名する。 |
+| `reachesExchange_targetHand_of_equal_sum` | `reachesHand_targetHand_of_equal_sum` | 固定目標への到達補題を関係名に合わせる。 |
 
 ## モジュール間の依存
 
@@ -87,3 +90,10 @@ Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, MentsuHand, B
 交換列の補題を共有の [Exchange.lean](../Shanten/Exchange.lean) へ移動した。
 既存の公開名・型を維持し、完成形への到達と不足数による下界を形に依存しない補題へ
 一般化した。面子手の既存補題はその特殊化として利用する。
+
+完成形の4枚制限の取り出しは `Complete.validCounts`、完成経路からのシャンテン
+上界は `IsShapeShanten.le_of_completion_bound`、到達性からの値の存在は
+`exists_isShapeShanten_of_reachesCompletion` に共通化した。形ごとの証明は
+完成経路の構成に集中し、最小距離の選択や上界への変換を重複させない。
+ドローと目標指向交換で不足数が1減る証明も、牌種ごとの等式を総和へ持ち上げる
+同じ補題を利用する。完成条件・到達回数・シャンテン値の意味は変更していない。

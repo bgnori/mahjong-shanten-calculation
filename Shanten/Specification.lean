@@ -1,4 +1,5 @@
 import Shanten.Core
+import Mathlib.Data.Nat.Find
 
 namespace Shanten
 
@@ -33,6 +34,9 @@ def Complete : Shape → Hand → Prop
         hand.fixedMelds = 0 ∧
           ∃ pair, pair ∈ orphanKinds ∧
             HasTiles hand (orphanTiles + Multiset.replicate 1 pair)
+
+lemma Complete.validCounts (hcomplete : Complete shape hand) : ValidCounts hand := by
+  cases shape <;> exact hcomplete.1
 
 /--
 One improvement step either draws one tile or exchanges one standing tile for
@@ -88,6 +92,42 @@ theorem isShapeShanten_unique
     rcases lt_or_gt_of_ne hne with h₁₂ | h₂₁
     · exact hminimal₂ distance₁ h₁₂ hreaches₁
     · exact hminimal₁ distance₂ h₂₁ hreaches₂
+  omega
+
+/-- Any completion path bounds the minimal completion distance. -/
+lemma IsShapeShanten.add_one_le_of_reachesCompletion
+    (hvalue : IsShapeShanten hand shape value)
+    (hreach : ReachesCompletion Complete shape hand distance) :
+    value + 1 ≤ (distance : Int) := by
+  obtain ⟨_, minimum, hminimum, _, hminimal⟩ := hvalue
+  have : minimum ≤ distance := by
+    by_contra h
+    exact hminimal distance (by omega) hreach
+  omega
+
+lemma IsShapeShanten.le_of_completion_bound
+    (hvalue : IsShapeShanten hand shape value)
+    (hbound : ∃ distance : Nat, distance ≤ bound ∧
+      ReachesCompletion Complete shape hand distance) :
+    value ≤ (bound : Int) - 1 := by
+  obtain ⟨distance, hbound, hreach⟩ := hbound
+  have := hvalue.add_one_le_of_reachesCompletion hreach
+  omega
+
+/-- An applicable reachable shape has a shanten value bounded by the given path. -/
+theorem exists_isShapeShanten_of_reachesCompletion
+    (hreach : ReachesCompletion Complete shape hand distance)
+    (happlicable : Applicable shape hand) :
+    ∃ value : Int, IsShapeShanten hand shape value ∧
+      value ≤ (distance : Int) - 1 := by
+  classical
+  have hexists : ∃ distance, ReachesCompletion Complete shape hand distance :=
+    ⟨distance, hreach⟩
+  have hvalue : IsShapeShanten hand shape ((Nat.find hexists : Int) - 1) :=
+    ⟨happlicable, Nat.find hexists, by omega, Nat.find_spec hexists,
+      fun smaller hsmaller => Nat.find_min hexists hsmaller⟩
+  refine ⟨_, hvalue, ?_⟩
+  have := hvalue.add_one_le_of_reachesCompletion hreach
   omega
 
 /- A missing value means that the shape is not a candidate for this hand. -/

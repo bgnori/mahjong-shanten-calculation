@@ -18,9 +18,9 @@ inductive ReachesPairing : Hand → Hand → Nat → Prop
       ReachesPairing next target distance →
       ReachesPairing hand target (distance + 1)
 
-lemma ReachesPairing.toReachesExchange :
+lemma ReachesPairing.toReachesHand :
     ReachesPairing before after distance →
-      ReachesExchange before after distance := by
+      ReachesHand before after distance := by
   intro h
   induction h with
   | done =>
@@ -36,9 +36,9 @@ inductive ReachesDistinctness : Hand → Hand → Nat → Prop
       ReachesDistinctness next target distance →
       ReachesDistinctness hand target (distance + 1)
 
-lemma ReachesDistinctness.toReachesExchange :
+lemma ReachesDistinctness.toReachesHand :
     ReachesDistinctness before after distance →
-      ReachesExchange before after distance := by
+      ReachesHand before after distance := by
   intro h
   induction h with
   | done =>
@@ -116,9 +116,9 @@ inductive ReachesPairMaking : Hand → Hand → Nat → Prop
       ReachesPairMaking next target distance →
       ReachesPairMaking hand target (distance + 1)
 
-lemma ReachesPairMaking.toReachesExchange :
+lemma ReachesPairMaking.toReachesHand :
     ReachesPairMaking before after distance →
-      ReachesExchange before after distance := by
+      ReachesHand before after distance := by
   intro h
   induction h with
   | done =>
@@ -204,9 +204,9 @@ inductive ReachesProtectedPairMaking
       ReachesProtectedPairMaking protectedTiles next target distance →
       ReachesProtectedPairMaking protectedTiles hand target (distance + 1)
 
-lemma ReachesProtectedPairMaking.toReachesExchange :
+lemma ReachesProtectedPairMaking.toReachesHand :
     ReachesProtectedPairMaking protectedTiles before after distance →
-      ReachesExchange before after distance := by
+      ReachesHand before after distance := by
   intro h
   induction h with
   | done =>

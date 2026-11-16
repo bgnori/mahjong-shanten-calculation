@@ -280,9 +280,21 @@
   ある状態から次の状態へ進む1回の操作。`HandStep` は牌を引く、または1枚を
   別の牌種に交換する改善操作、`NextMentsuHandState` は面子手DPの1選択を表す。
 
+- **不足枚数 (count deficit)** `[数学][Lean]`
+  目標に対して足りない枚数の総和 `∑ tile, (target tile - current tile)`。
+  `Nat` の引き算なので、余剰の牌種は0として数える。`countDeficit` は完成形の
+  種類に依存しない。同じ総枚数の目標へはこの回数の交換で到達でき、完成目標が
+  1枚多い場合はドロー1回と交換でこの回数の改善になる。
+
+- **目標指向交換 (target-directed exchange)** `[数学][Lean]`
+  固定した目標に対して不足する牌種を引き、余剰の牌種を捨てる交換。
+  `TargetExchange` が表し、不足枚数をちょうど1減らす。
+
 - **最短距離 (minimal distance)** `[数学]`
   到達可能な距離のうち最小のもの。距離0が完成、距離1がテンパイになるため、
-  シャンテン値は最短距離から1を引く。
+  シャンテン値は最短距離から1を引く。適用可能な形への到達があれば最短距離と
+  シャンテン値が存在し、任意の完成経路の距離がその上界になる。この推論は
+  面子手・七対子・国士無双で共通である。
 
 - **健全性 (soundness)** `[数学][検証]`
   計算器が「完成」と報告したものが、宣言的な完成条件を実際に満たす性質。
@@ -306,6 +318,7 @@
 | `Shape` | `mentsuHand`、`sevenPairs`、`thirteenOrphans` の形の列挙型。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `Applicable` | 形を評価できるかを表す述語。特殊形は固定面子なしの場合だけ真。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `Complete` | 指定した形の完成条件。役や待ちの良し悪しは含めない。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
+| `Complete.validCounts` | 3形に共通する完成形の4枚制限を取り出す補題。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `HandStep` | 1枚ドローまたは1枚交換による改善遷移。固定面子数は保存する。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `ReachesCompletion` | 指定回数の `HandStep` で完成条件へ到達する関係。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `ShapeShanten` | 形ごとの最小到達距離をシャンテン値へ変換した、値の候補。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
@@ -315,10 +328,13 @@
 | `MentsuHandSearch` | 完成面子4個＋雀頭という、現行の面子手探索の完了条件。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
 | `MentsuHandBlockSearch` | 面子＋搭子の合計4ブロック＋雀頭というブロック探索の完了条件。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
 | `MentsuHandBlockDecomposition` | 面子手を雀頭・完成面子・搭子へ分解した証明付き構造。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
-| `target` | 到達したい完成形の牌の多重集合。`mentsuHandTarget` などで構成する。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
-| `deficit` | 現在のカウントが目標に不足する枚数。共有定義 `countDeficit` を必要な交換・ドローの下限に使う。 | [`Shanten/Exchange.lean`](../Shanten/Exchange.lean) |
+| `target` | 到達したい目標。`TileCounts` または牌の多重集合で表す。完成形とは限らず、七対子のテンパイ目標も含む。 | [`Shanten/Exchange.lean`](../Shanten/Exchange.lean) |
+| `countDeficit` | 現在のカウントが目標に不足する枚数の総和。必要な交換・ドローの下限に使う。 | [`Shanten/Exchange.lean`](../Shanten/Exchange.lean) |
+| `TargetExchange` | 目標に対する不足牌種のドローと余剰牌種の打牌による交換。 | [`Shanten/Exchange.lean`](../Shanten/Exchange.lean) |
 | `CompletionRespectsCopyLimit` | 搭子を補充して完成させても、各牌種4枚を超えないという述語。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
-| `ReachesExchange` | `HandStep` を指定回数つないだ関係。面子手・七対子の構成的証明で共有する。 | [`Shanten/Exchange.lean`](../Shanten/Exchange.lean) |
+| `ReachesHand` | 指定回数の `HandStep` で指定した手牌へ到達する関係。交換だけでなくドローも許す。旧名は `ReachesExchange`。 | [`Shanten/Exchange.lean`](../Shanten/Exchange.lean) |
+| `IsShapeShanten.le_of_completion_bound` | 完成経路の距離上界からシャンテン上界を得る、3形共通の補題。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
+| `exists_isShapeShanten_of_reachesCompletion` | 適用可能な形への完成経路から、シャンテン値の存在と上界を得る共通定理。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `PairingExchange` / `PairMakingExchange` | 前者は2枚未満の牌種へ引く交換。後者は既存の対を保ちながら単独牌を対にする交換。 | [`SevenPairs/Exchange/Basic.lean`](../Shanten/SevenPairs/Exchange/Basic.lean) |
 | `IsPairPreservingDiscard` / `IsAbsentTileKind` | 対を残せる3枚以上の牌種／現在0枚の牌種という条件。 | [`SevenPairs/Exchange/Basic.lean`](../Shanten/SevenPairs/Exchange/Basic.lean) |
 | `ProtectedPairMakingExchange` | 保護対象の牌種を残したまま対を作る交換の分類。 | [`SevenPairs/Exchange/Basic.lean`](../Shanten/SevenPairs/Exchange/Basic.lean) |
