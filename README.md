@@ -17,6 +17,9 @@ Terminology shared by the Go contract, Mahjong model, and Lean proofs is documen
 in [docs/GLOSSARY.md](docs/GLOSSARY.md).
 Potentially misleading terminology and proposed wording changes are documented in
 [docs/TERMINOLOGY_REVIEW.md](docs/TERMINOLOGY_REVIEW.md).
+The repository-wide review of the Lean model, Go contract, and verification
+environment is recorded in
+[docs/PROJECT_REVIEW_2026-11-16.md](docs/PROJECT_REVIEW_2026-11-16.md).
 
 ## Input
 
