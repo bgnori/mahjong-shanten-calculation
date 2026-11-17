@@ -26,6 +26,9 @@ domain core are recorded in
 A proposed independent Lean domain core, including Int37 terminology and tile
 capacity constraints, is described in
 [docs/MAHJONG_DOMAIN_CORE_PLAN_2026-11-16.md](docs/MAHJONG_DOMAIN_CORE_PLAN_2026-11-16.md).
+The implementation work packages, migration dependencies, and acceptance criteria
+for extracting the shared core with tenpai-shape classification are documented in
+[docs/SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md](docs/SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md).
 
 ## Input
 
