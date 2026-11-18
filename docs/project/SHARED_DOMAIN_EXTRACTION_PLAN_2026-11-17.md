@@ -2,7 +2,7 @@
 
 **作成日:** 2026-11-17  
 **状態:** W0完了（2026-11-17）、W1完了（2026-11-18）、W2の方針決定完了（2026-11-18）、
-W3完了（2026-11-18）。
+W3完了（2026-11-18）、W4完了（2026-11-19）。
 W0の対象コミット、用語対応、基準検査結果は
 [W0報告書](SHARED_DOMAIN_W0_BASELINE_2026-11-17.md)を参照。
 
@@ -326,6 +326,21 @@ shanten側は既存牌型との往復、Int37正規化・容量・集約の対�
 - 分類側: `lake build Mahjong MahjongTests`成功（866 jobs）、
   `go test ./mahjong`成功（0.226秒）。
 - 利用側の用語集から共通用語集へリンクした。既存の探索・分類実装は変更していない。
+
+### W4（完了、2026-11-19）
+
+`mahjong-domain-core`のコミット
+`6cbb59efcc56a45cf0f321b6cc8653d64cdadf57`に、対子・通常面子・槓占有と
+証人付き通常形分解仕様を追加した。槓は通常面子型に含めず、分解は雀頭と順序付き面子リストで保持するため、
+同一部品の反復や同じカウントに至る別分解を集合化で失わない。
+
+- `Pair.tiles`、`Meld.tiles`、`Kan.occupiedTiles`がそれぞれ2・3・4枚を表すことを証明。
+- `MeldList.counts_cons`と`StandardDecomposition.counts_eq_parts`で牌種ごとの多重度保存を示した。
+- `StandardCompletion`と、雀頭・面子リスト・指定面子数・牌種カウントを個別に持つ仕様との双方向同値
+  `standardCompletion_iff_parts`を証明し、`assert_no_sorry`の検査対象に加えた。
+- 共通用語集とREADMEに正式語、適用範囲、前提、Lean識別子を記載した。
+- 共通核の`lake build`成功（803 jobs）。Lean／mathlibは`v4.35.0`。
+- 利用側の既存仕様との接続・固定依存更新は未実施で、W5-S／W5-Cの対象とする。
 
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean
