@@ -137,6 +137,11 @@ The `dev` configuration is the default when opening this repository in a
 Dev Container. To use the lighter `user` configuration instead, select
 `.devcontainer/user/devcontainer.json` explicitly in VS Code. Lean 4 and
 mathlib in `dev` are both pinned to `v4.35.0`.
+The development image installs the version from [`lean-toolchain`](lean-toolchain)
+at build time. Rebuild the image when the pin changes; new containers from the
+same image do not download Lean again. For a plain Docker build, run
+`docker build -f .devcontainer/dev/Dockerfile -t shanten-dev .` from the
+repository root.
 Only the imported mathlib modules and their transitive dependencies are loaded
 and their prebuilt cache is fetched when the container is created. The Lean
 proofs use finite sets, multisets, natural numbers, and integers rather than

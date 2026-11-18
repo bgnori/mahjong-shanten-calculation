@@ -13,3 +13,9 @@ RUN rm -f /etc/apt/sources.list.d/yarn.list \
     && chown -R vscode:vscode "${ELAN_HOME}" \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+COPY lean-toolchain /tmp/lean-toolchain
+RUN toolchain="$(cat /tmp/lean-toolchain)" \
+    && runuser -u vscode -- elan toolchain install "$toolchain" \
+    && runuser -u vscode -- elan default "$toolchain" \
+    && rm /tmp/lean-toolchain

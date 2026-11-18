@@ -1,7 +1,8 @@
 {
   "name": "shanten-dev",
   "build": {
-    "dockerfile": "dev/Dockerfile"
+    "dockerfile": "dev/Dockerfile",
+    "context": ".."
   },
   "runArgs": ["--cpus=2", "--memory=16g"],
   "mounts": [
@@ -12,7 +13,7 @@
     "MATHLIB_NO_CACHE_ON_UPDATE": "1",
     "LEAN_NUM_THREADS": "2"
   },
-  "postCreateCommand": "elan toolchain install leanprover/lean4:v4.35.0 && lake update && lake exe cache get $(find Shanten -name '*.lean' -exec sed -n 's/^import \\(Mathlib\\..*\\)$/\\1/p' {} + | sort -u)",
+  "postCreateCommand": "lake update && lake exe cache get $(find Shanten -name '*.lean' -exec sed -n 's/^import \\(Mathlib\\..*\\)$/\\1/p' {} + | sort -u)",
   "customizations": {
     "vscode": {
       "extensions": ["golang.go", "leanprover.lean4"]
