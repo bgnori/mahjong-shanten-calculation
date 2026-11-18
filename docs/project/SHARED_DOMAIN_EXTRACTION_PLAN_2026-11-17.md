@@ -318,6 +318,9 @@ shanten側は既存牌型との往復、Int37正規化・容量・集約の対�
 両consumerは共通核のSHA `a21dd8484d22901683eeedd2ed77625245031029`に固定し、
 同SHAをGitHubの`main`へpushした。
 
+結果の独立レビューは[W3対応レビュー報告](SHARED_DOMAIN_W3_REVIEW_2026-11-19.md)を参照。
+確認時点ではconsumer側のW3変更はローカル`main`にあり、GitHubの`origin/main`には未反映。
+
 - 共通核: `lake build`成功。集約の加算・総数・容量保存、および136／37／34対応を含む。
 - shanten: `lake build`成功（934 jobs）。既存の`sorry`検査にInt37接続定理を追加。
 - 分類側: `lake build Mahjong MahjongTests`成功（866 jobs）、
