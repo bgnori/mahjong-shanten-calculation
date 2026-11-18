@@ -310,8 +310,9 @@ W0の固定基準コミットとは異なる分類側checkoutで実施したこ�
 ### W3（進行中）
 
 `mahjong-domain-core`に牌種・牌カウント・安定した34種indexを追加し、
-shanten側にSHA固定依存と、既存型との往復を保証するアダプタを導入した。
-136／37／34対応、集約・容量保存、および分類側アダプタは未完了。
+両利用側にSHA固定依存と既存型との往復を保証するアダプタを導入した。
+分類側では既存の34種順とのindex対応も証明した。136／37／34対応、
+集約・容量保存は未完了。
 
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean
