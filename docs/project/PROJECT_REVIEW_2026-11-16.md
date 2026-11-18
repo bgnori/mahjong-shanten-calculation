@@ -50,9 +50,9 @@ Lean検査で裏付けた。全証明本文の独立した数学的再証明、�
 
 ## R1：交換遷移が4枚制限を保存しない
 
-**根拠:** [HandStep](../Shanten/Specification.lean#L45)、
-[exchangeHand_step](../Shanten/Exchange.lean#L59)、
-[validCounts_exchangeHand](../Shanten/Exchange.lean#L84)。
+**根拠:** [HandStep](../../Shanten/Specification.lean#L45)、
+[exchangeHand_step](../../Shanten/Exchange.lean#L59)、
+[validCounts_exchangeHand](../../Shanten/Exchange.lean#L84)。
 
 ドロー分岐には `ValidCounts after` があるが、交換分岐にはない。
 `exchangeHand_step` も、捨てる牌が存在して引く牌と異なることだけで遷移を構成する。
@@ -96,7 +96,7 @@ Lean検査で裏付けた。全証明本文の独立した数学的再証明、�
   目標に向かう交換には目標の牌種別4枚制限も要求した。
   以前の、無効な開始手や無効な目標にも適用できた補題の型は意図的に制限している。
   有効13枚相当手牌に対する一般探索の仕様一致・全域性の前提は変更していない。
-- [回帰検査](../Shanten/MentsuHand/Examples.lean) で、上記13枚手が有効であること、
+- [回帰検査](../../Shanten/MentsuHand/Examples.lean) で、上記13枚手が有効であること、
   東5枚への交換と任意長の経路が存在しないこと、有効な交換と逆向きの4枚目のドローを検査した。
 - `lake build Shanten` 成功（909 jobs）。保存定理・共有到達・一般探索・バッチ走査・
   七対子上限・国士最大値の主要14宣言を `#print axioms` で検査し、`sorryAx` 依存なし。
@@ -104,13 +104,13 @@ Lean検査で裏付けた。全証明本文の独立した数学的再証明、�
 
 ## R2：固定面子の個数だけでは契約の数値を保持できない
 
-**根拠:** [Hand](../Shanten/Core.lean#L32)、
-[Complete](../Shanten/Specification.lean#L19)、
-[Input](../shanten.go#L28)、
-[入力の合算容量制約](../README.md#input)。
+**根拠:** [Hand](../../Shanten/Core.lean#L32)、
+[Complete](../../Shanten/Specification.lean#L19)、
+[Input](../../shanten.go#L28)、
+[入力の合算容量制約](../../README.md#input)。
 
 現行Leanモデルが固定面子の容量検証を表現できない点は
-[現行計画](./SHANTEN_LEAN4_PLAN.md#目的と維持する契約) に正しく明記されている。
+[現行計画](SHANTEN_LEAN4_PLAN.md#目的と維持する契約) に正しく明記されている。
 ただし、入力検証をGo側で済ませれば残りの計算がそのまま正しくなる、という関係ではない。
 
 次の二つは、どちらも入力時点では合算4枚制限に違反しない。
@@ -139,20 +139,20 @@ Bの値は0なので、抽象化後の同一入力から両者の正しい値を
 ### R2対応結果：段階導入（2026-11-16）
 
 利用者の選択に従い、既存の `Hand`・一般探索を全面移行せず、
-[容量付きモデル](../Shanten/Capacity.lean) を `Shanten.Capacity` に追加した。
+[容量付きモデル](../../Shanten/Capacity.lean) を `Shanten.Capacity` に追加した。
 
 - 固定面子の実牌内容から残余容量を導出する。通常の面子は既存 `Meld` を再利用し、
   槓は1面子・消費4枚。`ValidHand` は手元牌と固定牌の和が4以下であること、
   固定面子数の整合・上限4を要求する。固定牌だけで超過する入力も拒否する。
 - 入力・構造的完成形・ドロー・交換・経路に同じ固定文脈の容量制約を課し、
   容量付き最短距離仕様と値の一意性を定義・証明した。
-- [A/B受入証明](../Shanten/Capacity/Examples.lean) の `inputA_shanten` は値1、
+- [A/B受入証明](../../Shanten/Capacity/Examples.lean) の `inputA_shanten` は値1、
   `inputB_shanten` は値0。いずれも到達上界だけでなく最短性を証明した。
   両入力の有効性、容量超過のドロー・交換、槓と固定牌だけの容量超過も回帰検査した。
 - 旧モデルへの射影は距離を保存し、両値が存在すれば旧値は新値の下界となる。
   `ValidHand [] hand` の下では `isShapeShanten_nil_iff` が3形の仕様一致を与える。
   固定面子ありの旧計算値をそのまま新しい答えとは扱わない。
-  詳細な[設計・再利用範囲](./SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2)を計画へ追記した。
+  詳細な[設計・再利用範囲](SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2)を計画へ追記した。
 - `lake build` 成功（915 jobs）。容量付きモデルの主要9宣言を通常ビルドの証明穴検査に追加し、
   `#print axioms` でも `sorryAx`・`native_decide` 依存がないことを確認した。
 
@@ -168,10 +168,10 @@ Go実装は保留であり、Go契約全体への適合は主張しない。
   完成後の手元牌と固定牌の合算4枚制限を満たす候補から最小値を計算する。
 - 全完成候補の被覆性、候補への容量を守る到達経路、任意の完成経路に対する不足枚数下界を証明した。
   固定面子が占有しない字牌から完成目標も構成し、目標の存在を入力前提に残していない。
-- [仕様一致・全域性](../Shanten/Capacity/Totality.lean) は
+- [仕様一致・全域性](../../Shanten/Capacity/Totality.lean) は
   `IsThirteenTileEquivalentHand fixed hand` の下で成立する。
   最小値を実現する探索状態の存在と、固定面子なしでの抽象版との計算結果の一致も証明した。
-- [計算回帰例](../Shanten/Capacity/Examples.lean) の `inputA_search` / `inputB_search` で、
+- [計算回帰例](../../Shanten/Capacity/Examples.lean) の `inputA_search` / `inputB_search` で、
   実際の探索結果が `some 1` / `some 0` になることを `decide` で検査した。
   槓を含む有効入力の計算例も検査した。
 - `lake build` 成功（918 jobs）。主要31宣言の証明穴検査を通過し、
@@ -184,17 +184,17 @@ Go実装は保留であり、Go契約全体への適合は主張しない。
 
 ### 順序4の対応結果：14枚相当の面子手・最適打牌（2026-11-16）
 
-- [Fourteen.lean](../Shanten/Capacity/Fourteen.lean) で、容量を満たす任意の14枚相当手牌に対し、
+- [Fourteen.lean](../../Shanten/Capacity/Fourteen.lean) で、容量を満たす任意の14枚相当手牌に対し、
   同じ一般探索の仕様一致・結果の存在一意性・最適状態を証明した。
   完成目標と手牌が同枚数の場合の交換列を再利用し、13枚相当の既存保証を維持した。
 - 完成形であることと、探索結果が `some (-1)` になることの同値を証明した。
-- [Discard.lean](../Shanten/Capacity/Discard.lean) で、実際に持っている牌を捨てた後の
+- [Discard.lean](../../Shanten/Capacity/Discard.lean) で、実際に持っている牌を捨てた後の
   有効13枚相当入力と探索結果を列挙する `discardSearchResults`、
   その最小値 `minimumDiscardSearch`、最適打牌を全列挙する `optimalDiscards` を実装した。
 - 未完成の有効14枚相当手牌では、元の探索値と打牌後最小値が一致し、
   最適打牌は合法で少なくとも1種存在することを証明した。
   完成済みの場合は打牌で値が変わるため、先に完成値−1を確認する。
-- [回帰例](../Shanten/Capacity/Examples.lean) で、同じ東1・白1でも固定容量により
+- [回帰例](../../Shanten/Capacity/Examples.lean) で、同じ東1・白1でも固定容量により
   最適打牌が「東のみ」／「東・白」と変わることを実計算した。
   値1の未完成手、完成値−1と打牌後値0の違い、持っていない牌の除外、槓も検査した。
 - `lake build` 成功（920 jobs）。主要42宣言の証明穴検査を通過。
@@ -204,17 +204,17 @@ Go実装は保留であり、Go契約全体への適合は主張しない。
 
 ### 順序4の対応結果：七対子・国士無双の一般計算（2026-11-16）
 
-- [Special.lean](../Shanten/Special.lean) で、固定面子なしの有効な13枚手・14枚手すべてに対し、
+- [Special.lean](../../Shanten/Special.lean) で、固定面子なしの有効な13枚手・14枚手すべてに対し、
   七対子の閉形式 `sevenPairsShanten` と国士無双の既存閉形式 `kokushiShanten` が、
   最短完成距離から1を引く仕様値と一致することを証明した。
 - 七対子は四枚使いを1対種と数え、7牌種に満たない場合の補正を含む。
   国士は么九牌の対だけを数える。どちらも最適目標の構成と全完成形に対する不足数下界を示す。
-- [Capacity/Special.lean](../Shanten/Capacity/Special.lean) の
+- [Capacity/Special.lean](../../Shanten/Capacity/Special.lean) の
   `sevenPairsSearch hand` / `thirteenOrphansSearch hand` は、
   有効13・14枚相当入力で容量付き `IsShapeShanten` と双方向に一致する。
   `none` は適用不可と同値であり、暗槓も特殊形を適用不可にする。
   これらの関数は入力検証器ではなく、容量・枚数・固定文脈の整合は別途検証する。
-- [回帰例](../Shanten/Capacity/Examples.lean) で13枚テンパイ・14枚完成、
+- [回帰例](../../Shanten/Capacity/Examples.lean) で13枚テンパイ・14枚完成、
   四枚使いと牌種不足、中張牌の対の除外、么九牌の刻子、国士の最大値13、暗槓を検査した。
 - `lake build` 成功（922 jobs）。主要52宣言の証明穴検査を通過。
   追加した主要10宣言の公理依存は `propext`・`Classical.choice`・`Quot.sound` の範囲のみ。
@@ -225,7 +225,7 @@ Go実装は保留であり、Go契約全体への適合は主張しない。
 
 - 容量付き `IsOverallShanten` を、計算器に依存しない「いずれかの形で達成される最小仕様値」
   として定義し、一意性と、値−1がいずれかの形の完成と同値になることを証明した。
-- [Overall.lean](../Shanten/Capacity/Overall.lean) で、
+- [Overall.lean](../../Shanten/Capacity/Overall.lean) で、
   既存3形への共通窓口 `shapeSearch fixed hand shape` と
   `overallMinimumSearch fixed hand` を追加した。適用不可の `none` は最小値から除外する。
 - 有効13・14枚相当入力すべてで `overallMinimumSearch_eq_some_iff` が総合仕様との一致、
@@ -242,7 +242,7 @@ Go実装は保留であり、Go契約全体への適合は主張しない。
 
 ### 順序4の対応結果：37種入力の容量検証・正規化（Lean側、2026-11-16）
 
-- [Input37.lean](../Shanten/Input37.lean) に符号付き37種入力のモデルと検証・正規化を追加した。
+- [Input37.lean](../../Shanten/Input37.lean) に符号付き37種入力のモデルと検証・正規化を追加した。
   `Fin 37 → Int` は添字の長さと赤5の区別を保ち、各面子は種類文字列と全実牌を保持する。
 - 非負性を手元牌・各固定面子の各欄で検査し、その後、合算物理容量を検査する。
   赤5は1枚、通常5は3枚、その他は4枚まで。正規化後だけの4枚検査で済ませない。
@@ -265,10 +265,10 @@ Go実装は利用者の別計画を先行するため保留し、Goソースと�
 ## R3：自動検証と証明依存の継続的な検査がない
 
 **根拠:** 対象コミットの追跡ファイル一覧に `.github/workflows/` は存在しない。
-[READMEの検査手順](../README.md#checks) と
-[台帳の検証記録](./SHANTEN_LEAN4_PROGRESS.md#検証記録) が現在の検証手段である。
+[READMEの検査手順](../../README.md#checks) と
+[台帳の検証記録](SHANTEN_LEAN4_PROGRESS.md#検証記録) が現在の検証手段である。
 
-Leanの回帰例は [Examples](../Shanten/MentsuHand/Examples.lean) に存在し、公開入口から
+Leanの回帰例は [Examples](../../Shanten/MentsuHand/Examples.lean) に存在し、公開入口から
 ビルドされる。Goに数値テストがないことも、計算器未実装という現在の範囲では妥当である。
 不足しているのは、それらを変更のたびに実行するリポジトリ内の仕組みである。
 外部CIやbranch protectionの有無は今回確認していない。
@@ -285,12 +285,12 @@ Leanの回帰例は [Examples](../Shanten/MentsuHand/Examples.lean) に存在し
 
 ### R3対応内容（2026-11-16）
 
-- [GitHub Actions](../.github/workflows/checks.yml) で、push・pull request・手動実行時に
+- [GitHub Actions](../../.github/workflows/checks.yml) で、push・pull request・手動実行時に
   GoとLeanの独立ジョブを実行する。Goは `go.mod` のバージョンを明示的に導入し、
   `go test ./...` / `go vet ./...` を実行する。開発コンテナは変更しない。
 - Leanは `lean-toolchain` と `lake-manifest.json` を使用し、`lake update` せずに
   import対象のMathlibキャッシュを取得して `lake build` を実行する。
-- [ProofChecks.lean](../Shanten/ProofChecks.lean) を公開入口からimportし、
+- [ProofChecks.lean](../../Shanten/ProofChecks.lean) を公開入口からimportし、
   主要14宣言にMathlibの `assert_no_sorry` を適用する。
   間接的な `sorryAx` 依存もビルド失敗にする。既存の `native_decide` 依存は許容し、
   通常の警告は一律エラー化しない。
@@ -303,9 +303,9 @@ Leanの回帰例は [Examples](../Shanten/MentsuHand/Examples.lean) に存在し
 
 **状態:** Pending。利用者側で仕様を整理して返す方針につき、今回のR3対応では変更しない。
 
-**根拠:** [go.mod](../go.mod#L3) は `go 1.26.4`。
-一方、[dev用Dockerfile](../.devcontainer/dev/Dockerfile#L1) と
-[user用設定](../.devcontainer/user/devcontainer.json#L3) はGo 1.24系イメージを使う。
+**根拠:** [go.mod](../../go.mod#L3) は `go 1.26.4`。
+一方、[dev用Dockerfile](../../.devcontainer/dev/Dockerfile#L1) と
+[user用設定](../../.devcontainer/user/devcontainer.json#L3) はGo 1.24系イメージを使う。
 
 今回の環境ではGo 1.24.5・`GOTOOLCHAIN=local` で、READMEどおりの両Goコマンドが
 バージョン不足で失敗した。`GOTOOLCHAIN=auto` による1.26.4の取得後は成功した。
@@ -341,9 +341,9 @@ Leanの回帰例は [Examples](../Shanten/MentsuHand/Examples.lean) に存在し
   Go移植前に基準値・測定環境・資源上限を定めて評価する必要がある。
 - **旧搭子モデル:** `Taatsu.sequence` は連続2枚と一意の補充先を表し、一般の嵌張を
   直接持つ型ではない。嵌張にも対応する新一般探索と、旧分解・走査の被覆範囲を
-  [用語集](./GLOSSARY.md) や [ブロック説明](./SHANTEN_BLOCKS.md) でも区別するとよい。
-- **小さな文書不整合:** [README](../README.md#errors-and-ownership) の並行利用説明と
-  [用語集](./GLOSSARY.md) のバックエンド説明には `v1` が残る。現契約の `v2` との
+  [用語集](../GLOSSARY.md) や [ブロック説明](../SHANTEN_BLOCKS.md) でも区別するとよい。
+- **小さな文書不整合:** [README](../../README.md#errors-and-ownership) の並行利用説明と
+  [用語集](../GLOSSARY.md) のバックエンド説明には `v1` が残る。現契約の `v2` との
   関係を整理したいが、現時点でコードの挙動を変える問題ではない。
 
 ## 検証結果

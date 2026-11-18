@@ -9,7 +9,7 @@
 
 この文書は、`shanten-submodule` の数値計算ロジックをLean4で定義・証明し、
 その仕様に一致するGo実装を後段で提供するための計画である。実装と証明の現在の
-到達点は [進捗台帳](./2026-11-15_SHANTEN_LEAN4_PROGRESS.md) に記録する。
+到達点は [進捗台帳](2026-11-15_SHANTEN_LEAN4_PROGRESS.md) に記録する。
 
 Go側の型・入出力・エラーの境界は
 外部シャンテン計算モジュール契約（当時の参照先 `SHANTEN_EXTERNAL_MODULE.md`）と
@@ -195,7 +195,7 @@ Leanの証明済み関数から自動抽出することは前提にしないが�
 上限を超えないことを不変条件とする。
 
 この共有層の最初の実装は
-[`Shanten/MentsuHand.lean`](../../Shanten/MentsuHand.lean) に置く。ここでは既に、
+[`Shanten/MentsuHand.lean`](../../../Shanten/MentsuHand.lean) に置く。ここでは既に、
 DP状態の骨格、面子手の目標牌姿、目標に対する牌種ごとの不足枚数を定義している。
 次の実装単位で、残りカウントを状態へ追加し、各選択肢の遷移とメモ化可能な
 評価関数を実装する。
@@ -246,10 +246,10 @@ DP状態の骨格、面子手の目標牌姿、目標に対する牌種ごとの
 ```
 
 を構成する。既存の
-[`mentsuHandShanten_le_eight_of_completion_bound`](../../Shanten/Bounds.lean) は、この
+[`mentsuHandShanten_le_eight_of_completion_bound`](../../../Shanten/Bounds.lean) は、この
 到達性補題を受け取る最終段階として再利用する。
 
-固定面子がある場合は、[`HandStep`](../../Shanten/Specification.lean) の
+固定面子がある場合は、[`HandStep`](../../../Shanten/Specification.lean) の
 `fixedMelds` 不変条件とDPの固定面子数を対応させる。`fixedMelds > 0` なら七対子・
 国士無双が不適用であることを使い、面子手の上限から総合値の上限を導出する。
 

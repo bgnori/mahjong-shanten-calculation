@@ -5,9 +5,9 @@
 **実装の確認基準:** Lean側の37種容量検証・正規化と容量付き34種モデルへの接続（2026-11-16）
 
 この台帳には現在の成果と未解決条件だけを記録する。作業範囲は
-[現行計画](./SHANTEN_LEAN4_PLAN.md)、判断の根拠は
-[追補レビュー](./MENTSU_HAND_PROGRESS_REVIEW_FOLLOWUP.md) を参照する。
-過去の補題別履歴・撤回した計画は [アーカイブ](./archive/README.md) に分離した。
+[現行計画](SHANTEN_LEAN4_PLAN.md)、判断の根拠は
+[追補レビュー](MENTSU_HAND_PROGRESS_REVIEW_FOLLOWUP.md) を参照する。
+過去の補題別履歴・撤回した計画は [アーカイブ](archive/README.md) に分離した。
 旧コードの除去によって、現在の未解決条件を完了扱いにはしていない。
 
 ## 現在地
@@ -30,20 +30,20 @@
 | 検証運用 | CI設定・成功確認済み | Go／Lean独立ジョブの成功を利用者が確認。主要87宣言の推移的な `sorryAx` 依存を通常ビルドで拒否する。今回追加分のGitHub上の実行はpush後。 |
 | Go適合性 | 保留 | 利用者の別計画を先行し、現段階では実装しない。Go計算器とLean仕様の値一致、共有fixtureは未実装。 |
 
-公開入口は [MentsuHand.lean](../Shanten/MentsuHand.lean)、
-[SevenPairs.lean](../Shanten/SevenPairs.lean) と
-[ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean)、
-特殊形の一般式は [Special.lean](../Shanten/Special.lean)、
-実装の配置と読む順序は[構成表](./SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序)を参照する。
+公開入口は [MentsuHand.lean](../../Shanten/MentsuHand.lean)、
+[SevenPairs.lean](../../Shanten/SevenPairs.lean) と
+[ThirteenOrphans.lean](../../Shanten/ThirteenOrphans.lean)、
+特殊形の一般式は [Special.lean](../../Shanten/Special.lean)、
+実装の配置と読む順序は[構成表](SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序)を参照する。
 既存のターゲットDPの仕様一致は、新しいバッチ走査の成果とは別に数える。
 手牌消費付きブロック探索は
-[Search/BlockSearch.lean](../Shanten/MentsuHand/Search/BlockSearch.lean) に配置し、
-公開入口 [Shanten.lean](../Shanten.lean) からimportする。
+[Search/BlockSearch.lean](../../Shanten/MentsuHand/Search/BlockSearch.lean) に配置し、
+公開入口 [Shanten.lean](../../Shanten.lean) からimportする。
 
 ## レビューR1：共有遷移の有効性保存
 
-[レビューR1](./PROJECT_REVIEW_2026-11-16.md#r1対応結果2026-11-16) に対応し、
-[HandStep](../Shanten/Specification.lean) の交換分岐にも終了手の `ValidCounts` を要求した。
+[レビューR1](PROJECT_REVIEW_2026-11-16.md#r1対応結果2026-11-16) に対応し、
+[HandStep](../../Shanten/Specification.lean) の交換分岐にも終了手の `ValidCounts` を要求した。
 
 - `HandStep.validCounts`：ドロー・交換のいずれも終了手は有効。
 - `ReachesHand.validCounts`：有効な開始手からの任意長の経路は有効性を保存する。
@@ -54,7 +54,7 @@
   目標到達・七対子の変換補題には開始手の有効性を引き継ぎ、目標への交換には
   目標の牌種別4枚制限を要求する。無効入力にも適用できた旧補題の型は制限したが、
   有効13枚相当手牌に対する一般探索の仕様一致・全域性の前提は維持した。
-- [回帰例](../Shanten/MentsuHand/Examples.lean) に有効13枚手「東4・南4・西4・北1」を追加。
+- [回帰例](../../Shanten/MentsuHand/Examples.lean) に有効13枚手「東4・南4・西4・北1」を追加。
   北から東への交換と東5枚への任意長の経路を拒否する。
   東から北への有効な交換と、その逆向きに4枚目の東を引く交換は構成できる。
 
@@ -63,7 +63,7 @@
 
 ## レビューR2：容量付きモデルの段階導入
 
-[Capacity.lean](../Shanten/Capacity.lean) を公開入口からimportした。
+[Capacity.lean](../../Shanten/Capacity.lean) を公開入口からimportした。
 名前空間 `Shanten.Capacity` で既存の抽象仕様と区別する。
 固定面子の実牌内容を不変の文脈として持ち、槓は1面子・4枚消費とする。
 `ValidHand` は手元牌と固定牌の合算4枚制限を入力・完成先・各遷移に課す。
@@ -73,13 +73,13 @@
 - `ReachesCompletion.toAbstract`：容量を忘れても同じ距離の旧完成経路を得る。
 - `IsShapeShanten.abstract_le`：両仕様で値が存在する場合、旧値は容量付き値の下界。
 - `isShapeShanten_nil_iff`：`ValidHand [] hand` の下で、固定面子なしの3形の仕様は旧仕様と同値。
-- [受入例](../Shanten/Capacity/Examples.lean) の `inputA_valid` / `inputB_valid`：
+- [受入例](../../Shanten/Capacity/Examples.lean) の `inputA_valid` / `inputB_valid`：
   レビューのA/Bはいずれも有効な13枚相当入力。
 - `inputA_shanten` / `inputB_shanten`：Aは最短2手・値1、Bは最短1手・値0。
   到達上界だけでなく、これより短い完成経路がないことと値の一意性まで検査した。
 - 容量超過のドロー・交換、槓で残余容量が0になる場合、固定牌だけで容量超過する場合の回帰例を追加。
 
-[設計と再利用条件](./SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2) に、
+[設計と再利用条件](SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2) に、
 射影・下界関係・固定面子なしでの一致と、既存算術を再利用できる範囲を明記した。
 抽象版の一般探索の計算結果は変更していない。
 容量付きの一般探索への接続は以下の順序4冒頭で完了した。
@@ -88,14 +88,14 @@
 ## 順序4の冒頭：容量付き一般探索（13枚相当）
 
 既存のブロック列挙・手牌消費を再利用し、
-[Search.lean](../Shanten/Capacity/Search.lean) で固定牌込みの完成容量を満たす候補だけを残す。
+[Search.lean](../../Shanten/Capacity/Search.lean) で固定牌込みの完成容量を満たす候補だけを残す。
 公開関数は `Capacity.generalMentsuHandMinimumSearch fixed hand`。
 旧関数の結果を補正する方式ではなく、容量を満たす候補集合から最小値を取り直す。
 
 - `mem_generalMentsuHandStates_iff`：容量を満たす全完成形候補の被覆性・健全性。
 - `generalMentsuHandState_reaches`：各候補まで不足枚数ちょうどで到達する容量付き経路を構成。
 - `exists_state_of_reachesCompletion`：任意の完成経路に対する不足枚数の下界。
-- [Totality.lean](../Shanten/Capacity/Totality.lean) の `exists_complete_target`：
+- [Totality.lean](../../Shanten/Capacity/Totality.lean) の `exists_complete_target`：
   固定面子が占有しない字牌から必要な刻子・雀頭を構成し、有効目標の存在を入力前提に残さない。
 - `generalMentsuHandMinimumSearch_eq_some_iff` /
   `generalMentsuHandMinimumSearch_exists_unique` /
@@ -105,7 +105,7 @@
 - `inputA_search` / `inputB_search`：実際の探索を `decide` で実行し、`some 1` / `some 0` を検査。
   槓で東の残余容量が0でも、別種の雀頭で完成できる計算例も追加した。
 
-共有の [Exchange.lean](../Shanten/Exchange.lean) に
+共有の [Exchange.lean](../../Shanten/Exchange.lean) に
 目標方向の算術的交換列 `ReachesTargetExchange` を抽出した。
 同じ不足枚数の帰納構成を、旧経路・容量付き経路へそれぞれ有効性条件付きで変換する。
 旧 `reachesHand_targetHand_of_equal_sum` の型・保証は維持した。
@@ -115,7 +115,7 @@
 
 ## 順序4：14枚相当と最適打牌（面子手）
 
-[Fourteen.lean](../Shanten/Capacity/Fourteen.lean) で、
+[Fourteen.lean](../../Shanten/Capacity/Fourteen.lean) で、
 `IsFourteenTileEquivalentHand fixed hand` を満たす任意の手牌について、
 13枚相当と同じ一般探索の仕様一致・存在一意性・最適状態を証明した。
 出口定理は `generalMentsuHandMinimumSearch_eq_some_iff_of_fourteen` /
@@ -124,7 +124,7 @@
 完成目標と手牌の枚数が等しい場合の容量付き交換列を再利用し、
 13枚相当向けの既存定理の型・保証は維持した。
 
-[Discard.lean](../Shanten/Capacity/Discard.lean) は手元牌の合法な打牌を列挙する。
+[Discard.lean](../../Shanten/Capacity/Discard.lean) は手元牌の合法な打牌を列挙する。
 固定面子は変更せず、持っている牌を1枚捨てると有効な13枚相当入力になる。
 
 - `discardSearchResults`：各合法打牌と13枚相当探索結果の組。
@@ -145,7 +145,7 @@ Aは最適打牌が東のみ、Bは東・白の双方となることを実計算
 
 ## 順序4：七対子・国士無双の一般計算
 
-[Special.lean](../Shanten/Special.lean) で、固定面子なし・4枚制限を満たす
+[Special.lean](../../Shanten/Special.lean) で、固定面子なし・4枚制限を満たす
 任意の13枚手または14枚手について、計算可能な閉形式の最短完成距離仕様との一致を証明した。
 
 - `sevenPairsShanten_isShapeShanten`：
@@ -158,14 +158,14 @@ Aは最適打牌が東のみ、Bは東・白の双方となることを実計算
 - 上限用の既存証明を仮定せず、共有の不足数下界と、
   ドロー／同枚数交換の到達証明を使って閉形式の最小性まで証明した。
 
-[Capacity/Special.lean](../Shanten/Capacity/Special.lean) は
+[Capacity/Special.lean](../../Shanten/Capacity/Special.lean) は
 `sevenPairsSearch hand` / `thirteenOrphansSearch hand` を公開する。
 有効13・14枚相当入力に対し `*_eq_some_iff` が容量付き仕様との双方向の一致を保証する。
 固定面子なしでは旧仕様との同値を再利用し、固定面子があれば `none` とする。
 `*_eq_none_iff` により、暗槓を含む適用不可と `none` が同値。
 適用可能なのに未計算という状態はない。入力の容量・枚数・固定文脈との整合検証は別途必要。
 
-[回帰例](../Shanten/Capacity/Examples.lean) は13枚テンパイ・14枚完成、
+[回帰例](../../Shanten/Capacity/Examples.lean) は13枚テンパイ・14枚完成、
 四枚使いを含む13枚の値6／14枚の値5、中張牌の対を数えない国士、
 么九牌の刻子、国士の最大値13、暗槓での適用除外を検査した。
 3形を最小値で統合する計算API・総合仕様との一致と、Lean側の37種入力は以下で完了した。
@@ -178,7 +178,7 @@ Go対応は未実装のまま保留する。
 計算関数に依存しない達成最小値の定義であり、
 `isOverallShanten_unique` と `isOverallShanten_neg_one_iff` を証明した。
 
-[Overall.lean](../Shanten/Capacity/Overall.lean) は
+[Overall.lean](../../Shanten/Capacity/Overall.lean) は
 `shapeSearch fixed hand shape` と `overallMinimumSearch fixed hand` を公開する。
 対象は `ValidHand fixed hand` と、13枚相当または14枚相当の枚数条件。
 
@@ -202,7 +202,7 @@ Go対応と容量付きモデル全域での追加の数値上限は対象外。
 
 ## 順序4：37種入力の容量検証・正規化
 
-[Input37.lean](../Shanten/Input37.lean) はLean側の入力境界。
+[Input37.lean](../../Shanten/Input37.lean) はLean側の入力境界。
 `Counts37 := Fin 37 → Int` により長さは型で固定し、負数は検証で拒否する。
 赤5は0・10・20、通常数牌は1..9・11..19・21..29、字牌は30..36の契約上の添字を保持する。
 入力は手元牌と、種類文字列・全実牌カウントを持つ固定面子のリスト。
@@ -233,12 +233,12 @@ Go対応と容量付きモデル全域での追加の数値上限は対象外。
 
 ## レビューR3：自動検証
 
-[Checksワークフロー](../.github/workflows/checks.yml) を追加した。
+[Checksワークフロー](../../.github/workflows/checks.yml) を追加した。
 Goは `go.mod` 指定のバージョンで `go test ./...` / `go vet ./...` を実行する。
 Leanは固定済みツールチェーンと依存manifestを使い、`lake update` せずに
 import対象のMathlibキャッシュを取得して `lake build` を実行する。
 
-[ProofChecks.lean](../Shanten/ProofChecks.lean) は公開入口からimportされるため、
+[ProofChecks.lean](../../Shanten/ProofChecks.lean) は公開入口からimportされるため、
 ローカルの通常ビルドでも主要87宣言の推移的な `sorryAx` 依存を拒否する。
 検査対象はR1保存定理・共有到達・一般探索・バッチ走査・七対子上限・国士最大値に加え、
 R2の容量保存・旧仕様との対応・A/B受入証明、容量付き一般探索の仕様一致・全域性・計算結果、
@@ -262,18 +262,18 @@ R3設定後のCI成功は利用者から確認済みとの報告を受けた。
   移動後と一致し、未移動・重複したコードがないことを機械照合した。
 - Mathlibキャッシュの取得はサブディレクトリも走査するよう、READMEと両devcontainer設定を
   更新した。JSON構文と、必要な12 importを漏れなく取得対象にすることも検査済み。
-- 旧1,665行の [SevenPairs.lean](../Shanten/SevenPairs.lean) は12行の公開入口にし、
+- 旧1,665行の [SevenPairs.lean](../../Shanten/SevenPairs.lean) は12行の公開入口にし、
   七対子固有の実装は基本定義・カウント・完成形・交換戦略・到達性の8モジュールに分割した。
   最大324行。汎用の不足枚数・交換操作・交換列は
-  [Exchange.lean](../Shanten/Exchange.lean) に切り出し、面子手も直接共有する。
+  [Exchange.lean](../../Shanten/Exchange.lean) に切り出し、面子手も直接共有する。
 - テンパイ目標と完成時カウント、対を残す打牌、未登場牌種、単独牌の存在を表す名前を
-  整理した。[改名表](./SHANTEN_LEAN_STRUCTURE.md#改名) の変更以外は公開名を維持する。
+  整理した。[改名表](../SHANTEN_LEAN_STRUCTURE.md#改名) の変更以外は公開名を維持する。
   `e7f741a` の92宣言すべてについて、改名後の宣言・命題・証明本文が移動先と一致し、
   未移動・重複した宣言がないことを機械照合した。到達上限などの証明範囲は拡張していない。
 
 ## 国士無双：最大シャンテン数13
 
-[ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) を公開入口からimportした。
+[ThirteenOrphans.lean](../../Shanten/ThirteenOrphans.lean) を公開入口からimportした。
 対象は `IsThirteenTileHand` を満たす固定面子なしの有効な13枚手。
 
 - `reaches_thirteenOrphans_completion`：完成形への14手以内の到達を構成する。
@@ -285,7 +285,7 @@ R3設定後のCI成功は利用者から確認済みとの報告を受けた。
 - `thirteenOrphansShanten_maximum`：上界13とその達成をまとめた定理。
 
 面子手にあった汎用の交換・目標到達補題12宣言を共有の
-[Exchange.lean](../Shanten/Exchange.lean) へ移動し、完成形への到達と不足数の下界を
+[Exchange.lean](../../Shanten/Exchange.lean) へ移動し、完成形への到達と不足数の下界を
 形に依存しない形へ一般化した。既存の面子手補題の名前・型は維持した。
 `kokushiShanten` と仕様値の一般的一致、14枚手、Go実装は証明したとは扱わない。
 
@@ -509,4 +509,4 @@ R3設定後のCI成功は利用者から確認済みとの報告を受けた。
 2. 完了したチェック項目は根拠となる定理とともに成果欄へ移す。
 3. 経路を仮定する変換と、分解から経路を生成する定理を区別して報告する。
 4. 撤回した方針や詳細な過去履歴はアーカイブへ移し、現行チェックリストに残さない。
-5. 対象範囲や完了条件を変更するときは [現行計画](./SHANTEN_LEAN4_PLAN.md) も更新する。
+5. 対象範囲や完了条件を変更するときは [現行計画](SHANTEN_LEAN4_PLAN.md) も更新する。

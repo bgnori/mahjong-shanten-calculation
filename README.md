@@ -5,30 +5,14 @@ This module contains types, an interface, and error categories only.
 There is no calculator, adapter, registry, dynamic loader, or validation algorithm.
 It depends only on the Go standard library, not on the parent aka37 module.
 
-The Lean4-first verification and Go implementation plan is documented in
-[docs/SHANTEN_LEAN4_PLAN.md](docs/SHANTEN_LEAN4_PLAN.md).
-The current proof progress is tracked in
-[docs/SHANTEN_LEAN4_PROGRESS.md](docs/SHANTEN_LEAN4_PROGRESS.md).
+User-facing documentation for the contract, domain terminology, and Lean model
+is indexed in [docs/](docs/README.md).
 The current Lean source layout is documented in
 [docs/SHANTEN_LEAN_STRUCTURE.md](docs/SHANTEN_LEAN_STRUCTURE.md).
-Superseded plans and detailed proof history are preserved in
-[docs/archive/](docs/archive/README.md); they are not current work instructions.
 Terminology shared by the Go contract, Mahjong model, and Lean proofs is documented
 in [docs/GLOSSARY.md](docs/GLOSSARY.md).
-Potentially misleading terminology and proposed wording changes are documented in
-[docs/TERMINOLOGY_REVIEW.md](docs/TERMINOLOGY_REVIEW.md).
-The repository-wide review of the Lean model, Go contract, and verification
-environment is recorded in
-[docs/PROJECT_REVIEW_2026-11-16.md](docs/PROJECT_REVIEW_2026-11-16.md).
-The comparison with mahjong-formalization and recommendations for a shared
-domain core are recorded in
-[docs/MAHJONG_FORMALIZATION_REUSE_REVIEW_2026-11-16.md](docs/MAHJONG_FORMALIZATION_REUSE_REVIEW_2026-11-16.md).
-A proposed independent Lean domain core, including Int37 terminology and tile
-capacity constraints, is described in
-[docs/MAHJONG_DOMAIN_CORE_PLAN_2026-11-16.md](docs/MAHJONG_DOMAIN_CORE_PLAN_2026-11-16.md).
-The implementation work packages, migration dependencies, and acceptance criteria
-for extracting the shared core with tenpai-shape classification are documented in
-[docs/SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md](docs/SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md).
+Project plans, progress records, and reviews are grouped separately in
+[docs/project/](docs/project/README.md).
 
 ## Input
 
@@ -231,7 +215,7 @@ The result is at least `-1`, and equals `-1` exactly when any shape is complete.
 With fixed melds it reduces to mentsu search; without fixed melds it agrees with
 the original abstract `OverallShanten` specification.
 Input validation remains a separate prerequisite, and the underlying mentsu
-enumeration is not optimized. See the [capacity design](./docs/SHANTEN_LEAN4_PLAN.md#完了した段階導入容量付きモデルr2).
+enumeration is not optimized. See the [Lean source structure](./docs/SHANTEN_LEAN_STRUCTURE.md).
 
 [Shanten/Input37.lean](./Shanten/Input37.lean) is the Lean-only input layer under
 `Shanten.Input37`. `Counts37` is `Fin 37 → Int`, preserving signed values and the
@@ -279,5 +263,5 @@ pair-preserving discards from other discards; see the
 maximum thirteen-orphans shanten number on valid concealed thirteen-tile hands is
 exactly 13, using the completion-distance specification. Every such hand has a
 finite value at most 13, and `kokushiWorstCase` attains 13.
-See the [module map](./docs/SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序)
+See the [module map](./docs/SHANTEN_LEAN_STRUCTURE.md)
 for responsibilities and a suggested reading order.

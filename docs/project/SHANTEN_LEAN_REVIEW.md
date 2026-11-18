@@ -1,8 +1,8 @@
 # `Shanten.lean` レビュー結果
 
 > 過去の構成・仕様に対するレビュー記録であり、以下の対応順序は現在の作業指示ではない。
-> 現在の範囲は [現行計画](./SHANTEN_LEAN4_PLAN.md)、
-> 成果と未解決条件は [現行台帳](./SHANTEN_LEAN4_PROGRESS.md) を参照する。
+> 現在の範囲は [現行計画](SHANTEN_LEAN4_PLAN.md)、
+> 成果と未解決条件は [現行台帳](SHANTEN_LEAN4_PROGRESS.md) を参照する。
 
 レビュー対象は、依頼時の `shante.lean` に相当するリポジトリ上の
 [Shanten.lean](/workspaces/shanten/Shanten.lean) である。レビュー時点では、`lake build Shanten`

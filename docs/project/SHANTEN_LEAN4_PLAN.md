@@ -3,15 +3,15 @@
 **更新:** 2026-11-16
 
 この文書は現在の作業範囲と完了条件を定める。成果・検証状況の正は
-[進捗台帳](./SHANTEN_LEAN4_PROGRESS.md) とする。
+[進捗台帳](SHANTEN_LEAN4_PROGRESS.md) とする。
 旧実装順序、完了済みの導入手順、撤回した探索方針は
-[アーカイブ](./archive/README.md) に保存した。現在のTODOとして使わない。
+[アーカイブ](archive/README.md) に保存した。現在のTODOとして使わない。
 
 ## 目的と維持する契約
 
 Leanで数学的仕様と計算可能な探索の一致を証明し、その仕様に対応するGo計算器を
 後段で実装・検証する。Goの入力・結果・エラー契約は
-[リポジトリのREADME](../README.md) を参照する。
+[リポジトリのREADME](../../README.md) を参照する。
 
 - 37種入力の赤5を計算時に通常5へ統合する。固定面子は暗槓も含む。
 - 面子手は常に適用可能。七対子・国士無双は固定面子がない場合だけ適用する。
@@ -21,7 +21,7 @@ Leanで数学的仕様と計算可能な探索の一致を証明し、その仕�
 
 抽象版の一般探索は34牌種に正規化済みで、固定面子は個数だけを持つ。
 R2への段階導入として、固定面子の実牌内容と合算容量を保持する
-[容量付きモデル](../Shanten/Capacity.lean) を別層に追加した。
+[容量付きモデル](../../Shanten/Capacity.lean) を別層に追加した。
 このモデル上の `Capacity.generalMentsuHandMinimumSearch fixed hand` は、
 有効13枚相当・14枚相当手牌すべてで面子手の容量付き仕様との一致・全域性まで証明済み。
 14枚相当では未完成手の最適打牌との一致も証明した。
@@ -32,58 +32,58 @@ Go実装は利用者の別計画を先行するため保留し、契約全体を
 
 ## ファイル構成と読む順序
 
-[MentsuHand.lean](../Shanten/MentsuHand.lean) は公開import用の入口に限定する。
-実装は [MentsuHand/](../Shanten/MentsuHand/) 以下の共通基盤・`Scan`・`Search` に分割した。
+[MentsuHand.lean](../../Shanten/MentsuHand.lean) は公開import用の入口に限定する。
+実装は [MentsuHand/](../../Shanten/MentsuHand) 以下の共通基盤・`Scan`・`Search` に分割した。
 面子手の名前空間 `Shanten` と公開定義・定理名は維持し、証明内容は変更していない。
 
-[SevenPairs.lean](../Shanten/SevenPairs.lean) も公開import入口とし、
-[SevenPairs/](../Shanten/SevenPairs/) 以下を基本定義・カウント補題・完成形への接続・
+[SevenPairs.lean](../../Shanten/SevenPairs.lean) も公開import入口とし、
+[SevenPairs/](../../Shanten/SevenPairs) 以下を基本定義・カウント補題・完成形への接続・
 交換戦略・到達性に分割した。汎用の不足枚数と交換操作は
-[Exchange.lean](../Shanten/Exchange.lean) で面子手と共有する。
-七対子の読む順序と改名対応は [構造文書](./SHANTEN_LEAN_STRUCTURE.md#七対子の構成と読む順序)
+[Exchange.lean](../../Shanten/Exchange.lean) で面子手と共有する。
+七対子の読む順序と改名対応は [構造文書](../SHANTEN_LEAN_STRUCTURE.md#七対子の構成と読む順序)
 を参照する。以下は面子手の構成表である。
 
-容量付きモデルは [Capacity.lean](../Shanten/Capacity.lean) を入口とし、
-[Basic](../Shanten/Capacity/Basic.lean)（固定面子・残余容量）、
-[Specification](../Shanten/Capacity/Specification.lean)（容量付き仕様・旧仕様との対応）、
-[Reachability](../Shanten/Capacity/Reachability.lean)（容量を守る目標到達）、
-[Search](../Shanten/Capacity/Search.lean)（容量付き候補と最小値）、
-[Totality](../Shanten/Capacity/Totality.lean)（一般入力の全域性・仕様一致）、
-[Fourteen](../Shanten/Capacity/Fourteen.lean)（14枚相当の仕様一致・完成値）、
-[Discard](../Shanten/Capacity/Discard.lean)（最適打牌・打牌後最小値との対応）、
-[Special](../Shanten/Capacity/Special.lean)（特殊形の計算と容量付き仕様一致）、
-[Overall](../Shanten/Capacity/Overall.lean)（3形の総合計算と仕様一致）、
-[Examples](../Shanten/Capacity/Examples.lean)（R2のA/B受入例・計算結果）の順に読む。
+容量付きモデルは [Capacity.lean](../../Shanten/Capacity.lean) を入口とし、
+[Basic](../../Shanten/Capacity/Basic.lean)（固定面子・残余容量）、
+[Specification](../../Shanten/Capacity/Specification.lean)（容量付き仕様・旧仕様との対応）、
+[Reachability](../../Shanten/Capacity/Reachability.lean)（容量を守る目標到達）、
+[Search](../../Shanten/Capacity/Search.lean)（容量付き候補と最小値）、
+[Totality](../../Shanten/Capacity/Totality.lean)（一般入力の全域性・仕様一致）、
+[Fourteen](../../Shanten/Capacity/Fourteen.lean)（14枚相当の仕様一致・完成値）、
+[Discard](../../Shanten/Capacity/Discard.lean)（最適打牌・打牌後最小値との対応）、
+[Special](../../Shanten/Capacity/Special.lean)（特殊形の計算と容量付き仕様一致）、
+[Overall](../../Shanten/Capacity/Overall.lean)（3形の総合計算と仕様一致）、
+[Examples](../../Shanten/Capacity/Examples.lean)（R2のA/B受入例・計算結果）の順に読む。
 既存の抽象仕様を置き換えるものではなく、名前空間 `Shanten.Capacity` で区別する。
-特殊形の閉形式そのものの証明は [Special.lean](../Shanten/Special.lean) に置き、
+特殊形の閉形式そのものの証明は [Special.lean](../../Shanten/Special.lean) に置き、
 七対子の完成カウント・国士の完成目標・共有の不足数と到達補題を再利用する。
-37種の入力境界は [Input37.lean](../Shanten/Input37.lean) を入口とし、
-[Basic](../Shanten/Input37/Basic.lean)（添字・物理容量・整数正規化）、
-[Validation](../Shanten/Input37/Validation.lean)（検証・面子認識・エラー）、
-[Correctness](../Shanten/Input37/Correctness.lean)（保存・容量付きモデルへの接続）、
-[Examples](../Shanten/Input37/Examples.lean)（受理・拒否の回帰検査）の順に読む。
+37種の入力境界は [Input37.lean](../../Shanten/Input37.lean) を入口とし、
+[Basic](../../Shanten/Input37/Basic.lean)（添字・物理容量・整数正規化）、
+[Validation](../../Shanten/Input37/Validation.lean)（検証・面子認識・エラー）、
+[Correctness](../../Shanten/Input37/Correctness.lean)（保存・容量付きモデルへの接続）、
+[Examples](../../Shanten/Input37/Examples.lean)（受理・拒否の回帰検査）の順に読む。
 
 | 層 | モジュール | 責務 |
 |---|---|---|
-| 共通 | [Basic](../Shanten/MentsuHand/Basic.lean) | ターツ、状態・選択の型、選択が使う牌。 |
-| 共通 | [ChoiceGrouping](../Shanten/MentsuHand/ChoiceGrouping.lean) | 代表牌による選択列の分類と重複度を保つ順列性。 |
-| 共通 | [State](../Shanten/MentsuHand/State.lean) | 遷移、履歴不変条件、到達関係、34牌種順。 |
-| 共通 | [Targets](../Shanten/MentsuHand/Targets.lean) | 完成目標と探索状態の対応。 |
-| 共通 | [Exchange](../Shanten/MentsuHand/Exchange.lean) | 共有の交換・到達補題の面子手完成形への特殊化。 |
-| 共通 | [Decomposition](../Shanten/MentsuHand/Decomposition.lean) | 雀頭＋4ブロック分解、選択列、完成後4枚制限。 |
-| 牌種順走査 | [Scan/Basic](../Shanten/MentsuHand/Scan/Basic.lean) | 枚数制限付き遷移とバッチ走査の関係。 |
-| 牌種順走査 | [Scan/Paths](../Shanten/MentsuHand/Scan/Paths.lean) | 前向き経路、不変条件、バッチとの接続。 |
-| 牌種順走査 | [Scan/DecompositionPaths](../Shanten/MentsuHand/Scan/DecompositionPaths.lean) | 分解の任意の順列から合法な経路を構成。 |
-| 牌種順走査 | [Scan/Grouping](../Shanten/MentsuHand/Scan/Grouping.lean) | 分解から34牌種順バッチ走査と完了状態を構成。 |
-| 牌種順走査 | [Scan/Completion](../Shanten/MentsuHand/Scan/Completion.lean) | 走査状態から完成目標・シャンテン仕様への条件付き接続。 |
-| 完成形探索 | [Search/Enumeration](../Shanten/MentsuHand/Search/Enumeration.lean) | 完成形候補の列挙、牌集合DP、妥当性判定。 |
-| 完成形探索 | [Search/TargetDP](../Shanten/MentsuHand/Search/TargetDP.lean) | 不足数を累積する完成形DPと所属の特徴付け。 |
-| 完成形探索 | [Search/Minimum](../Shanten/MentsuHand/Search/Minimum.lean) | 最小目標距離と到達距離の下界。 |
-| 完成形探索 | [Search/Reachability](../Shanten/MentsuHand/Search/Reachability.lean) | 目標距離を実現する引牌・交換列の構成。 |
-| 完成形探索 | [Search/Correctness](../Shanten/MentsuHand/Search/Correctness.lean) | 最小目標距離と数学的シャンテン仕様の対応。 |
-| 完成形探索 | [Search/Totality](../Shanten/MentsuHand/Search/Totality.lean) | 一般13枚相当手牌の全域性とターゲットDPの仕様一致。 |
-| 完成形探索 | [Search/BlockSearch](../Shanten/MentsuHand/Search/BlockSearch.lean) | 手牌消費・不足数を持つブロック探索と仕様一致。 |
-| 検証例 | [Examples](../Shanten/MentsuHand/Examples.lean) | 重複ターツ、雀頭なし、孤立牌、嵌張、4枚制限の回帰証明。 |
+| 共通 | [Basic](../../Shanten/MentsuHand/Basic.lean) | ターツ、状態・選択の型、選択が使う牌。 |
+| 共通 | [ChoiceGrouping](../../Shanten/MentsuHand/ChoiceGrouping.lean) | 代表牌による選択列の分類と重複度を保つ順列性。 |
+| 共通 | [State](../../Shanten/MentsuHand/State.lean) | 遷移、履歴不変条件、到達関係、34牌種順。 |
+| 共通 | [Targets](../../Shanten/MentsuHand/Targets.lean) | 完成目標と探索状態の対応。 |
+| 共通 | [Exchange](../../Shanten/MentsuHand/Exchange.lean) | 共有の交換・到達補題の面子手完成形への特殊化。 |
+| 共通 | [Decomposition](../../Shanten/MentsuHand/Decomposition.lean) | 雀頭＋4ブロック分解、選択列、完成後4枚制限。 |
+| 牌種順走査 | [Scan/Basic](../../Shanten/MentsuHand/Scan/Basic.lean) | 枚数制限付き遷移とバッチ走査の関係。 |
+| 牌種順走査 | [Scan/Paths](../../Shanten/MentsuHand/Scan/Paths.lean) | 前向き経路、不変条件、バッチとの接続。 |
+| 牌種順走査 | [Scan/DecompositionPaths](../../Shanten/MentsuHand/Scan/DecompositionPaths.lean) | 分解の任意の順列から合法な経路を構成。 |
+| 牌種順走査 | [Scan/Grouping](../../Shanten/MentsuHand/Scan/Grouping.lean) | 分解から34牌種順バッチ走査と完了状態を構成。 |
+| 牌種順走査 | [Scan/Completion](../../Shanten/MentsuHand/Scan/Completion.lean) | 走査状態から完成目標・シャンテン仕様への条件付き接続。 |
+| 完成形探索 | [Search/Enumeration](../../Shanten/MentsuHand/Search/Enumeration.lean) | 完成形候補の列挙、牌集合DP、妥当性判定。 |
+| 完成形探索 | [Search/TargetDP](../../Shanten/MentsuHand/Search/TargetDP.lean) | 不足数を累積する完成形DPと所属の特徴付け。 |
+| 完成形探索 | [Search/Minimum](../../Shanten/MentsuHand/Search/Minimum.lean) | 最小目標距離と到達距離の下界。 |
+| 完成形探索 | [Search/Reachability](../../Shanten/MentsuHand/Search/Reachability.lean) | 目標距離を実現する引牌・交換列の構成。 |
+| 完成形探索 | [Search/Correctness](../../Shanten/MentsuHand/Search/Correctness.lean) | 最小目標距離と数学的シャンテン仕様の対応。 |
+| 完成形探索 | [Search/Totality](../../Shanten/MentsuHand/Search/Totality.lean) | 一般13枚相当手牌の全域性とターゲットDPの仕様一致。 |
+| 完成形探索 | [Search/BlockSearch](../../Shanten/MentsuHand/Search/BlockSearch.lean) | 手牌消費・不足数を持つブロック探索と仕様一致。 |
+| 検証例 | [Examples](../../Shanten/MentsuHand/Examples.lean) | 重複ターツ、雀頭なし、孤立牌、嵌張、4枚制限の回帰証明。 |
 
 一般手牌の計算を読む場合は共通基盤から `Search` を表の順に読む。
 与えられた分解の牌種順走査を読む場合は、共通基盤から `Scan` を表の順に読む。
@@ -96,7 +96,7 @@ Go実装は利用者の別計画を先行するため保留し、契約全体を
 
 ## 完了した目標：国士無双の最大シャンテン数13
 
-[ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) で、固定面子なしの有効な13枚手
+[ThirteenOrphans.lean](../../Shanten/ThirteenOrphans.lean) で、固定面子なしの有効な13枚手
 すべてに国士無双の仕様値が存在して13以下となることと、その上界を達成する手牌の
 存在を証明した。出口定理は `thirteenOrphansShanten_maximum`、
 値の存在は `thirteenOrphansShanten_exists`。
@@ -141,7 +141,7 @@ Go実装は利用者の別計画を先行するため保留し、契約全体を
 入力は `ValidCounts hand` と `tileCount hand + 3 * hand.fixedMelds = 13` を満たす
 任意の手牌。雀頭なし・孤立牌・ブロック不足も含め、分解の存在を要求しない。
 
-[Search/BlockSearch.lean](../Shanten/MentsuHand/Search/BlockSearch.lean) に、
+[Search/BlockSearch.lean](../../Shanten/MentsuHand/Search/BlockSearch.lean) に、
 次の有限探索を実装した。
 
 1. 完成後の雀頭候補と `4 - hand.fixedMelds` 個の面子候補を順に選ぶ。
@@ -190,7 +190,7 @@ Go実装は利用者の別計画を先行するため保留し、契約全体を
   `IsShapeShanten` はその最短距離から1を引いた値を表す。
   値の一意性に加え、以下の13枚相当の容量付き一般探索との一致も証明済み。
 
-[受入例](../Shanten/Capacity/Examples.lean) はレビューのA/Bについて、
+[受入例](../../Shanten/Capacity/Examples.lean) はレビューのA/Bについて、
 入力の有効性だけでなく最短距離を検査する。
 `inputA_shanten` は最短2手・値1、`inputB_shanten` は最短1手・値0。
 Aの0手・1手の完成を否定し、東から白への交換と白のドローで2手を構成する。
@@ -276,7 +276,7 @@ Go言語上のデータ・整数演算・エラーへの対応は保留する。
 ### 七対子・国士無双の一般計算と仕様一致（完了）
 
 固定面子なし・4枚制限を満たす13枚手または14枚手を対象とする。
-[Special.lean](../Shanten/Special.lean) で次の閉形式を最短完成距離から証明した。
+[Special.lean](../../Shanten/Special.lean) で次の閉形式を最短完成距離から証明した。
 
 - `sevenPairsShanten hand = 6 - pairCount hand + (7 - distinctTileCount hand)`。
   最後の減算は自然数の切り詰め減算。四枚使いも1対種として数える。
@@ -289,7 +289,7 @@ Go言語上のデータ・整数演算・エラーへの対応は保留する。
   `kokushiShanten_isShapeShanten`。いずれも完成距離の上界だけでなく最小性を含む。
   13枚手はドローと交換、14枚手は同枚数交換の共有証明を再利用する。
 
-[Capacity/Special.lean](../Shanten/Capacity/Special.lean) は
+[Capacity/Special.lean](../../Shanten/Capacity/Special.lean) は
 `sevenPairsSearch hand` / `thirteenOrphansSearch hand` を公開する。
 固定面子がなければ閉形式の `some value`、あれば `none` を返す。
 有効13・14枚相当入力では `sevenPairsSearch_eq_some_iff` /
@@ -306,12 +306,12 @@ Go言語上のデータ・整数演算・エラーへの対応は保留する。
 
 対象は `ValidHand fixed hand` を満たし、
 `tileCount hand + 3 * fixed.length` が13または14となる入力。
-[Specification.lean](../Shanten/Capacity/Specification.lean) の
+[Specification.lean](../../Shanten/Capacity/Specification.lean) の
 `Capacity.IsOverallShanten fixed hand value` は、
 いずれかの形でその仕様値を達成し、全形の仕様値以下となることを要求する。
 計算関数の結果を定義に使わず、一意性と、値−1がいずれかの完成形と同値になることを証明した。
 
-[Overall.lean](../Shanten/Capacity/Overall.lean) の
+[Overall.lean](../../Shanten/Capacity/Overall.lean) の
 `shapeSearch fixed hand shape` は既存3形の計算への共通窓口、
 `overallMinimumSearch fixed hand` は既存の `minOption` による最小値。
 特殊形が適用不可なら `none` として除外し、0などへ置き換えない。

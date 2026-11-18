@@ -13,7 +13,7 @@
 > 固定面子を別文脈として受け取らないという範囲の違いと、
 > 分類結果が4枚制約を破ることは異なる。
 > ドメイン語彙の安定化を目的に優先順位を見直した
-> [独立Lean共通核の計画案](./MAHJONG_DOMAIN_CORE_PLAN_2026-11-16.md)を参照。
+> [独立Lean共通核の計画案](MAHJONG_DOMAIN_CORE_PLAN_2026-11-16.md)を参照。
 
 ## 1. 結論
 
@@ -43,10 +43,10 @@ Lean環境の整合と対応定理の検証を先に行い、その結果で判�
 
 ### 現在地を取り違えないための整理
 
-- shantenのGoは[型とインターフェースだけ](../shanten.go)で、数値計算器は未実装。
+- shantenのGoは[型とインターフェースだけ](../../shanten.go)で、数値計算器は未実装。
   Leanには、固定面子容量、13・14枚相当の通常形探索、特殊形、総合値、
   37種入力の検証・正規化が既にある。
-  [既存レビュー](./PROJECT_REVIEW_2026-11-16.md)は当初の指摘と対応結果を併記するため、
+  [既存レビュー](PROJECT_REVIEW_2026-11-16.md)は当初の指摘と対応結果を併記するため、
   古い「未対応」の記述だけを現在の不足として扱わなかった。
 - 分類側は[Leanを仕様の正本][f-readme]とし、Go・Python等を従属実装としている。
   Leanの通常形待ち判定は1・4・7・10・13枚を対象とするが、
@@ -69,21 +69,21 @@ Lean環境の整合と対応定理の検証を先に行い、その結果で判�
 | 対子 | `pairTiles Tile : Multiset Tile` | `Toitsu.toitsu Tile`とその`List Tile` |
 | 物理牌 | 入力37種で赤を区別。構造計算は34牌種 | `PhysicalTile = Tile × Fin 4`。構造計算は34牌種 |
 
-根拠はshantenの[Core](../Shanten/Core.lean#L10)と、
+根拠はshantenの[Core](../../Shanten/Core.lean#L10)と、
 分類側の[Basic][f-basic]・[Pattern][f-pattern]。
 スート・字牌を明示的に対応させれば牌種間の全単射を構成でき、
 順子開始位置もともに0〜6なので面子も対応する。
 これは構造上の対応の確認であって、今回Leanで全単射を証明したという意味ではない。
 
 ただし、型だけを移動しても効果は限定的である。
-shantenの[Core](../Shanten/Core.lean)には七対子・国士の式と補題も入り、
+shantenの[Core](../../Shanten/Core.lean)には七対子・国士の式と補題も入り、
 分類側の[Basic][f-basic]には表示・物理牌・列挙順も入る。
 **どちらのファイルも丸ごと共通パッケージに移す単位ではない。**
 
 ### 3.2 手牌は同名でも別の責務を持つ
 
-shantenの[Hand](../Shanten/Core.lean#L32)は牌種別自然数カウントと固定面子数。
-[容量付きモデル](../Shanten/Capacity/Basic.lean#L28)が固定牌の内容を外部文脈として持ち、
+shantenの[Hand](../../Shanten/Core.lean#L32)は牌種別自然数カウントと固定面子数。
+[容量付きモデル](../../Shanten/Capacity/Basic.lean#L28)が固定牌の内容を外部文脈として持ち、
 手元牌と固定牌の合算4枚制限を課す。
 
 分類側の[Hand][f-hand]は、面子数と、所定枚数の物理牌への埋め込みを持つ。
@@ -100,7 +100,7 @@ shantenの固定面子数`m`とは異なる。有効な13枚相当の通常形�
 
 ### 3.3 最大の接点は通常形の和了分解
 
-shantenの[Complete](../Shanten/Specification.lean#L19)の通常形分岐は、
+shantenの[Complete](../../Shanten/Specification.lean#L19)の通常形分岐は、
 牌数上限と「雀頭＋面子列の牌多重集合との一致」を要求する。
 分類側には[WinningPartitionSpec][f-partition]と、
 実行列挙との同値定理`mem_winningPartitions_iff_spec`がある。
@@ -122,7 +122,7 @@ shantenは完成候補ごとの不足枚数の**最小値**を必要とする。
 
 ### 3.4 正規化は共通性が高いが、入力コンテナは異なる
 
-shantenの[Input37](../Shanten/Input37/Basic.lean#L22)と
+shantenの[Input37](../../Shanten/Input37/Basic.lean#L22)と
 分類側Goの[countsFromInt37][f-go-int37]は、ともに次を採用する。
 
 - 0・10・20が赤5、1〜9・11〜19・21〜29が通常数牌、30〜36が字牌。
@@ -149,7 +149,7 @@ shantenの負数検査、各入力欄の非負性、固定牌との合算、面�
 | A | 東1 | 東東東・123萬・123筒・123索 | 1 |
 | B | 東1 | 南南南・123萬・123筒・123索 | 0 |
 
-shantenでは[値と実探索結果](../Shanten/Capacity/Examples.lean#L84)の両方を区別している。
+shantenでは[値と実探索結果](../../Shanten/Capacity/Examples.lean#L84)の両方を区別している。
 分類側Leanへ残余形の「東1」だけを渡せば、[通常形待ち仕様][f-wait]では東待ちになる。
 しかしAでは東を足すと固定牌を含めて5枚になる。分類側はその固定文脈を受け取らない。
 なお「東1」は分類側Go公開APIでは枚数エラーになるため、
@@ -168,7 +168,7 @@ shantenでは[値と実探索結果](../Shanten/Capacity/Examples.lean#L84)の�
 待ち集合の段階ではこのフィルタを接続点にできる。
 これは今回の定義比較から得た**接続案**であり、証明済みのリポジトリ間定理ではない。
 非テンパイ入力の最短距離まで得るには、現在の待ちをフィルタするだけでは足りず、
-shantenのように[完成目標・遷移・経路](../Shanten/Capacity/Specification.lean)にも容量が必要。
+shantenのように[完成目標・遷移・経路](../../Shanten/Capacity/Specification.lean)にも容量が必要。
 
 ### 4.2 通常形テンパイと総合shanten 0は同じではない
 
@@ -179,12 +179,12 @@ shantenのように[完成目標・遷移・経路](../Shanten/Capacity/Specific
 
 比較するのはまず**通常形の値0**と通常形待ちの存在。
 13枚相当という前提も必要で、完成14枚の値−1や打牌後の最適値は別の接続である。
-shanten側の[14枚仕様](../Shanten/Capacity/Fourteen.lean)・
-[最適打牌](../Shanten/Capacity/Discard.lean#L150)は分類器にはない。
+shanten側の[14枚仕様](../../Shanten/Capacity/Fourteen.lean)・
+[最適打牌](../../Shanten/Capacity/Discard.lean#L150)は分類器にはない。
 
 ### 4.3 分解情報を潰してよい範囲が異なる
 
-shantenの[一般探索状態](../Shanten/MentsuHand/Search/BlockSearch.lean#L21)は
+shantenの[一般探索状態](../../Shanten/MentsuHand/Search/BlockSearch.lean#L21)は
 完成牌多重集合・使用牌・不足枚数を保持する。
 同じ完成牌を作る異なる面子分解を同一状態にしても、最小不足枚数には支障がない。
 
@@ -205,12 +205,12 @@ shantenの状態集合だけから分類結果を復元することはできな�
 - 分類側の[待ち核保存除去][f-reduction]は、面子を牌姿から取り去った別の小さい牌姿を比較する。
   shantenで面子を「固定」する操作とは異なる。除去牌の容量を保持しないので、
   分類の可約性から固定面子ありの値不変性は導けない。
-- shantenの旧[Taatsu](../Shanten/MentsuHand/Basic.lean#L11)の`sequence`は連続2枚と一意の補充先。
+- shantenの旧[Taatsu](../../Shanten/MentsuHand/Basic.lean#L11)の`sequence`は連続2枚と一意の補充先。
   分類側の両面・嵌張・辺張とは同じ型ではない。一般探索が嵌張を扱えることと、
   この旧型を全待ち分類へ流用できることは別である。
 - 分類側の非テンパイは分類APIではエラーだが、shanten計算器には通常の成功入力。
   分類不明・還元曖昧という分類固有エラーもshantenの
-  [エラー契約](../shanten.go#L61)には持ち込まない。
+  [エラー契約](../../shanten.go#L61)には持ち込まない。
 - 暗槓を含む固定面子と特殊形の適用除外、槓の4枚占有はshantenに残す。
   分類側の完成面子候補は順子・刻子であり、固定槓のモデルではない。
 
@@ -227,7 +227,7 @@ shantenの状態集合だけから分類結果を復元することはできな�
 ### 移行費用を左右する実際の障害
 
 1. **Lean／Mathlibの版差。** shantenは
-   [v4.35.0](../lean-toolchain)／[Mathlib v4.35.0](../lakefile.lean)、
+   [v4.35.0](../../lean-toolchain)／[Mathlib v4.35.0](../../lakefile.lean)、
    分類側は[v4.28.0][f-toolchain]／[Mathlib v4.28.0][f-lake]。
    同じLake依存グラフで両者の別バージョンをそのまま維持できるとは考えない。
    一方への版合わせと関連証明の再ビルドを独立工程にする必要がある。
@@ -235,7 +235,7 @@ shantenの状態集合だけから分類結果を復元することはできな�
    shantenは`Shanten`名前空間。単なる`abbrev`では異なる帰納型が同一になるわけではない。
    共通型への移行か、双方向変換と対応補題が必要になる。
 3. **証明の依存と信頼境界。** shantenは
-   [ProofChecks](../Shanten/ProofChecks.lean)で主要出口の推移的`sorryAx`を拒否する。
+   [ProofChecks](../../Shanten/ProofChecks.lean)で主要出口の推移的`sorryAx`を拒否する。
    分類側の[標準順キーの単射性][f-canonical]には`native_decide`が使われる。
    共有後も証明穴の不在とネイティブ計算への依存を区別して検査すべきで、
    移動だけで保証が強くなるわけではない。

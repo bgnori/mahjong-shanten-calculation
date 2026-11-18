@@ -1,8 +1,8 @@
 # MentsuHand.lean レビュー：実際に進んでいるか
 
 > 2026-11-15時点の評価記録。2026-11-16に旧計画を
-> [アーカイブ](./archive/README.md) へ分離した。現在の作業指示は
-> [現行計画](./SHANTEN_LEAN4_PLAN.md) と [現行台帳](./SHANTEN_LEAN4_PROGRESS.md) を参照する。
+> [アーカイブ](archive/README.md) へ分離した。現在の作業指示は
+> [現行計画](SHANTEN_LEAN4_PLAN.md) と [現行台帳](SHANTEN_LEAN4_PROGRESS.md) を参照する。
 
 ## 結論
 
@@ -19,11 +19,11 @@
 
 - レビュー日時：2026-11-15、13:42 UTC時点。
 - 主対象：依頼に添付された読み取り専用スナップショット、エディタ上6,691行。
-- 比較対象：[現行ソース](../Shanten/MentsuHand.lean)、コミット `15f58acbaae33304f605055e4e0703e3613a5fc4`。
+- 比較対象：[現行ソース](../../Shanten/MentsuHand.lean)、コミット `15f58acbaae33304f605055e4e0703e3613a5fc4`。
 - 添付版のSHA-256：`e8c1e487e6eb7f3e279983394d9d0dc1762d91a9e5ba59e7a2ddffe69deb27cc`
 - 現行版のSHA-256：`1dc4034b7c3378ad94cc1412b01c670481949c8245a45dffff622b195b0f576f`
 - 現行版は添付版に106行を追加したもの。追加箇所は `forward_of_sublist` と `batch_of_representative_group`。以下では添付時点と、その後の追加成果を区別する。
-- [進捗台帳](./SHANTEN_LEAN4_PROGRESS.md)、[計画](./SHANTEN_LEAN4_PLAN.md)、Git履歴、ローカルに保存された直前の作業報告も照合した。作業報告だけを根拠にはせず、定義・型・差分を確認した。
+- [進捗台帳](SHANTEN_LEAN4_PROGRESS.md)、[計画](SHANTEN_LEAN4_PLAN.md)、Git履歴、ローカルに保存された直前の作業報告も照合した。作業報告だけを根拠にはせず、定義・型・差分を確認した。
 
 以下のソースリンクは上記現行版の行番号を指す。3,583行目までは添付版と同じで、追加箇所以降は原則として添付版の行番号に106を加えた位置になる。証明全行の独立再証明やGo実装の適合性監査ではなく、進捗と証明構成の障害を重点確認した。
 
@@ -33,10 +33,10 @@
 
 対象：
 
-- [部分列からの次選択の妥当性](../Shanten/MentsuHand.lean#L2006)
-- [バッチ追加後のコピー制限](../Shanten/MentsuHand.lean#L3401)
-- [牌種バッチ走査後のコピー制限](../Shanten/MentsuHand.lean#L3446)
-- 現行版で追加された [forward_of_sublist](../Shanten/MentsuHand.lean#L3586)、[batch_of_representative_group](../Shanten/MentsuHand.lean#L3661)
+- [部分列からの次選択の妥当性](../../Shanten/MentsuHand.lean#L2006)
+- [バッチ追加後のコピー制限](../../Shanten/MentsuHand.lean#L3401)
+- [牌種バッチ走査後のコピー制限](../../Shanten/MentsuHand.lean#L3446)
+- 現行版で追加された [forward_of_sublist](../../Shanten/MentsuHand.lean#L3586)、[batch_of_representative_group](../../Shanten/MentsuHand.lean#L3661)
 
 これらの主要な前提は、概ね次の形である。
 
@@ -44,7 +44,7 @@
 List.Sublist (pre ++ choices) decomposition.blockChoices
 ```
 
-しかし [blockChoices](../Shanten/MentsuHand.lean#L1608) は「雀頭、面子リスト、搭子リスト」の順であり、牌種順ではない。個々の牌種グループが元の列の部分列であることと、**牌種順に連結したグループ全体が元の列の部分列であることは別**である。
+しかし [blockChoices](../../Shanten/MentsuHand.lean#L1608) は「雀頭、面子リスト、搭子リスト」の順であり、牌種順ではない。個々の牌種グループが元の列の部分列であることと、**牌種順に連結したグループ全体が元の列の部分列であることは別**である。
 
 例えば、東を雀頭、萬子12を搭子とすると、元の列は次の順になる。
 
@@ -55,7 +55,7 @@ List.Sublist (pre ++ choices) decomposition.blockChoices
 
 後者は前者の順列だが部分列ではない。この例は後述R2の有効な13枚手・4枚制限付き分解で実現する。単に不正な選択列を持ち出した例ではない。**この部分列性の否定をLeanで確認した。**
 
-現行版の新しい補題をそのまま牌種ごとに繰り返しても、この前提は一般には供給できない。[completion_respects_of_perm](../Shanten/MentsuHand.lean#L2238) は既にあるが、完成した列全体の順列不変性だけでは、走査途中の各接頭辞に必要な妥当性を供給しない。
+現行版の新しい補題をそのまま牌種ごとに繰り返しても、この前提は一般には供給できない。[completion_respects_of_perm](../../Shanten/MentsuHand.lean#L2238) は既にあるが、完成した列全体の順列不変性だけでは、走査途中の各接頭辞に必要な妥当性を供給しない。
 
 **推奨する修正方向**
 
@@ -65,10 +65,10 @@ List.Sublist (pre ++ choices) decomposition.blockChoices
 
 対象：
 
-- [reachableOnTilesFromWithCopyLimit](../Shanten/MentsuHand.lean#L2475)
-- [AppliesMentsuHandChoiceBatch](../Shanten/MentsuHand.lean#L2524)
-- [AppliesMentsuHandTileBatchScan](../Shanten/MentsuHand.lean#L2567)
-- [バッチ走査から到達性への変換](../Shanten/MentsuHand.lean#L3496)
+- [reachableOnTilesFromWithCopyLimit](../../Shanten/MentsuHand.lean#L2475)
+- [AppliesMentsuHandChoiceBatch](../../Shanten/MentsuHand.lean#L2524)
+- [AppliesMentsuHandTileBatchScan](../../Shanten/MentsuHand.lean#L2567)
+- [バッチ走査から到達性への変換](../../Shanten/MentsuHand.lean#L3496)
 
 旧関係は牌種リストの1要素につき1回しか選択できない。バッチ関係は同じ牌種で複数回選択できる。これは単なる表現の違いではない。
 
@@ -82,7 +82,7 @@ List.Sublist (pre ++ choices) decomposition.blockChoices
 
 この分解は、現在の `MentsuHandBlockDecomposition` の全条件を満たす。一方、搭子12萬を選べる牌種位置は1萬・2萬の2か所しかない。旧一選択走査では同じ搭子を4回選べない。
 
-確認に際しては、候補を代表牌だけに制限していない点にも注意した。[choicesForTile](../Shanten/MentsuHand.lean#L327) はブロックに含まれるどの牌種でも選べる。それでも、この例では2位置に4選択が必要なので不可能である。
+確認に際しては、候補を代表牌だけに制限していない点にも注意した。[choicesForTile](../../Shanten/MentsuHand.lean#L327) はブロックに含まれるどの牌種でも選べる。それでも、この例では2位置に4選択が必要なので不可能である。
 
 Leanで、一選択走査に対して
 
@@ -102,7 +102,7 @@ Leanで、一選択走査に対して
 
 ### R3 / High：任意のブロック分解の列挙ができても、全13枚手・全ターゲットの完全性には届かない
 
-対象：[MentsuHandBlockDecomposition](../Shanten/MentsuHand.lean#L1427)
+対象：[MentsuHandBlockDecomposition](../../Shanten/MentsuHand.lean#L1427)
 
 この構造は、入力手牌に既に次のものがあることを要求する。
 
@@ -142,7 +142,7 @@ Leanで、一選択走査に対して
 
 ### R4 / Medium：直近の「グループから経路・バッチ」の補題は雀頭を処理できない
 
-対象：現行版で追加された [forward_of_sublist](../Shanten/MentsuHand.lean#L3586)、[batch_of_representative_group](../Shanten/MentsuHand.lean#L3661)
+対象：現行版で追加された [forward_of_sublist](../../Shanten/MentsuHand.lean#L3586)、[batch_of_representative_group](../../Shanten/MentsuHand.lean#L3661)
 
 両方とも次を要求する。
 
@@ -178,8 +178,8 @@ Leanで、一選択走査に対して
 
 ### 完成済みと認めてよい
 
-- 有効カウントと `tileCount hand + 3 * hand.fixedMelds = 13` を前提にした、[ターゲットDPと形シャンテン数の同値](../Shanten/MentsuHand.lean#L6415)。
-- [有効13枚手に対する面子手シャンテンの存在](../Shanten/MentsuHand.lean#L6457)。
+- 有効カウントと `tileCount hand + 3 * hand.fixedMelds = 13` を前提にした、[ターゲットDPと形シャンテン数の同値](../../Shanten/MentsuHand.lean#L6415)。
+- [有効13枚手に対する面子手シャンテンの存在](../../Shanten/MentsuHand.lean#L6457)。
 - 適切なブロック分解・完成探索状態が与えられた場合の、完成ターゲットの構成や条件付き到達性。
 - バッチ・前向き経路の連結、状態・履歴の保存など、追加された個々の補題。
 
@@ -190,7 +190,7 @@ Leanで、一選択走査に対して
 - 全有効手牌の最小値をカバーするブロック探索。
 - ブロック探索の実行可能な最小値関数と `IsShapeShanten` の値一致。
 
-特に末尾の [exists_isShapeShanten_mentsuHand_of_constrainedBlockSearchOnTileOrder](../Shanten/MentsuHand.lean#L6787) は、探索成功を**仮定して何らかの仕様値の存在**を示す定理である。探索の全域性や、探索が計算した値との一致を述べているわけではない。
+特に末尾の [exists_isShapeShanten_mentsuHand_of_constrainedBlockSearchOnTileOrder](../../Shanten/MentsuHand.lean#L6787) は、探索成功を**仮定して何らかの仕様値の存在**を示す定理である。探索の全域性や、探索が計算した値との一致を述べているわけではない。
 
 また、冒頭の証明地図と第10章の「完結させます」という説明は、この区別が見えにくい。最終目標を示す説明として読むべきであり、現在すべて完了していることの証拠にはならない。
 

@@ -1,8 +1,8 @@
 # MentsuHand.lean 追補レビュー：前回から妥当な進捗があるか
 
 > 2026-11-15時点の評価記録。2026-11-16に旧計画を
-> [アーカイブ](./archive/README.md) へ分離した。現在の作業指示は
-> [現行計画](./SHANTEN_LEAN4_PLAN.md) と [現行台帳](./SHANTEN_LEAN4_PROGRESS.md) を参照する。
+> [アーカイブ](archive/README.md) へ分離した。現在の作業指示は
+> [現行計画](SHANTEN_LEAN4_PLAN.md) と [現行台帳](SHANTEN_LEAN4_PROGRESS.md) を参照する。
 
 ## 判定
 
@@ -25,9 +25,9 @@
 
 ## レビュー対象と基準点
 
-- 前回：[進捗レビュー](./MENTSU_HAND_PROGRESS_REVIEW.md)、実装の基準点 `15f58ac`。
+- 前回：[進捗レビュー](MENTSU_HAND_PROGRESS_REVIEW.md)、実装の基準点 `15f58ac`。
 - 今回：`f79ed59d025ce4c68bb88f06f9d193a2c1426827`、2026-11-15 14:36 UTC頃に検査。
-- 対象：[MentsuHand.lean](../Shanten/MentsuHand.lean)、[進捗台帳](./SHANTEN_LEAN4_PROGRESS.md)、[計画](./SHANTEN_LEAN4_PLAN.md)。
+- 対象：[MentsuHand.lean](../../Shanten/MentsuHand.lean)、[進捗台帳](SHANTEN_LEAN4_PROGRESS.md)、[計画](SHANTEN_LEAN4_PLAN.md)。
 - 添付された進捗台帳は作業ツリーのものとSHA-256が一致：
   `08044e2dcdb156336a6bc2af7a5ab8e0878357e99e69461f8e2fb3b768c7ae37`
 - 実装ソースのSHA-256：
@@ -45,18 +45,18 @@
 
 次は新規成果として認めてよい。
 
-- [MentsuHandChoiceSubmultiset](../Shanten/MentsuHand.lean#L1699) はリストを `Multiset` として比較し、順序を固定せず重複度を保持する。
-- [mentsuHandChoicesGroupedByTiles](../Shanten/MentsuHand.lean#L260) は、牌種ごとに選択を取り出し、残りを後続牌種へ渡す。
-- [残余列の空性](../Shanten/MentsuHand.lean#L385) と [グループ列全体の順列性](../Shanten/MentsuHand.lean#L442) により、代表牌が対象牌種列に含まれる選択を漏らしたり増やしたりしないことを示した。
+- [MentsuHandChoiceSubmultiset](../../Shanten/MentsuHand.lean#L1699) はリストを `Multiset` として比較し、順序を固定せず重複度を保持する。
+- [mentsuHandChoicesGroupedByTiles](../../Shanten/MentsuHand.lean#L260) は、牌種ごとに選択を取り出し、残りを後続牌種へ渡す。
+- [残余列の空性](../../Shanten/MentsuHand.lean#L385) と [グループ列全体の順列性](../../Shanten/MentsuHand.lean#L442) により、代表牌が対象牌種列に含まれる選択を漏らしたり増やしたりしないことを示した。
 
 ここは前回にはなかった、まとまった成果である。レビュー側でも、順列性の定理を**任意の `MentsuHandBlockDecomposition` の `blockChoices` と34牌種順に適用できる**ことをLeanで確認した。前提が実際の対象へ適用できないだけの空疎な補題ではない。
 
 ただし、新しい `MentsuHandChoiceSubmultiset` の使用箇所は、その基本性質と単一グループの包含までである。次の既存証明は引き続き `List.Sublist` を要求している。
 
-- [valid_next_choice_of_sublist](../Shanten/MentsuHand.lean#L2324)
-- [completion_respects_of_sublist](../Shanten/MentsuHand.lean#L2521)
-- [forward_of_sublist](../Shanten/MentsuHand.lean#L3994)
-- [batch_of_representative_group](../Shanten/MentsuHand.lean#L4069)
+- [valid_next_choice_of_sublist](../../Shanten/MentsuHand.lean#L2324)
+- [completion_respects_of_sublist](../../Shanten/MentsuHand.lean#L2521)
+- [forward_of_sublist](../../Shanten/MentsuHand.lean#L3994)
+- [batch_of_representative_group](../../Shanten/MentsuHand.lean#L4069)
 
 **「新しい関係を定義した」ことと「順序を変えた途中状態から次の遷移を証明できる」ことは、まだ別である。** 前回止まった実際の呼び出し箇所には、新しい関係が届いていない。
 
@@ -66,7 +66,7 @@
 
 旧一選択走査との単純な同値を目標から外し、バッチ走査を正式な中間関係とする方針は前回の反例に整合する。
 
-新しい [AppliesMentsuHandGroupedTileBatches](../Shanten/MentsuHand.lean#L2945) は、牌種ごとのフィルタ列をバッチ処理し、残りの列を再帰的に処理する関係である。[to_scan](../Shanten/MentsuHand.lean#L2962) によって、これを既存の牌種順バッチ走査へ変換できる。
+新しい [AppliesMentsuHandGroupedTileBatches](../../Shanten/MentsuHand.lean#L2945) は、牌種ごとのフィルタ列をバッチ処理し、残りの列を再帰的に処理する関係である。[to_scan](../../Shanten/MentsuHand.lean#L2962) によって、これを既存の牌種順バッチ走査へ変換できる。
 
 ただし、この関係の存在を、任意の分解から構成する定理はまだない。関係を定義して変換を証明したことは有用だが、その関係を満たす経路を得たことにはならない。
 
@@ -82,9 +82,9 @@
 
 **判定：未解決。認識はされているが、証明上の改善はない。**
 
-[forward_of_sublist](../Shanten/MentsuHand.lean#L3994) と [batch_of_representative_group](../Shanten/MentsuHand.lean#L4069) は引き続き、処理する全選択が非雀頭であることを要求する。
+[forward_of_sublist](../../Shanten/MentsuHand.lean#L3994) と [batch_of_representative_group](../../Shanten/MentsuHand.lean#L4069) は引き続き、処理する全選択が非雀頭であることを要求する。
 
-[MentsuHandChoiceStateMatches](../Shanten/MentsuHand.lean#L3399) も、使用牌・面子数・搭子数だけを保持し、雀頭を既に処理したかどうかと `state.pair` の対応を含まない。今回、これを補う雀頭用不変条件や、雀頭を含むグループを実際に処理する定理は追加されていない。
+[MentsuHandChoiceStateMatches](../../Shanten/MentsuHand.lean#L3399) も、使用牌・面子数・搭子数だけを保持し、雀頭を既に処理したかどうかと `state.pair` の対応を含まない。今回、これを補う雀頭用不変条件や、雀頭を含むグループを実際に処理する定理は追加されていない。
 
 新しい経路→バッチ変換それ自体は雀頭を排除しない。しかし、その入力となる経路を分解から供給するところが未解決である。
 
@@ -96,7 +96,7 @@
 | `330666b`、14:24 | 複数グループを状態でつなぐ関係と、バッチ走査への変換 | 各グループのバッチが既に存在すること |
 | `f79ed59`、14:27 | 前向き経路を新しい複数グループ関係の1ステップへ注入 | 現在グループの経路と、後続グループ関係 |
 
-最後の [step_of_forward](../Shanten/MentsuHand.lean#L3559) の主要前提は次のとおり。
+最後の [step_of_forward](../../Shanten/MentsuHand.lean#L3559) の主要前提は次のとおり。
 
 ```lean
 (hpath :
@@ -113,7 +113,7 @@
 
 ## 進捗台帳で注意すべき点
 
-現在の台帳は未完成を明記しており、以前より誠実である。ただし [「次に必要な証明」](./archive/2026-11-15_SHANTEN_LEAN4_PROGRESS.md#次に必要な証明レビュー後) には旧計画が残り、判断を難しくしている。
+現在の台帳は未完成を明記しており、以前より誠実である。ただし [「次に必要な証明」](archive/2026-11-15_SHANTEN_LEAN4_PROGRESS.md#次に必要な証明レビュー後) には旧計画が残り、判断を難しくしている。
 
 - 「牌種順の `List.Perm` が未完了」という説明は、今回完成したデータ層の順列性と、まだできていない経路の再配置を区別していない。
 - 「牌カウントと完成後コピー制限は完了」は、旧部分列条件下の補題としては正しいが、新しい順序非依存の途中状態について完了したわけではない。

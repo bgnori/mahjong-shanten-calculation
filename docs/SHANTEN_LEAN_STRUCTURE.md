@@ -1,9 +1,8 @@
 # Leanソースの構造
 
-この文書は現在の配置を説明する。初回分割の移行指示は完了済みの計画として
-[アーカイブ](./archive/2026-11-15_SHANTEN_LEAN_STRUCTURE.md) に移した。
-現在の実装作業は [計画](./SHANTEN_LEAN4_PLAN.md) と
-[台帳](./SHANTEN_LEAN4_PROGRESS.md) に従う。
+この文書は現在のLeanソースの配置と各モジュールの責務を説明する。
+プロジェクト計画・進捗・レビューの資料は
+[プロジェクト管理文書](./project/README.md) に分けている。
 
 ## モジュール
 
@@ -121,7 +120,7 @@ Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, Special, Ment
 ```
 
 上表はプロジェクト内の依存を示す（Mathlibのimportは省略）。
-面子手内部の詳細は [計画の構成表](./SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序) を参照する。
+面子手内部の詳細は上記のモジュール表を参照する。
 共有定義は既存の提供元を再利用し、循環importを作らない。
 構造変更が必要になった場合も、宣言・命題の意味の変更とは分離して検証する。
 
