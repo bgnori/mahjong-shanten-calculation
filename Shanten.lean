@@ -1,4 +1,5 @@
 import Shanten.Core
+import Shanten.DomainAdapter
 import Shanten.Specification
 import Shanten.SevenPairs
 import Shanten.ThirteenOrphans

@@ -2,7 +2,7 @@
 
 **作成日:** 2026-11-17  
 **状態:** W0完了（2026-11-17）、W1完了（2026-11-18）、W2の方針決定完了（2026-11-18）。
-新規リポジトリ作成とW3以降は未着手。
+W3は着手中（共有牌型とshantenアダプタを追加）。
 W0の対象コミット、用語対応、基準検査結果は
 [W0報告書](SHARED_DOMAIN_W0_BASELINE_2026-11-17.md)を参照。
 
@@ -305,8 +305,13 @@ W0の固定基準コミットとは異なる分類側checkoutで実施したこ�
 独立核のリポジトリ名を`mahjong-domain-core`、公開名前空間を`MahjongDomain`、
 ライセンスをMITとし、固定SHA依存と共通用語集の配置・利用側リンク方針を決めた。
 詳細は「W2決定」を参照。ユーザー確認により主保守者を`@bgnori`、著作権者表示を
-`bgnori`、開始年を2026年とした。GitHub認証が利用できず、
-リポジトリ作成および既存コードの移植は行っていない。
+`bgnori`、開始年を2026年とした。リポジトリを作成し、最初の共有牌型を追加した。
+
+### W3（進行中）
+
+`mahjong-domain-core`に牌種・牌カウント・安定した34種indexを追加し、
+shanten側にSHA固定依存と、既存型との往復を保証するアダプタを導入した。
+136／37／34対応、集約・容量保存、および分類側アダプタは未完了。
 
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean
