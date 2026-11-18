@@ -1,8 +1,8 @@
 # shanten・テンパイ形分類の共通コード／仕様抽出作業計画
 
 **作成日:** 2026-11-17  
-**状態:** W0完了（2026-11-17）、W1完了（2026-11-18）、W2の方針決定完了（2026-11-18）。
-W3は着手中（共有牌型とshantenアダプタを追加）。
+**状態:** W0完了（2026-11-17）、W1完了（2026-11-18）、W2の方針決定完了（2026-11-18）、
+W3完了（2026-11-18）。
 W0の対象コミット、用語対応、基準検査結果は
 [W0報告書](SHARED_DOMAIN_W0_BASELINE_2026-11-17.md)を参照。
 
@@ -309,12 +309,20 @@ W0の固定基準コミットとは異なる分類側checkoutで実施したこ�
 詳細は「W2決定」を参照。ユーザー確認により主保守者を`@bgnori`、著作権者表示を
 `bgnori`、開始年を2026年とした。リポジトリを作成し、最初の共有牌型を追加した。
 
-### W3（進行中）
+### W3（完了、2026-11-18）
 
-`mahjong-domain-core`に牌種・牌カウント・安定した34種indexを追加し、
-両利用側にSHA固定依存と既存型との往復を保証するアダプタを導入した。
-分類側では既存の34種順とのindex対応も証明した。136／37／34対応、
-集約・容量保存は未完了。
+`mahjong-domain-core`に136物理牌ID・Int37・34牌種の表現対応、Int37集約、
+総数・加算・容量保存定理を追加し、共通用語集を公開した。
+shanten側は既存牌型との往復、Int37正規化・容量・集約の対応定理を、
+分類側は既存牌種順と物理牌IDの対応・copy保存をアダプタで保証する。
+両consumerは共通核のSHA `a21dd8484d22901683eeedd2ed77625245031029`に固定し、
+同SHAをGitHubの`main`へpushした。
+
+- 共通核: `lake build`成功。集約の加算・総数・容量保存、および136／37／34対応を含む。
+- shanten: `lake build`成功（934 jobs）。既存の`sorry`検査にInt37接続定理を追加。
+- 分類側: `lake build Mahjong MahjongTests`成功（866 jobs）、
+  `go test ./mahjong`成功（0.226秒）。
+- 利用側の用語集から共通用語集へリンクした。既存の探索・分類実装は変更していない。
 
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean

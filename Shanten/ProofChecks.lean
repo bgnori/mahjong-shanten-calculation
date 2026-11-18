@@ -3,6 +3,7 @@ import Shanten.ThirteenOrphans
 import Shanten.Bounds
 import Shanten.Capacity
 import Shanten.Input37
+import Shanten.DomainAdapter
 import Mathlib.Util.AssertNoSorry
 
 /-!
@@ -101,5 +102,8 @@ assert_no_sorry Input37.Examples.negative_count_rejections
 assert_no_sorry Input37.Examples.malformed_meld_rejections
 assert_no_sorry Input37.Examples.hand_size_rejections
 assert_no_sorry Input37.Examples.red_identity_invariant
+assert_no_sorry DomainAdapter.normalizeTile_matches_domain
+assert_no_sorry DomainAdapter.capacity_matches_domain
+assert_no_sorry DomainAdapter.normalizeCounts_matches_domain
 
 end Shanten

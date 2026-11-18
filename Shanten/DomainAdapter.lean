@@ -1,7 +1,7 @@
 module
 
 public import Shanten.Core
-public import MahjongDomain.Tile
+public import MahjongDomain.Representation
 
 /-!
 # Adapter for the shared Mahjong domain
@@ -67,5 +67,12 @@ theorem toDomainCounts_ofDomainCounts (counts : MahjongDomain.TileCounts) :
     toDomainCounts (ofDomainCounts counts) = counts := by
   funext tile
   simp [toDomainCounts, ofDomainCounts, toDomainTile_ofDomainTile]
+
+theorem toDomainTile_injective : Function.Injective toDomainTile := by
+  intro left right h
+  calc
+    left = ofDomainTile (toDomainTile left) := (ofDomainTile_toDomainTile left).symm
+    _ = ofDomainTile (toDomainTile right) := congrArg ofDomainTile h
+    _ = right := ofDomainTile_toDomainTile right
 
 end Shanten.DomainAdapter
