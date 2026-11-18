@@ -26,6 +26,7 @@ Int37・Int34とその対応をLeanで共通定義し、各プロジェクトが
 作成時点ではリポジトリ名・公開API名は未確定だった。2026-11-18のW2で
 `bgnori/mahjong-domain-core`、公開名前空間`MahjongDomain`を選定した
 （詳細は[抽出作業計画](SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md)）。
+同日、待ち分類・シャンテン数計算・将来の点数計算を含む4領域の名前体系も合意した。
 
 **方向性**
 

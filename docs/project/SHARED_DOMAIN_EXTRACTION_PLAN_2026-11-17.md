@@ -141,11 +141,22 @@ W0の回帰基準確保は抽出前に行うが、相互テストだけで完了
 
 #### W2決定（2026-11-18）
 
-- **配置先・リポジトリ名:** 独立したGitHubリポジトリ
-  `bgnori/mahjong-domain-core`を作成し、
-  shantenとmahjong-formalizationが共通の正本として利用する。
+- **名前体系:** 表示名を「Mahjong + 対象」、リポジトリslugを`mahjong-<対象>`に揃える。
+  待ち分類は「Mahjong Wait Classification」／`mahjong-wait-classification`、
+  シャンテン数計算は「Mahjong Shanten」／`mahjong-shanten`、
+  将来の点数計算は「Mahjong Scoring」／`mahjong-scoring`、
+  共有ドメイン核は「Mahjong Domain Core」／`mahjong-domain-core`とする。
+  汎用名`mahjong`は将来の統合ライブラリ用に確保し、共有核には使わない。
+- **配置先・リポジトリ名:** 共有核は独立した`bgnori/mahjong-domain-core`として作成し、
+  `mahjong-shanten`と`mahjong-wait-classification`が共通の正本として利用する。
   `mahjong-domain-core`は麻雀ドメインの小さなLean基盤であることを表し、
   両利用側や将来の他の利用者にも用途を限定しすぎない名前とする。
+- **公開パス移行:** 利用者の実態は未確認だが、名前変更に伴う破壊的変更を許容し、
+  Go moduleとimport例も新しいリポジトリ名に揃える。
+  パス案は`github.com/bgnori/mahjong-wait-classification`と
+  `github.com/bgnori/mahjong-shanten`。公開済み計算結果は履歴上の固定成果物として扱い、
+  旧module pathの互換層は設けない。GitHub Pagesの公開先と参照リンクは改名時に確認する。
+  この決定は命名方針であり、GitHub上の既存リポジトリ名やGo moduleはまだ変更していない。
 - **名前空間・Lake入口:** Lean名前空間と公開root moduleを`MahjongDomain`、
   Lake package名を`mahjongDomain`とする。既存の`Shanten`／`Mahjong`名前空間との
   衝突を避ける。ソース・証明の正本はこのリポジトリに一つだけ置く。
