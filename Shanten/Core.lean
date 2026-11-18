@@ -1,9 +1,13 @@
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Mathlib.Data.Fintype.Sigma
-import Mathlib.Data.Fintype.Sum
-import Mathlib.Data.Multiset.Replicate
+module
+
+public import Mathlib.Algebra.Order.BigOperators.Group.Finset
+public import Mathlib.Data.Fintype.Sigma
+public import Mathlib.Data.Fintype.Sum
+public import Mathlib.Data.Multiset.Replicate
 import Mathlib.Tactic.DeriveFintype
 import Mathlib.Tactic.Push
+
+@[expose] public section
 
 namespace Shanten
 
@@ -156,7 +160,7 @@ lemma exists_missing_tile_kind
     intro tile
     simp only [presentTiles, Finset.mem_filter, Finset.mem_univ, true_and]
     exact Nat.pos_of_ne_zero (hmissing tile)
-  have hcard : 7 ≤ Fintype.card Tile := by native_decide
+  have hcard : 7 ≤ Fintype.card Tile := by decide
   have : 7 ≤ distinctTileCount hand := by
     rw [distinctTileCount_eq_presentTiles_card, hpresent]
     simpa using hcard

@@ -1,5 +1,7 @@
-import Shanten.Core
-import MahjongDomain.Tile
+module
+
+public import Shanten.Core
+public import MahjongDomain.Tile
 
 /-!
 # Adapter for the shared Mahjong domain
@@ -7,6 +9,8 @@ import MahjongDomain.Tile
 These conversions keep the existing `Shanten` types as the public interface
 while proving their tile and count representations correspond to the core.
 -/
+
+@[expose] public section
 
 namespace Shanten.DomainAdapter
 
