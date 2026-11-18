@@ -5,7 +5,6 @@ public import Mathlib.Data.Fintype.Sigma
 public import Mathlib.Data.Fintype.Sum
 public import Mathlib.Data.Multiset.Replicate
 import Mathlib.Tactic.DeriveFintype
-import Mathlib.Tactic.Push
 
 @[expose] public section
 
