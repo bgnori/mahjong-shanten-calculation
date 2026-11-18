@@ -242,6 +242,19 @@ W0の固定基準コミットとは異なる分類側checkoutで実施したこ�
   コンストラクタ順を明示した`Fintype.ofList`に置換し、対象ビルドを再実行して確認した。
 - 分類側の`lake-manifest.json`を更新。新しい同値証明、Goテスト、全列挙は実施していない。
 
+#### W1受入再確認（2026-11-18）
+
+現行checkoutでも同じ版で再検査した。shantenは
+`f1d45b09a93c13ba5da38874714921988724a928`、分類側は
+`699ba4dd9d29df5bfa82eebb16598024e1aabdaf`。
+
+- shanten: Lean／mathlib `v4.35.0`、`lake build`成功（928 jobs）、
+  `GOTOOLCHAIN=auto go test ./...`と`GOTOOLCHAIN=auto go vet ./...`成功。
+  Goパッケージにテストファイルはないため、`go test`はビルド確認であり数値適合テストではない。
+- 分類側: Lean／mathlib `v4.35.0`、`lake build Mahjong MahjongTests`成功（826 jobs）、
+  `GOTOOLCHAIN=auto go test ./mahjong`成功（0.216秒）。
+- Leanビルドは開発コンテナで実行。既存のmathlib import／lint警告はあるが、エラーなし。
+
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean
 [partition]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/WaitCompletionFinder.lean#L259
