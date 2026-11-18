@@ -342,6 +342,8 @@ shanten側は既存牌型との往復、Int37正規化・容量・集約の対�
 - 共通核の`lake build`成功（803 jobs）。Lean／mathlibは`v4.35.0`。
 - 利用側の既存仕様との接続・固定依存更新は未実施で、W5-S／W5-Cの対象とする。
 
+独立レビューは[W4対応レビュー報告](SHARED_DOMAIN_W4_REVIEW_2026-11-19.md)を参照。
+
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean
 [partition]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/WaitCompletionFinder.lean#L259
