@@ -391,6 +391,7 @@ shantenを共通核のW4コミット
 
 shanten・分類の相互依存を避けるため、接続証明を`shanten/w6`の独立Lakeパッケージに置いた。
 W5-S／W5-Cのローカルcheckoutを参照し、共通核や各利用側のAPI・列挙器は変更していない。
+受入条件に対するレビューは[W6対応レビュー報告](SHARED_DOMAIN_W6_REVIEW_2026-11-19.md)を参照。
 
 - 牌種変換の往復と`CountsMatch`から、分類側牌列の長さとshanten側カウント総数が一致することを証明した。
 - 分類側の`IsStandardAgari`と共有`StandardCompletion`を双方向に接続した。
