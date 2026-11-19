@@ -2,7 +2,8 @@
 
 **作成日:** 2026-11-17  
 **状態:** W0完了（2026-11-17）、W1完了（2026-11-18）、W2の方針決定完了（2026-11-18）、
-W3完了（2026-11-18）、W4完了（2026-11-19）、W5-S完了（2026-11-19）。
+W3完了（2026-11-18）、W4完了（2026-11-19）、W5-S完了（2026-11-19）、
+W5-C完了（2026-11-19）。
 W0の対象コミット、用語対応、基準検査結果は
 [W0報告書](SHARED_DOMAIN_W0_BASELINE_2026-11-17.md)を参照。
 
@@ -365,7 +366,26 @@ shantenを共通核のW4コミット
 - shanten: Lean／mathlib `v4.35.0`、W4 SHA固定後の`lake build`成功（935 jobs）。
   既存の探索・A/B例・特殊形を含む全公開ビルドを検査した。
 
-W5-CとW6は未着手。
+### W5-C（完了、2026-11-19）
+
+分類側を共通核のW4コミット
+`6cbb59efcc56a45cf0f321b6cc8653d64cdadf57`へ固定し、
+既存分類APIと列挙器を維持したまま、通常形分解と合法待ちの証明出口を共有仕様へ接続した。
+分類側の変更はコミット`803ba63`。
+
+- `Mahjong.DomainAdapter`に対子・完成面子・順序付き面子列・分解の相互変換を追加し、
+  牌種多重度とリスト順を保存する往復定理を証明した。同じ面子が繰り返される場合も
+  `List`のまま保持し、槓は通常面子へ変換しない。
+- `WinningPartitionSpec.toDomainStandardCompletion`は、分類側の個別分解から対応する
+  `StandardDecomposition`を直接構成し、共有`StandardCompletion`の面子数と牌種カウントを証明する。
+  `IsStandardAgari.toDomainStandardCompletion`と`waitingTiles_member_toDomainWait`により、
+  既存の和了・合法待ち出口から共有完成仕様を利用できるようにした。
+- `winningPartitions`、`waitingTiles`、正規化順、分類ID・重複度を変更していない。
+  用語集はW4固定版の共通用語集を参照し、分類固有の意味と列挙責務を記録した。
+- 分類側: Lean／mathlib `v4.35.0`、`lake build Mahjong MahjongTests`成功（868 jobs）。
+  `go test ./mahjong`もGo `1.24.5`で成功（0.233秒）。
+
+W6は未着手。
 
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean
