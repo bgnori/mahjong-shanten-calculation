@@ -131,6 +131,11 @@ Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, Special, Ment
 アダプタと対応定理を介して共有定義を利用する。循環importを作らない。
 構造変更が必要になった場合も、宣言・命題の意味の変更とは分離して検証する。
 
+固定面子文脈付き待ちと分類側`IsWaitFor`の同値は、両プロジェクト間の循環依存を避けるため
+独立した[`w6/`](../w6/) Lakeパッケージに置く。CIは分類側の検査対象を
+`803ba634ab53b90c0b51add76f7ce36b1bf73b2c`に固定し、W6の接続定理とA/B例を
+推移的`sorryAx`不在検査付きでビルドする。既存の`Shanten`公開rootと探索器は変更しない。
+
 国士無双の追加時に、面子手の `Exchange` にあった汎用の目標カウント・不足数・
 交換列の補題を共有の [Exchange.lean](../Shanten/Exchange.lean) へ移動した。
 既存の公開名・型を維持し、完成形への到達と不足数による下界を形に依存しない補題へ

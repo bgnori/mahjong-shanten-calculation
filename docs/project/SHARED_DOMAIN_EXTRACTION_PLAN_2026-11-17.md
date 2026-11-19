@@ -3,7 +3,7 @@
 **作成日:** 2026-11-17  
 **状態:** W0完了（2026-11-17）、W1完了（2026-11-18）、W2の方針決定完了（2026-11-18）、
 W3完了（2026-11-18）、W4完了（2026-11-19）、W5-S完了（2026-11-19）、
-W5-C完了（2026-11-19）、W6完了。
+W5-C完了（2026-11-19）、W6完了、W7完了（2026-11-20）。
 W0の対象コミット、用語対応、基準検査結果は
 [W0報告書](SHARED_DOMAIN_W0_BASELINE_2026-11-17.md)を参照。
 
@@ -406,6 +406,32 @@ W5-S／W5-Cのローカルcheckoutを参照し、共通核や各利用側のAPI�
   分類側の東待ちは共通だが、東刻子固定では容量条件が偽、南刻子固定では真となり、
   後者から通常形shanten 0も導いた。
 - Lean／mathlib `v4.35.0`で`cd w6 && lake build`成功（921 jobs）。
+
+### W7（完了、2026-11-20）
+
+既存の公開入口と個別APIを保ったまま、共通核・両利用側・W6接続の固定版検査をCIへ追加した。
+W6レビューで指摘された接続定理の推移的`sorryAx`検査も実装した。
+
+- 共通核は両consumerの`lakefile.lean`と`lake-manifest.json`で
+  `6cbb59efcc56a45cf0f321b6cc8653d64cdadf57`に固定されていることを確認した。
+- shared-domain CI jobは、共通核の同SHA、shantenの実行対象revision、
+  分類側`803ba634ab53b90c0b51add76f7ce36b1bf73b2c`を検査し、
+  共通核、shanten既定target、分類側`Mahjong MahjongTests`、分類Go契約、
+  W6接続パッケージを順にビルド／テストする。
+- `Shanten.lean`と分類側`Mahjong.lean`の互換公開入口をCI対象に含めた。
+  共通核導入前の公開型・探索器・列挙器は接続検査で置換しない。
+- `fixedContextWait_iff_classificationWait`、
+  `isShapeShanten_zero_iff_exists_fixedContextWait`、
+  `isShapeShanten_zero_iff_exists_classificationWait`、容量A/B例の全てに
+  `assert_no_sorry`を追加し、W6の通常ビルドで検査する。
+- shantenの用語集とLean構成文書に共通核の固定版・接続パッケージを記録し、
+  READMEにW7 CIの検査範囲を案内した。
+- ローカル再検査: 共通核`lake build`成功（803 jobs）、shanten `lake build`成功
+  （935 jobs）、分類側`lake build Mahjong MahjongTests`成功（868 jobs）、
+  W6 `lake build`成功（922 jobs）、分類側`go test ./mahjong`成功（0.233秒）。
+  GitHub Actions workflow YAMLもパース検査を通過した。
+- 上記はローカルcheckoutでの検査結果であり、GitHub Actions上の実行結果は
+  workflow実行後に確認する。
 
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean

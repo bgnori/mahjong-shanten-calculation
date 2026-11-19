@@ -24,6 +24,10 @@
 共通核の `MahjongDomain.StandardCompletion` は雀頭と順序付き面子列の証人を保持する。
 shantenの通常形 `Complete` は `mentsuComplete_iff_standardCompletion` でこの仕様に対応し、
 4枚制限や固定面子文脈は利用側の前提として別に保つ。
+このリポジトリは共通核の完全なコミットSHAを
+[`lakefile.lean`](../lakefile.lean)と[`lake-manifest.json`](../lake-manifest.json)で固定する。
+固定文脈付き待ちの接続は独立した[`w6/`](../w6/)パッケージで検査し、
+CIでは分類側も固定コミットでチェックアウトする。
 
 ## まず押さえる区別
 

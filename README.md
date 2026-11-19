@@ -108,7 +108,11 @@ future calculator or adapter implementation.
 [GitHub Actions](.github/workflows/checks.yml) runs these Go checks and `lake build`
 on every push and pull request, and supports manual runs. The Go job installs the
 version from `go.mod`; the Lean job uses `lean-toolchain` and the committed
-`lake-manifest.json`, without running `lake update`.
+`lake-manifest.json`, without running `lake update`. A shared-domain regression job
+also builds the core and both consumers at their pinned revisions, exercises their
+existing public Lean entrypoints, checks both consumer links to the fixed shared
+glossary, runs the classification Go contract test, and builds the fixed-context
+connection package with transitive `sorryAx` checks.
 
 The default Lean build imports [Shanten/ProofChecks.lean](Shanten/ProofChecks.lean).
 Its `assert_no_sorry` checks reject transitive `sorryAx` dependencies in the main

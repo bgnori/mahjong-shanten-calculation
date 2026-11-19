@@ -1,5 +1,6 @@
 import Shanten.Capacity.Examples
 import Mahjong.WaitCompletionFinder
+import Mathlib.Util.AssertNoSorry
 
 namespace SharedDomainW6
 
@@ -521,5 +522,11 @@ theorem capacityB_shanten_zero :
   obtain ⟨_, h13B, _, _, hwaitB⟩ := capacityAB
   exact (isShapeShanten_zero_iff_exists_fixedContextWait h13B).mpr
     ⟨east, hwaitB⟩
+
+assert_no_sorry fixedContextWait_iff_classificationWait
+assert_no_sorry isShapeShanten_zero_iff_exists_fixedContextWait
+assert_no_sorry isShapeShanten_zero_iff_exists_classificationWait
+assert_no_sorry capacityAB
+assert_no_sorry capacityB_shanten_zero
 
 end SharedDomainW6

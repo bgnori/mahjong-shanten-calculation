@@ -48,3 +48,74 @@ jobs:
             -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
       - name: Build and reject proof holes
         run: lake build
+
+  shared-domain:
+    name: Shared domain regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      LEAN_NUM_THREADS: "2"
+      MATHLIB_NO_CACHE_ON_UPDATE: "1"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: shanten
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: bgnori/mahjong-domain-core
+          ref: 6cbb59efcc56a45cf0f321b6cc8653d64cdadf57
+          path: mahjong-domain-core
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: bgnori/mahjong-formalization
+          ref: 803ba634ab53b90c0b51add76f7ce36b1bf73b2c
+          path: mahjong-formalization
+      - name: Install elan
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            -o "$RUNNER_TEMP/elan-init.sh"
+          sh "$RUNNER_TEMP/elan-init.sh" -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Lean toolchain
+        run: elan toolchain install "$(cat shanten/lean-toolchain)"
+      - name: Verify shared glossary references
+        run: |
+          test -f mahjong-domain-core/docs/GLOSSARY.md
+          grep -Fq \
+            'https://github.com/bgnori/mahjong-domain-core/blob/6cbb59efcc56a45cf0f321b6cc8653d64cdadf57/docs/GLOSSARY.md' \
+            shanten/docs/GLOSSARY.md
+          grep -Fq \
+            'https://github.com/bgnori/mahjong-domain-core/blob/6cbb59efcc56a45cf0f321b6cc8653d64cdadf57/docs/GLOSSARY.md' \
+            mahjong-formalization/docs/domain-vocabulary.md
+      - name: Build shared domain core
+        working-directory: mahjong-domain-core
+        run: |
+          lake exe cache get $(find MahjongDomain -name '*.lean' \
+            -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+          lake build
+      - name: Build shanten compatibility entrypoint
+        working-directory: shanten
+        run: |
+          lake exe cache get $(find Shanten -name '*.lean' \
+            -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+          lake build
+      - name: Build classification compatibility entrypoint
+        working-directory: mahjong-formalization
+        run: |
+          lake exe cache get $(find Mahjong MahjongTests -name '*.lean' \
+            -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+          lake build Mahjong MahjongTests
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: mahjong-formalization/go.mod
+          cache: false
+      - name: Test classification Go contract
+        working-directory: mahjong-formalization
+        run: go test ./mahjong
+      - name: Build fixed-context connection and reject proof holes
+        working-directory: shanten/w6
+        run: |
+          lake exe cache get $(find ../Shanten ../../mahjong-formalization/Mahjong . \
+            -name '*.lean' -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+          lake build
