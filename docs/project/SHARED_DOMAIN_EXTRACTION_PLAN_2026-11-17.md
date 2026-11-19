@@ -385,6 +385,8 @@ shantenを共通核のW4コミット
 - 分類側: Lean／mathlib `v4.35.0`、`lake build Mahjong MahjongTests`成功（868 jobs）。
   `go test ./mahjong`もGo `1.24.5`で成功（0.233秒）。
 
+独立レビューは[W5対応レビュー報告](SHARED_DOMAIN_W5_REVIEW_2026-11-19.md)を参照。
+
 W6は未着手。
 
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
