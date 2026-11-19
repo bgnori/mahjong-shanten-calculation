@@ -1,4 +1,5 @@
 import Shanten.Core
+import Shanten.DomainAdapter
 import Mathlib.Data.Nat.Find
 
 namespace Shanten
@@ -34,6 +35,24 @@ def Complete : Shape → Hand → Prop
         hand.fixedMelds = 0 ∧
           ∃ pair, pair ∈ orphanKinds ∧
             HasTiles hand (orphanTiles + Multiset.replicate 1 pair)
+
+theorem mentsuComplete_iff_standardCompletion (hand : Hand) :
+    Complete .mentsuHand hand ↔
+      ValidCounts hand ∧
+        hand.fixedMelds ≤ 4 ∧
+        MahjongDomain.StandardCompletion (4 - hand.fixedMelds)
+          (DomainAdapter.toDomainCounts hand.counts) := by
+  constructor
+  · rintro ⟨hvalid, pair, melds, hlength, htiles⟩
+    have hfixed : hand.fixedMelds ≤ 4 := by omega
+    refine ⟨hvalid, hfixed, ?_⟩
+    exact (DomainAdapter.standardCompletion_iff_shantenParts
+      hand.counts hand.fixedMelds hfixed).mpr ⟨pair, melds, by omega, htiles⟩
+  · rintro ⟨hvalid, hfixed, hcompletion⟩
+    obtain ⟨pair, melds, hlength, htiles⟩ :=
+      (DomainAdapter.standardCompletion_iff_shantenParts
+        hand.counts hand.fixedMelds hfixed).mp hcompletion
+    exact ⟨hvalid, pair, melds, by omega, htiles⟩
 
 lemma Complete.validCounts (hcomplete : Complete shape hand) : ValidCounts hand := by
   cases shape <;> exact hcomplete.1

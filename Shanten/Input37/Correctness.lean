@@ -5,7 +5,12 @@ namespace Shanten.Input37
 
 lemma normalizedHand_counts_cast (h : Nonnegative input.standing) (tile : Tile) :
     ((normalizedHand input h).counts tile : Int) = normalizeCounts input.standing tile :=
-  Int.natCast_toNat_eq_self.mpr (normalizeCounts_nonneg h tile)
+  by
+    simp only [normalizedHand]
+    rw [DomainAdapter.normalizeCounts_matches_domain]
+    apply Int.natCast_toNat_eq_self.mpr
+    rw [← DomainAdapter.normalizeCounts_matches_domain]
+    exact normalizeCounts_nonneg h tile
 
 lemma normalizedHand_tileCount (h : Nonnegative input.standing) :
     (tileCount (normalizedHand input h) : Int) = standingCount input := by
@@ -154,7 +159,19 @@ theorem normalized_equivalent
     rw [hsome left hl, hsome right hr, hparsed]
   refine ⟨hfixed, ?_⟩
   unfold normalizedHand
-  rw [heq.1, hlength]
+  apply congrArg₂ Hand.mk
+  · funext tile
+    calc
+      (MahjongDomain.aggregateInt37 (fun index => left.standing index)
+        (DomainAdapter.toDomainTile tile)).toNat =
+          (normalizeCounts left.standing tile).toNat := by
+            rw [← DomainAdapter.normalizeCounts_matches_domain]
+      _ = (normalizeCounts right.standing tile).toNat :=
+        congrArg Int.toNat (congrFun heq.1 tile)
+      _ = (MahjongDomain.aggregateInt37 (fun index => right.standing index)
+          (DomainAdapter.toDomainTile tile)).toNat := by
+            rw [DomainAdapter.normalizeCounts_matches_domain]
+  · exact hlength
 
 theorem overall_normalization_invariant
     (hleft : validateAndNormalize left = .ok normalizedLeft)

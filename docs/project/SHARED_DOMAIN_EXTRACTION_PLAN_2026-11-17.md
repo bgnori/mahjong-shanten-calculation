@@ -2,7 +2,7 @@
 
 **作成日:** 2026-11-17  
 **状態:** W0完了（2026-11-17）、W1完了（2026-11-18）、W2の方針決定完了（2026-11-18）、
-W3完了（2026-11-18）、W4完了（2026-11-19）。
+W3完了（2026-11-18）、W4完了（2026-11-19）、W5-S完了（2026-11-19）。
 W0の対象コミット、用語対応、基準検査結果は
 [W0報告書](SHARED_DOMAIN_W0_BASELINE_2026-11-17.md)を参照。
 
@@ -343,6 +343,29 @@ shanten側は既存牌型との往復、Int37正規化・容量・集約の対�
 - 利用側の既存仕様との接続・固定依存更新は未実施で、W5-S／W5-Cの対象とする。
 
 独立レビューは[W4対応レビュー報告](SHARED_DOMAIN_W4_REVIEW_2026-11-19.md)を参照。
+
+### W5-S（完了、2026-11-19）
+
+shantenを共通核のW4コミット
+`6cbb59efcc56a45cf0f321b6cc8653d64cdadf57`へ固定し、
+既存の型と公開入口を維持したまま、通常形完成・容量・入力正規化の出口を接続した。
+
+- `Shanten.DomainAdapter`で牌・対子・面子・順序付き面子列と牌種カウントを共有型へ変換し、
+  `standardCompletion_iff_shantenParts`で各分解の双方向対応と枚数を保持する。
+  固定面子数が4以下という前提も明示し、自然数の減算で不正な固定数を隠さない。
+- `Complete .mentsuHand`を共有`StandardCompletion`へ接続する
+  `mentsuComplete_iff_standardCompletion`を追加した。
+  `Capacity.Complete.mentsuHand_iff_standardCompletion`が共有仕様を容量付き完成出口で利用し、
+  既存の4固定面子時の対子判定も同値から導く。
+- `Input37.normalizedHand`の牌種集約を共有核の`aggregateInt37`で実行する。
+  既存正規化関数との一致を`normalizeCounts_matches_domain`で利用し、
+  枚数・容量・バリデーション後の容量付き手牌の保証を維持する。
+- 新しい主要対応定理と入力・容量付き出口を`ProofChecks.lean`の
+  推移的`sorryAx`不在検査へ追加した。探索器、特殊形、分類出力、公開Go契約は変更していない。
+- shanten: Lean／mathlib `v4.35.0`、W4 SHA固定後の`lake build`成功（935 jobs）。
+  既存の探索・A/B例・特殊形を含む全公開ビルドを検査した。
+
+W5-CとW6は未着手。
 
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean

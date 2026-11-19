@@ -1,9 +1,36 @@
 import Shanten.Capacity.Basic
+import Shanten.DomainAdapter
+import Shanten.Specification
 
 namespace Shanten.Capacity
 
 def Complete (fixed : List FixedMeld) (shape : Shape) (hand : Hand) : Prop :=
   ValidHand fixed hand ∧ Shanten.Complete shape hand
+
+theorem Complete.mentsuHand_iff_standardCompletion :
+    Complete fixed .mentsuHand hand ↔
+      ValidHand fixed hand ∧
+        MahjongDomain.StandardCompletion (4 - fixed.length)
+          (Shanten.DomainAdapter.toDomainCounts hand.counts) := by
+  constructor
+  · rintro ⟨hvalid, hcomplete⟩
+    obtain ⟨_, _, hcompletion⟩ :=
+      Shanten.mentsuComplete_iff_standardCompletion hand |>.mp hcomplete
+    have hlength : hand.fixedMelds = fixed.length := hvalid.1
+    rw [hlength] at hcompletion
+    exact ⟨hvalid, hcompletion⟩
+  · rintro ⟨hvalid, hcompletion⟩
+    have hfixed : hand.fixedMelds = fixed.length := hvalid.1
+    have hbound : hand.fixedMelds ≤ 4 := by
+      rw [hfixed]
+      exact hvalid.2.1
+    have hstandard :
+        MahjongDomain.StandardCompletion (4 - hand.fixedMelds)
+          (Shanten.DomainAdapter.toDomainCounts hand.counts) := by
+      rw [hfixed]
+      exact hcompletion
+    exact ⟨hvalid, (Shanten.mentsuComplete_iff_standardCompletion hand).mpr
+      ⟨hvalid.validCounts, hbound, hstandard⟩⟩
 
 def HandStep (fixed : List FixedMeld) (before after : Hand) : Prop :=
   ValidHand fixed before ∧ Shanten.HandStep before after ∧ ValidHand fixed after
@@ -196,18 +223,45 @@ lemma complete_mentsuHand_iff_of_four_fixed (hlength : fixed.length = 4) :
     Complete fixed .mentsuHand hand ↔
       ValidHand fixed hand ∧ ∃ pair, HasTiles hand (pairTiles pair) := by
   constructor
-  · rintro ⟨hvalid, _, pair, melds, hmelds, htiles⟩
-    have hnil : melds = [] := by
-      have := hvalid.1
-      have : melds.length = 0 := by omega
-      exact List.length_eq_zero_iff.mp this
+  · intro hcomplete
+    obtain ⟨hvalid, hstandard⟩ :=
+      Complete.mentsuHand_iff_standardCompletion.mp hcomplete
+    have hstandard0 : MahjongDomain.StandardCompletion 0
+        (Shanten.DomainAdapter.toDomainCounts hand.counts) := by
+      simpa [hlength] using hstandard
+    obtain ⟨pair, melds, hmelds, hcounts⟩ :=
+      (MahjongDomain.standardCompletion_iff_parts 0
+        (Shanten.DomainAdapter.toDomainCounts hand.counts)).mp hstandard0
+    have hnil : melds = [] := List.length_eq_zero_iff.mp hmelds
     subst melds
-    exact ⟨hvalid, pair, by simpa [meldsTiles] using htiles⟩
+    refine ⟨hvalid, Shanten.DomainAdapter.ofDomainPair pair, ?_⟩
+    intro tile
+    have hshared := congrFun hcounts (Shanten.DomainAdapter.toDomainTile tile)
+    have hconvert := congrFun
+      (Shanten.DomainAdapter.toDomain_pairMeldCounts
+        (Shanten.DomainAdapter.ofDomainPair pair) [])
+      (Shanten.DomainAdapter.toDomainTile tile)
+    rw [Shanten.DomainAdapter.toDomainPair_ofDomainPair] at hconvert
+    have hcount :
+        (pairTiles (Shanten.DomainAdapter.ofDomainPair pair)).count tile =
+          hand.counts tile := by
+      simpa [Shanten.DomainAdapter.toDomainCounts,
+        Shanten.DomainAdapter.ofDomainTile_toDomainTile, meldsTiles,
+        MahjongDomain.MeldList.counts, MahjongDomain.MeldList.tiles] using
+          hconvert.trans hshared
+    exact hcount.symm
   · rintro ⟨hvalid, pair, htiles⟩
-    refine ⟨hvalid, hvalid.validCounts, pair, [], ?_, ?_⟩
-    · have := hvalid.1
-      simp only [List.length_nil]
-      omega
-    · simpa [meldsTiles] using htiles
+    have hfixed : hand.fixedMelds = 4 := by
+      rw [hvalid.1, hlength]
+    have hstandard :
+        MahjongDomain.StandardCompletion (4 - hand.fixedMelds)
+          (Shanten.DomainAdapter.toDomainCounts hand.counts) :=
+      (Shanten.DomainAdapter.standardCompletion_iff_shantenParts
+        hand.counts hand.fixedMelds (by omega)).mpr
+        ⟨pair, [], by simp [hfixed], by simpa [HasTiles, meldsTiles] using htiles⟩
+    have hcomplete :=
+      (Shanten.mentsuComplete_iff_standardCompletion hand).mpr
+        ⟨hvalid.validCounts, by omega, hstandard⟩
+    exact ⟨hvalid, hcomplete⟩
 
 end Shanten.Capacity

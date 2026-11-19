@@ -15,10 +15,15 @@
 
 ## 共通ドメイン用語の正本
 
-牌種、136物理牌ID、Int37、34種への正規化、集約、牌種容量の共通定義は、
-[Mahjong Domain Coreの用語集](https://github.com/bgnori/mahjong-domain-core/blob/a21dd8484d22901683eeedd2ed77625245031029/docs/GLOSSARY.md)
+牌種、136物理牌ID、Int37、34種への正規化、集約、牌種容量、対子・面子と
+通常形分解の共通定義は、
+[Mahjong Domain Coreの用語集](https://github.com/bgnori/mahjong-domain-core/blob/6cbb59efcc56a45cf0f321b6cc8653d64cdadf57/docs/GLOSSARY.md)
 を参照してください。この文書では、以下にshantenの入力・出力・探索に固有の意味と、
 共有定義との違いを記します。
+
+共通核の `MahjongDomain.StandardCompletion` は雀頭と順序付き面子列の証人を保持する。
+shantenの通常形 `Complete` は `mentsuComplete_iff_standardCompletion` でこの仕様に対応し、
+4枚制限や固定面子文脈は利用側の前提として別に保つ。
 
 ## まず押さえる区別
 
@@ -328,6 +333,7 @@
 | `Shape` | `mentsuHand`、`sevenPairs`、`thirteenOrphans` の形の列挙型。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `Applicable` | 形を評価できるかを表す述語。特殊形は固定面子なしの場合だけ真。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `Complete` | 指定した形の完成条件。役や待ちの良し悪しは含めない。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
+| `mentsuComplete_iff_standardCompletion` | 通常形 `Complete` と共有核の証人付き分解仕様との対応。固定面子数4以下を前提とする。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `Complete.validCounts` | 3形に共通する完成形の4枚制限を取り出す補題。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `HandStep` | 1枚ドローまたは1枚交換による改善遷移。固定面子数は保存する。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `ReachesCompletion` | 指定回数の `HandStep` で完成条件へ到達する関係。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |

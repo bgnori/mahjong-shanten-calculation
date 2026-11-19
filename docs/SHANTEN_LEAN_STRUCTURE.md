@@ -10,7 +10,8 @@
 |---|---|
 | [Shanten.lean](../Shanten.lean) | 主要モジュールをまとめる公開入口（直接importは下記参照）。 |
 | [Core.lean](../Shanten/Core.lean) | 牌・手牌・面子の基礎モデル、カウントや基本述語。 |
-| [Specification.lean](../Shanten/Specification.lean) | 形、完成形、到達関係、形シャンテンと総合値の宣言的仕様。到達性からの値の存在・上界の共通証明。 |
+| [DomainAdapter.lean](../Shanten/DomainAdapter.lean) | 既存の牌・カウント・対子・面子・分解を共通核へ双方向に接続するアダプタ。 |
+| [Specification.lean](../Shanten/Specification.lean) | 形、完成形、到達関係、形シャンテンと総合値の宣言的仕様。通常形完成を共有`StandardCompletion`へ接続する。 |
 | [Exchange.lean](../Shanten/Exchange.lean) | 形に依存しない不足枚数、交換操作、固定目標への到達、到達距離の下界。 |
 | [SevenPairs.lean](../Shanten/SevenPairs.lean) | 七対子の公開import入口。実装は下表のモジュールに分割。 |
 | [ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) | 有効13枚手の国士無双の仕様値の存在・上界13と、最大値を達成する具体例。 |
@@ -19,7 +20,7 @@
 | [Bounds.lean](../Shanten/Bounds.lean) | 到達性からの条件付き上界、国士無双の閉形式の直接計算などの上位補題。 |
 | [Capacity.lean](../Shanten/Capacity.lean) | 固定面子の実牌内容を持つ容量付きモデルの公開入口。既存抽象モデルとは別の段階導入。 |
 | [Capacity/Basic.lean](../Shanten/Capacity/Basic.lean) | 槓を含む固定面子、残余容量、合算容量の有効性と保存。 |
-| [Capacity/Specification.lean](../Shanten/Capacity/Specification.lean) | 容量付き完成・遷移・最短距離仕様、総合値の達成最小値仕様、旧モデルへの射影と固定面子なしでの同値。 |
+| [Capacity/Specification.lean](../Shanten/Capacity/Specification.lean) | 容量付き完成・遷移・最短距離仕様、共有通常形完成との対応、総合値の達成最小値仕様。 |
 | [Capacity/Reachability.lean](../Shanten/Capacity/Reachability.lean) | 共有の目標方向交換列を容量付き経路へ変換し、不足枚数で完成目標へ到達する。 |
 | [Capacity/Search.lean](../Shanten/Capacity/Search.lean) | 既存ブロック探索の容量フィルタ、完成形との対応、到達上界・下界、最小値証明。 |
 | [Capacity/Totality.lean](../Shanten/Capacity/Totality.lean) | 有効固定文脈の完成目標を構成し、13枚相当入力すべての全域性・仕様一致・最適状態を証明する。 |
@@ -30,8 +31,9 @@
 | [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/B、14枚相当の最適打牌、特殊形・総合値、容量超過・槓の回帰例。 |
 | [Input37.lean](../Shanten/Input37.lean) | 符号付き37種入力のLean側の公開入口。Go実装ではない。 |
 | [Input37/Basic.lean](../Shanten/Input37/Basic.lean) | aka37添字・物理容量、整数上の赤5統合、総枚数保存、統合後容量、入力妥当性の宣言的仕様。 |
-| [Input37/Validation.lean](../Shanten/Input37/Validation.lean) | 正規化前の検証と位置付きエラー、面子の構造認識、受理と入力仕様の同値。 |
-| [Input37/Correctness.lean](../Shanten/Input37/Correctness.lean) | 枚数・固定牌の保存、容量付き入力への接続、総合計算の前提、赤の割当て変更に対する値不変性。 |
+| [Input37/DomainAdapter.lean](../Shanten/Input37/DomainAdapter.lean) | Int37添字・牌種容量・符号付き集約と共通核の対応。 |
+| [Input37/Validation.lean](../Shanten/Input37/Validation.lean) | 共有集約による正規化、正規化前の検証と位置付きエラー、受理と入力仕様の同値。 |
+| [Input37/Correctness.lean](../Shanten/Input37/Correctness.lean) | 枚数・固定牌の保存、容量付き入力への接続、正規化の保存と赤の割当て変更に対する値不変性。 |
 | [Input37/Examples.lean](../Shanten/Input37/Examples.lean) | 13・14枚の赤混在、赤を含む面子・槓、容量超過・負数・不正面子・枚数の回帰検査。 |
 | [ProofChecks.lean](../Shanten/ProofChecks.lean) | 主要出口定理の推移的な `sorryAx` 依存を通常ビルドで拒否する。 |
 
@@ -82,7 +84,8 @@
 ## モジュール間の依存
 
 ```text
-Specification -> Core
+Specification -> Core, DomainAdapter
+DomainAdapter -> Core, MahjongDomain
 Exchange      -> Specification
 ThirteenOrphans -> Exchange
 SevenPairs.Basic -> Exchange
@@ -97,7 +100,7 @@ MentsuHand.Targets -> MentsuHand.State, Exchange
 Bounds        -> SevenPairs
 Special       -> SevenPairs.Completion, SevenPairs.Counting, ThirteenOrphans
 Capacity.Basic -> Exchange
-Capacity.Specification -> Capacity.Basic
+Capacity.Specification -> Capacity.Basic, DomainAdapter, Specification
 Capacity.Reachability -> Capacity.Specification
 Capacity.Search -> Capacity.Reachability, MentsuHand.Search.BlockSearch
 Capacity.Totality -> Capacity.Search
@@ -110,7 +113,8 @@ Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Reachability,
                  Capacity.Search, Capacity.Totality, Capacity.Fourteen,
                  Capacity.Discard, Capacity.Special, Capacity.Overall, Capacity.Examples
 Input37.Basic -> Capacity.Basic
-Input37.Validation -> Input37.Basic
+Input37.DomainAdapter -> Input37.Basic, DomainAdapter
+Input37.Validation -> Input37.DomainAdapter
 Input37.Correctness -> Input37.Validation, Capacity.Overall
 Input37.Examples -> Input37.Correctness
 Input37       -> Input37.Basic, Input37.Validation, Input37.Correctness, Input37.Examples
@@ -121,7 +125,10 @@ Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, Special, Ment
 
 上表はプロジェクト内の依存を示す（Mathlibのimportは省略）。
 面子手内部の詳細は上記のモジュール表を参照する。
-共有定義は既存の提供元を再利用し、循環importを作らない。
+共有核は [`lakefile.lean`](../lakefile.lean) と
+[`lake-manifest.json`](../lake-manifest.json) で
+`mahjong-domain-core`の固定コミットに依存する。既存の公開型・探索器は保持し、
+アダプタと対応定理を介して共有定義を利用する。循環importを作らない。
 構造変更が必要になった場合も、宣言・命題の意味の変更とは分離して検証する。
 
 国士無双の追加時に、面子手の `Exchange` にあった汎用の目標カウント・不足数・
