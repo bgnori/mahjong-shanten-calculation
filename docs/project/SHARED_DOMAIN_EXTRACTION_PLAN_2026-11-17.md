@@ -3,7 +3,7 @@
 **作成日:** 2026-11-17  
 **状態:** W0完了（2026-11-17）、W1完了（2026-11-18）、W2の方針決定完了（2026-11-18）、
 W3完了（2026-11-18）、W4完了（2026-11-19）、W5-S完了（2026-11-19）、
-W5-C完了（2026-11-19）。
+W5-C完了（2026-11-19）、W6完了。
 W0の対象コミット、用語対応、基準検査結果は
 [W0報告書](SHARED_DOMAIN_W0_BASELINE_2026-11-17.md)を参照。
 
@@ -387,7 +387,24 @@ shantenを共通核のW4コミット
 
 独立レビューは[W5対応レビュー報告](SHARED_DOMAIN_W5_REVIEW_2026-11-19.md)を参照。
 
-W6は未着手。
+### W6（完了）
+
+shanten・分類の相互依存を避けるため、接続証明を`shanten/w6`の独立Lakeパッケージに置いた。
+W5-S／W5-Cのローカルcheckoutを参照し、共通核や各利用側のAPI・列挙器は変更していない。
+
+- 牌種変換の往復と`CountsMatch`から、分類側牌列の長さとshanten側カウント総数が一致することを証明した。
+- 分類側の`IsStandardAgari`と共有`StandardCompletion`を双方向に接続した。
+  `fixedContextWait_iff_classificationWait`は、13枚相当・固定文脈・牌数一致を前提に、
+  固定文脈付き通常形待ちと分類側`IsWaitFor`および
+  `C(t) + F(t) < 4`の同値を示す。
+- `isShapeShanten_zero_iff_exists_fixedContextWait`と
+  `isShapeShanten_zero_iff_exists_classificationWait`により、
+  通常形shanten 0と固定文脈付き待ちの存在、および分類側待ちの存在を接続した。
+  総合shantenや七対子・国士との同一視は行っていない。
+- 公開A/B例では、`111m`＋東と固定「東刻子・123p・123s／南刻子・123p・123s」を使用。
+  分類側の東待ちは共通だが、東刻子固定では容量条件が偽、南刻子固定では真となり、
+  後者から通常形shanten 0も導いた。
+- Lean／mathlib `v4.35.0`で`cd w6 && lake build`成功（921 jobs）。
 
 [classification]: https://github.com/bgnori/mahjong-formalization/tree/bd84dd915b8fade0a8d04746a60021e4028848e7
 [basic]: https://github.com/bgnori/mahjong-formalization/blob/bd84dd915b8fade0a8d04746a60021e4028848e7/Mahjong/Basic.lean
