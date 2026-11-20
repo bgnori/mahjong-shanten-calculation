@@ -1,5 +1,5 @@
 {
-  "name": "shanten-dev",
+  "name": "mahjong-shanten-calculation-dev",
   "build": {
     "dockerfile": "Dockerfile",
     "context": "../.."

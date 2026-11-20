@@ -154,7 +154,7 @@ mathlib in `dev` are both pinned to `v4.35.0`.
 The development image installs the version from [`lean-toolchain`](lean-toolchain)
 at build time. Rebuild the image when the pin changes; new containers from the
 same image do not download Lean again. For a plain Docker build, run
-`docker build -f .devcontainer/dev/Dockerfile -t shanten-dev .` from the
+`docker build -f .devcontainer/dev/Dockerfile -t mahjong-shanten-calculation-dev .` from the
 repository root.
 Only the imported mathlib modules and their transitive dependencies are loaded
 and their prebuilt cache is fetched when the container is created. The Lean
