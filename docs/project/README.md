@@ -8,6 +8,7 @@
 - [Lean証明計画](./SHANTEN_LEAN4_PLAN.md)
 - [Lean証明進捗台帳](./SHANTEN_LEAN4_PROGRESS.md)
 - [共通ドメイン抽出計画](./SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md)
+- [core抽出候補の棚卸し](./CORE_EXTRACTION_CANDIDATES_2026-11-20.md)
 - [共通ドメインW0基準記録](./SHARED_DOMAIN_W0_BASELINE_2026-11-17.md)
 - [麻雀ドメイン共通核の導入計画案](./MAHJONG_DOMAIN_CORE_PLAN_2026-11-16.md)
 
