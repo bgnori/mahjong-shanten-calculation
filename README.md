@@ -114,10 +114,14 @@ future calculator or adapter implementation.
 on every push and pull request, and supports manual runs. The Go job installs the
 version from `go.mod`; the Lean job uses `lean-toolchain` and the committed
 `lake-manifest.json`, without running `lake update`. A shared-domain regression job
-also builds the core and both consumers at their pinned revisions, exercises their
-existing public Lean entrypoints, checks both consumer links to the fixed shared
+also builds Core and the classification consumer from `main`, exercises their
+existing public Lean entrypoints, checks both consumer links to the shared
 glossary, runs the classification Go contract test, and builds the fixed-context
-connection package with transitive `sorryAx` checks.
+connection package with transitive `sorryAx` checks. Lean jobs record the tested
+commit SHAs in the run summary. Core's own CI also builds both consumers from
+`main` against each Core push or pull request, so Core changes are checked without
+waiting for a consumer commit. This rolling policy is intentional while Core is
+evolving; it can later move to pinned revisions plus forward-compatibility CI.
 
 The default Lean build imports [Shanten/ProofChecks.lean](Shanten/ProofChecks.lean).
 Its `assert_no_sorry` checks reject transitive `sorryAx` dependencies in the main
@@ -166,7 +170,8 @@ automatically fetching all of mathlib. After updating dependencies or adding
 imports, fetch only the required cache with:
 
 ```sh
-lake exe cache get $(find Shanten -name '*.lean' -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+lake exe cache get $(find Shanten ../mahjong-domain-core/MahjongDomain -name '*.lean' \
+  -exec sed -n 's/^\(public \)\?import \(Mathlib\..*\)$/\2/p' {} + | sort -u)
 ```
 
 Build the Lean project in `dev` with:

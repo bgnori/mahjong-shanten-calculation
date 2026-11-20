@@ -17,17 +17,17 @@
 
 牌種、136物理牌ID、Int37、34種への正規化、集約、牌種容量、対子・面子と
 通常形分解の共通定義は、
-[Mahjong Domain Coreの用語集](https://github.com/bgnori/mahjong-domain-core/blob/6cbb59efcc56a45cf0f321b6cc8653d64cdadf57/docs/GLOSSARY.md)
+[Mahjong Domain Coreの用語集](https://github.com/bgnori/mahjong-domain-core/blob/main/docs/GLOSSARY.md)
 を参照してください。この文書では、以下にshantenの入力・出力・探索に固有の意味と、
 共有定義との違いを記します。
 
 共通核の `MahjongDomain.StandardCompletion` は雀頭と順序付き面子列の証人を保持する。
 shantenの通常形 `Complete` は `mentsuComplete_iff_standardCompletion` でこの仕様に対応し、
 4枚制限や固定面子文脈は利用側の前提として別に保つ。
-このリポジトリは共通核の完全なコミットSHAを
-[`lakefile.lean`](../lakefile.lean)と[`lake-manifest.json`](../lake-manifest.json)で固定する。
+このリポジトリは[`lakefile.lean`](../lakefile.lean)のpath依存で隣の共通核を使用し、
+CIでは共通核の`main`に追従する。
 固定文脈付き待ちの接続は独立した[`w6/`](../w6/)パッケージで検査し、
-CIでは分類側も固定コミットでチェックアウトする。
+CIでは分類側も`main`でチェックアウトし、検証した各コミットSHAを実行概要に残す。
 
 ## まず押さえる区別
 

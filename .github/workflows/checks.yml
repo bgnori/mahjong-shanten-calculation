@@ -38,8 +38,14 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: bgnori/mahjong-domain-core
-          ref: 6cbb59efcc56a45cf0f321b6cc8653d64cdadf57
+          ref: main
           path: mahjong-domain-core
+      - name: Record tested revisions
+        run: |
+          for repository in mahjong-domain-core shanten; do
+            printf '%s: %s\n' "$repository" "$(git -C "$repository" rev-parse HEAD)" \
+              >> "$GITHUB_STEP_SUMMARY"
+          done
       - name: Install elan
         run: |
           curl --proto '=https' --tlsv1.2 -sSf \
@@ -52,8 +58,8 @@ jobs:
         working-directory: shanten
       - name: Fetch imported Mathlib cache
         run: |
-          lake exe cache get $(find Shanten -name '*.lean' \
-            -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+          lake exe cache get $(find Shanten ../mahjong-domain-core/MahjongDomain -name '*.lean' \
+            -exec sed -n 's/^\(public \)\?import \(Mathlib\..*\)$/\2/p' {} + | sort -u)
         working-directory: shanten
       - name: Build and reject proof holes
         run: lake build
@@ -73,13 +79,19 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: bgnori/mahjong-domain-core
-          ref: 6cbb59efcc56a45cf0f321b6cc8653d64cdadf57
+          ref: main
           path: mahjong-domain-core
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: bgnori/mahjong-formalization
-          ref: 803ba634ab53b90c0b51add76f7ce36b1bf73b2c
+          ref: main
           path: mahjong-formalization
+      - name: Record tested revisions
+        run: |
+          for repository in mahjong-domain-core mahjong-formalization shanten; do
+            printf '%s: %s\n' "$repository" "$(git -C "$repository" rev-parse HEAD)" \
+              >> "$GITHUB_STEP_SUMMARY"
+          done
       - name: Install elan
         run: |
           curl --proto '=https' --tlsv1.2 -sSf \
@@ -93,28 +105,28 @@ jobs:
         run: |
           test -f mahjong-domain-core/docs/GLOSSARY.md
           grep -Fq \
-            'https://github.com/bgnori/mahjong-domain-core/blob/6cbb59efcc56a45cf0f321b6cc8653d64cdadf57/docs/GLOSSARY.md' \
+            'https://github.com/bgnori/mahjong-domain-core/blob/main/docs/GLOSSARY.md' \
             shanten/docs/GLOSSARY.md
           grep -Fq \
-            'https://github.com/bgnori/mahjong-domain-core/blob/6cbb59efcc56a45cf0f321b6cc8653d64cdadf57/docs/GLOSSARY.md' \
+            'https://github.com/bgnori/mahjong-domain-core/blob/main/docs/GLOSSARY.md' \
             mahjong-formalization/docs/domain-vocabulary.md
       - name: Build shared domain core
         working-directory: mahjong-domain-core
         run: |
           lake exe cache get $(find MahjongDomain -name '*.lean' \
-            -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+            -exec sed -n 's/^\(public \)\?import \(Mathlib\..*\)$/\2/p' {} + | sort -u)
           lake build
       - name: Build shanten compatibility entrypoint
         working-directory: shanten
         run: |
-          lake exe cache get $(find Shanten -name '*.lean' \
-            -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+          lake exe cache get $(find Shanten ../mahjong-domain-core/MahjongDomain -name '*.lean' \
+            -exec sed -n 's/^\(public \)\?import \(Mathlib\..*\)$/\2/p' {} + | sort -u)
           lake build
       - name: Build classification compatibility entrypoint
         working-directory: mahjong-formalization
         run: |
-          lake exe cache get $(find Mahjong MahjongTests -name '*.lean' \
-            -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+          lake exe cache get $(find Mahjong MahjongTests ../mahjong-domain-core/MahjongDomain \
+            -name '*.lean' -exec sed -n 's/^\(public \)\?import \(Mathlib\..*\)$/\2/p' {} + | sort -u)
           lake build Mahjong MahjongTests
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
@@ -126,6 +138,7 @@ jobs:
       - name: Build fixed-context connection and reject proof holes
         working-directory: shanten/w6
         run: |
-          lake exe cache get $(find ../Shanten ../../mahjong-formalization/Mahjong . \
-            -name '*.lean' -exec sed -n 's/^import \(Mathlib\..*\)$/\1/p' {} + | sort -u)
+          lake exe cache get $(find ../Shanten ../../mahjong-formalization/Mahjong \
+            ../../mahjong-domain-core/MahjongDomain SharedDomainW6.lean \
+            -name '*.lean' -exec sed -n 's/^\(public \)\?import \(Mathlib\..*\)$/\2/p' {} + | sort -u)
           lake build
