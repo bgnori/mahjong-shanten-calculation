@@ -20,17 +20,21 @@ consumer側に独立した定義が残っている。牌の表示形式はconsum
 すぐ使える共通機能として今回coreに追加する。探索状態や待ち分類の符号化は、
 引き続き各consumerの責務とする。
 
+Lean consumerでは既存の公開型・関数を保ちつつ、牌表示とInt37正規化の実処理をcoreへ委譲した。
+Tenhou IDからのInt37／Int34変換もcore側にある。Go consumerの同等処理はLeanライブラリを
+直接利用できないため、言語間の共有方法が決まるまで別途扱う。
+
 ## 候補一覧
 
 | 優先度 | consumerに残る定義 | core側の対応・現状 | 判断 |
 |---|---|---|---|
 | 高 | 分類側の`Rank`、`Suit`、`Honor`、`Tile`、牌種列挙・順序キー（[`Mahjong.Basic`](../../../mahjong-wait-classification/Mahjong/Basic.lean)） | [`Tile.lean`](../../../mahjong-domain-core/MahjongDomain/Tile.lean)に`Suit`、0始まりの`Rank`、`Honor`、正規化`Tile`、`Tile.all`、`Tile.index`がある。分類側adapterの`tileIndex_val`は`Tile.orderKey`との一致を証明している。 | 既存の分類側型を直ちに削除せず、core型への変換・互換入口を保ったまま、共通の意味とインデックスをcoreへ集約する。`Manzu`等の名前付きconstructorや`all`の列挙順は公開互換性として確認する。 |
 | 高 | shanten側の`Suit`、`Tile`、`TileCounts`、`Meld`と牌の多重集合定義（[`Shanten.Core`](../../Shanten/Core.lean)） | coreの[`Tile.lean`](../../../mahjong-domain-core/MahjongDomain/Tile.lean)と[`Parts.lean`](../../../mahjong-domain-core/MahjongDomain/Parts.lean)に対応する牌・カウント・面子・構成牌定義がある。[`Shanten.DomainAdapter`](../../Shanten/DomainAdapter.lean)は牌、対子、面子、カウントを接続する。 | 分類側と同じく、移植より正本化の候補。探索・特殊形で使う`Hand`や么九牌の計算はshanten固有なので残す。 |
-| 高 | `Counts37`、正規化牌、容量、集約とその基本則（[`Input37.Basic`](../../Shanten/Input37/Basic.lean)） | [`Representation.lean`](../../../mahjong-domain-core/MahjongDomain/Representation.lean)に`Int37Index`、`Int34Index`、Tenhou IDからのInt37／Int34カウント変換、容量、集約および保存則がある。[`Input37.DomainAdapter`](../../Shanten/Input37/DomainAdapter.lean)で定義間の一致を証明している。 | 入力全体の型・検証契約はshanten側に残し、正規化・容量・集約の計算はcoreを直接利用する方向が有力。37枠の型名やエラー契約は互換性を保つ。 |
+| 高 | `Counts37`、正規化牌、容量、集約とその基本則（[`Input37.Basic`](../../Shanten/Input37/Basic.lean)） | [`Representation.lean`](../../../mahjong-domain-core/MahjongDomain/Representation.lean)に`Int37Index`、`Int34Index`、Tenhou IDからのInt37／Int34カウント変換、容量、集約および保存則がある。 | `Counts37`はcoreの`Int37Counts`の別名とし、正規化牌・逆添字・容量・集約をcoreへ委譲済み。入力全体の型・検証契約と互換APIはshanten側に残し、[`Input37.DomainAdapter`](../../Shanten/Input37/DomainAdapter.lean)で対応を証明する。 |
 | 中 | `PhysicalTile := Tile × Fin 4`、`copiesPerTile`、`deck`、`deckSize`（分類側[`Mahjong.Basic`](../../../mahjong-wait-classification/Mahjong/Basic.lean)） | coreには線形な`PhysicalTileId : Fin 136`と牌種・Int37への対応がある。分類側adapterは組表現からIDへの変換と牌種保存を証明するが、逆変換や全単射をAPIとしては示していない。 | 未完了のモデル候補。`Tile × Fin 4`をcoreに足すか、IDを正本にして牌種・copyの射影を提供するかを先に決める。全単射と既存列挙の順序を証明し、`deck`が本当に共通APIかも確認する。 |
 | 低／既存接続 | `Toitsu`、`Shuntsu`、`MentsuCandidate`、`WinningComponent`とその牌列（分類側[`Pattern`](../../../mahjong-wait-classification/Mahjong/Pattern.lean)） | coreの[`Parts.lean`](../../../mahjong-domain-core/MahjongDomain/Parts.lean)に`Pair`、`Meld`、`Meld.tiles`があり、分類側[`PartsAdapter`](../../../mahjong-wait-classification/Mahjong/PartsAdapter.lean)で変換・牌数の対応を定義済み。 | ドメイン上の対子・順子・刻子は抽出済み。分類側のコンストラクタ名、`List Tile`による順序、列挙・正規化は分類の出力に関わるので、`Multiset`を使うcore表現へ一括置換しない。残るのは既存接続を活用する範囲の整理。 |
 | 条件付き | `FixedMeld`、固定牌の集約、残余容量（[`Capacity.Basic`](../../Shanten/Capacity/Basic.lean)） | coreに`Meld.tiles`と`Kan.occupiedTiles`はあるが、固定面子列・shantenの`Hand`を含む容量契約はない。 | 槓や固定牌の占有計算を他consumerも使う場合に限り、汎用の占有計算を候補とする。`ValidHand`、手牌枚数条件、交換操作はshanten側に残す。 |
-| 今回追加 | 分類側の`TileFormat`と`Tile.format`（[`Mahjong.Basic`](../../../mahjong-wait-classification/Mahjong/Basic.lean)） | coreの[`Tile.lean`](../../../mahjong-domain-core/MahjongDomain/Tile.lean)に`MahjongDomain.TileFormat`と`MahjongDomain.Tile.format`を追加。 | Unicodeとmpszをcoreから直接使える。正規化牌種に対する表示なので、赤5の区別は保持しない。consumer側の互換APIをcoreへ委譲する作業は別途扱う。 |
+| 今回追加 | 分類側の`TileFormat`と`Tile.format`（[`Mahjong.Basic`](../../../mahjong-wait-classification/Mahjong/Basic.lean)） | coreの[`Tile.lean`](../../../mahjong-domain-core/MahjongDomain/Tile.lean)に`MahjongDomain.TileFormat`と`MahjongDomain.Tile.format`を追加。 | 分類側の既存表示APIをcore formatterへの変換・委譲に更新済み。Unicodeとmpszを利用できる。正規化牌種に対する表示なので、赤5の区別は保持しない。 |
 
 ## coreへ追加しない定義
 
@@ -45,5 +49,6 @@ consumer側に独立した定義が残っている。牌の表示形式はconsum
 3. 固定牌・標準形の枚数などは、二つ以上のconsumerで再利用される定義・保存則に絞る。consumer固有の手牌条件や探索意味論は移さない。
 4. coreへ型を移すだけで完了とせず、adapterを通じて既存の出力・不正入力契約・証明の保証が維持されることを検証する。
 
-本書は候補調査であり、上記の抽出や公開API変更を実施した記録ではない。全体の境界と完了条件は
-[共通ドメイン抽出計画](./SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md)を参照。
+本書は候補調査とLean consumerのcore接続状況を記録する。Go consumerのTenhou ID変換は、
+Lean coreを直接importできないため未移行であり、言語間の共有方法を別途決める必要がある。
+全体の境界と完了条件は[共通ドメイン抽出計画](./SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md)を参照。
