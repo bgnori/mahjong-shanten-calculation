@@ -1,4 +1,4 @@
-# shanten
+# Mahjong Shanten Calculation
 
 Replaceable Go shanten calculator contract, version `aka37-shanten/v2`.
 This module contains types, an interface, and error categories only.
@@ -83,7 +83,7 @@ unless the implementation explicitly guarantees concurrent use.
 The module is intended to be referenced from aka37 at `modules/shanten` as a Git
 submodule. Clone/update it with `git submodule update --init --recursive`.
 Git submodules pin source commits; they do not add Go `require` or `replace`
-directives. Consumers can depend on `github.com/bgnori/shanten` at a chosen
+directives. Consumers can depend on `github.com/bgnori/mahjong-shanten-calculation` at a chosen
 module version. The parent does not import it until an adapter is implemented.
 The source repository is public; no private-module Go configuration is required.
 
@@ -97,7 +97,8 @@ require a new contract version and appropriate Go module versioning.
 
 ## Checks
 
-For local development with the shared domain and formalization repositories,
+For local development with the shared domain, wait-classification, and
+shanten-calculation repositories,
 keep all three repositories as siblings and open `mahjong.code-workspace` from
 their parent directory. This package's Lake configuration uses the sibling
 `../mahjong-domain-core` checkout directly.

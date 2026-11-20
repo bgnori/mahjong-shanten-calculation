@@ -4,7 +4,7 @@ open Lake DSL
 package sharedDomainW6 where
 
 require shanten from ".."
-require «mahjong-formalization» from "../../mahjong-formalization"
+require «mahjong-wait-classification» from "../../mahjong-wait-classification"
 
 @[default_target]
 lean_lib SharedDomainW6

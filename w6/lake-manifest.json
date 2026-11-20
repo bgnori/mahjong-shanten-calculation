@@ -3,10 +3,10 @@
  "packages":
  [{"type": "path",
    "scope": "",
-   "name": "«mahjong-formalization»",
+   "name": "«mahjong-wait-classification»",
    "manifestFile": "lake-manifest.json",
    "inherited": false,
-   "dir": "../../mahjong-formalization",
+   "dir": "../../mahjong-wait-classification",
    "copy": false,
    "configFile": "lakefile.lean"},
   {"type": "path",
