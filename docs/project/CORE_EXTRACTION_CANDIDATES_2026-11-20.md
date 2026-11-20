@@ -16,8 +16,9 @@ coreを表現の正本にする接続・互換化である。
 
 このほか、[shantenの `Core`](../../Shanten/Core.lean)と
 [`Input37.Basic`](../../Shanten/Input37/Basic.lean)にも、coreに同等定義がある一方で
-consumer側に独立した定義が残っている。対して、牌の表示形式や探索状態、待ち分類の
-符号化は各consumerの責務であり、coreへ移す候補とはしない。
+consumer側に独立した定義が残っている。牌の表示形式はconsumer固有として除外せず、
+すぐ使える共通機能として今回coreに追加する。探索状態や待ち分類の符号化は、
+引き続き各consumerの責務とする。
 
 ## 候補一覧
 
@@ -29,10 +30,10 @@ consumer側に独立した定義が残っている。対して、牌の表示形
 | 中 | `PhysicalTile := Tile × Fin 4`、`copiesPerTile`、`deck`、`deckSize`（分類側[`Mahjong.Basic`](../../../mahjong-wait-classification/Mahjong/Basic.lean)） | coreには線形な`PhysicalTileId : Fin 136`と牌種・Int37への対応がある。分類側adapterは組表現からIDへの変換と牌種保存を証明するが、逆変換や全単射をAPIとしては示していない。 | 未完了のモデル候補。`Tile × Fin 4`をcoreに足すか、IDを正本にして牌種・copyの射影を提供するかを先に決める。全単射と既存列挙の順序を証明し、`deck`が本当に共通APIかも確認する。 |
 | 低／既存接続 | `Toitsu`、`Shuntsu`、`MentsuCandidate`、`WinningComponent`とその牌列（分類側[`Pattern`](../../../mahjong-wait-classification/Mahjong/Pattern.lean)） | coreの[`Parts.lean`](../../../mahjong-domain-core/MahjongDomain/Parts.lean)に`Pair`、`Meld`、`Meld.tiles`があり、分類側[`PartsAdapter`](../../../mahjong-wait-classification/Mahjong/PartsAdapter.lean)で変換・牌数の対応を定義済み。 | ドメイン上の対子・順子・刻子は抽出済み。分類側のコンストラクタ名、`List Tile`による順序、列挙・正規化は分類の出力に関わるので、`Multiset`を使うcore表現へ一括置換しない。残るのは既存接続を活用する範囲の整理。 |
 | 条件付き | `FixedMeld`、固定牌の集約、残余容量（[`Capacity.Basic`](../../Shanten/Capacity/Basic.lean)） | coreに`Meld.tiles`と`Kan.occupiedTiles`はあるが、固定面子列・shantenの`Hand`を含む容量契約はない。 | 槓や固定牌の占有計算を他consumerも使う場合に限り、汎用の占有計算を候補とする。`ValidHand`、手牌枚数条件、交換操作はshanten側に残す。 |
+| 今回追加 | 分類側の`TileFormat`と`Tile.format`（[`Mahjong.Basic`](../../../mahjong-wait-classification/Mahjong/Basic.lean)） | coreの[`Tile.lean`](../../../mahjong-domain-core/MahjongDomain/Tile.lean)に`MahjongDomain.TileFormat`と`MahjongDomain.Tile.format`を追加。 | Unicodeとmpszをcoreから直接使える。正規化牌種に対する表示なので、赤5の区別は保持しない。consumer側の互換APIをcoreへ委譲する作業は別途扱う。 |
 
 ## coreへ追加しない定義
 
-- 分類側の`TileFormat`と`Tile.format`は表示形式であり、共通ドメイン型ではない。
 - 分類側の`Hand`は重複しない物理牌を選ぶ分類入力、shanten側の`Hand`は牌種カウントと固定面子数を持つ探索入力であり、同じ型へ統合しない。
 - `Taatsu`、探索state／choice、入力の`Input`・`MeldInput`・検証エラー、待ち分解・分類ID・既約性・病的プロファイルはconsumer固有の意味・出力契約を持つ。
 - 通常形の対子・面子の定義と、分類の正規順、牌列の順序・重複を保持する表現は別の層として扱う。共通定義の採用だけを理由に既存結果を変えない。
