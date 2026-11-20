@@ -97,6 +97,11 @@ require a new contract version and appropriate Go module versioning.
 
 ## Checks
 
+For local development with the shared domain and formalization repositories,
+keep all three repositories as siblings and open `mahjong.code-workspace` from
+their parent directory. This package's Lake configuration uses the sibling
+`../mahjong-domain-core` checkout directly.
+
 ```sh
 go test ./...
 go vet ./...
