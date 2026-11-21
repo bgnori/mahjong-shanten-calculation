@@ -23,9 +23,9 @@ def generalMentsuHandMinimumSearch (fixed : List FixedMeld) (hand : Hand) : Opti
 
 lemma validTarget_iff (hvalid : ValidHand fixed hand) (tiles : Multiset Tile) :
     validTileMultisetBool (tiles + fixedTiles fixed) = true ↔
-      ValidHand fixed (targetHand hand (countsOfTiles tiles)) := by
+      ValidHand fixed (targetHand hand (TileCounts.ofMultiset tiles)) := by
   rw [validTileMultisetBool_eq_true_iff]
-  simp only [ValidHand, targetHand, countsOfTiles, hvalid.1, hvalid.2.1,
+  simp only [ValidHand, targetHand, TileCounts.ofMultiset, hvalid.1, hvalid.2.1,
     true_and, Multiset.count_add]
 
 lemma mem_generalMentsuHandStates_iff (hvalid : ValidHand fixed hand)
@@ -33,7 +33,7 @@ lemma mem_generalMentsuHandStates_iff (hvalid : ValidHand fixed hand)
     state ∈ generalMentsuHandStates fixed hand ↔
       ∃ pair melds,
         melds.length + hand.fixedMelds = 4 ∧
-        ValidHand fixed (targetHand hand (countsOfTiles (mentsuHandTarget pair melds))) ∧
+        ValidHand fixed (targetHand hand (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
         state = generalMentsuHandStateFor hand (mentsuHandTarget pair melds) := by
   have hfixed : hand.fixedMelds ≤ 4 := hvalid.1 ▸ hvalid.2.1
   rw [generalMentsuHandStates, Finset.mem_filter,
@@ -64,7 +64,7 @@ lemma generalMentsuHandState_reaches_of_size (hvalid : ValidHand fixed hand)
   obtain ⟨pair, melds, hlength, hcapacity, rfl⟩ :=
     (mem_generalMentsuHandStates_iff hvalid state).mp hstate
   have hcomplete : Complete fixed .mentsuHand
-      (targetHand hand (countsOfTiles (mentsuHandTarget pair melds))) :=
+      (targetHand hand (TileCounts.ofMultiset (mentsuHandTarget pair melds))) :=
     ⟨hcapacity, complete_mentsuHand_targetHand hand _ pair melds
       hcapacity.validCounts hlength (targetHand_hasTiles_countsOfTiles hand _)⟩
   rcases hsize with h13 | h14
@@ -75,9 +75,9 @@ lemma generalMentsuHandState_reaches_of_size (hvalid : ValidHand fixed hand)
       (sum_countsOfTiles_mentsuHandTarget_of_thirteen_tile_count
         hand hstanding pair melds hlength) hvalid hcomplete
   · have hsum : (∑ tile : Tile, hand.counts tile) =
-        ∑ tile : Tile, countsOfTiles (mentsuHandTarget pair melds) tile := by
+        ∑ tile : Tile, TileCounts.ofMultiset (mentsuHandTarget pair melds) tile := by
       rw [countsOfTiles_sum_eq_card]
-      change tileCount hand = (pairTiles pair + meldsTiles melds).card
+      change tileCount hand = (pairTiles pair + MentsuCandidateList.tiles melds).card
       rw [Multiset.card_add, pairTiles_card, meldsTiles_card]
       have := hvalid.1
       omega
@@ -92,23 +92,23 @@ lemma exists_state_of_reachesCompletion (hvalid : ValidHand fixed hand)
     (hreach : ReachesCompletion fixed .mentsuHand hand distance) :
     ∃ state ∈ generalMentsuHandStates fixed hand, state.missing ≤ distance := by
   obtain ⟨after, hpath, hcapacity, _, pair, melds, hlength, htiles⟩ := hreach
-  have hcounts : countsOfTiles (mentsuHandTarget pair melds) = after.counts :=
+  have hcounts : TileCounts.ofMultiset (mentsuHandTarget pair melds) = after.counts :=
     funext (fun tile => (htiles tile).symm)
   have hmelds : melds.length + hand.fixedMelds = 4 := by
     have := hvalid.1
     have := hcapacity.1
     omega
   have htarget : ValidHand fixed
-      (targetHand hand (countsOfTiles (mentsuHandTarget pair melds))) := by
+      (targetHand hand (TileCounts.ofMultiset (mentsuHandTarget pair melds))) := by
     refine ⟨hvalid.1, hvalid.2.1, fun tile => ?_⟩
-    change countsOfTiles (mentsuHandTarget pair melds) tile +
+    change TileCounts.ofMultiset (mentsuHandTarget pair melds) tile +
       (fixedTiles fixed).count tile ≤ 4
     rw [hcounts]
     exact hcapacity.2.2 tile
   refine ⟨generalMentsuHandStateFor hand (mentsuHandTarget pair melds),
     (mem_generalMentsuHandStates_iff hvalid _).mpr
       ⟨pair, melds, hmelds, htarget, rfl⟩, ?_⟩
-  change countDeficit hand.counts (countsOfTiles (mentsuHandTarget pair melds)) ≤ distance
+  change countDeficit hand.counts (TileCounts.ofMultiset (mentsuHandTarget pair melds)) ≤ distance
   rw [hcounts]
   exact hpath.deficit_le
 

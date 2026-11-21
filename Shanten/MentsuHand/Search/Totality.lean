@@ -55,12 +55,12 @@ private lemma canonicalMentsuHandTarget_validCounts
     | suited suit rank =>
         cases suit <;> fin_cases rank <;>
           simp [canonicalMentsuHandPair, canonicalMentsuHandMelds,
-            mentsuHandTarget, pairTiles, Pair.tiles, meldsTiles, meldTiles,
+            mentsuHandTarget, pairTiles, Pair.tiles, MentsuCandidateList.tiles, MentsuCandidate.tiles,
             MentsuCandidate.tiles, Shuntsu.tiles]
     | honor rank =>
         fin_cases rank <;>
           simp [canonicalMentsuHandPair, canonicalMentsuHandMelds,
-            mentsuHandTarget, pairTiles, Pair.tiles, meldsTiles, meldTiles,
+            mentsuHandTarget, pairTiles, Pair.tiles, MentsuCandidateList.tiles, MentsuCandidate.tiles,
             MentsuCandidate.tiles, Shuntsu.tiles]
 
 set_option maxHeartbeats 1000000 in
@@ -79,7 +79,7 @@ lemma exists_mentsuHandShanten_as_min_validTargetDistance
   have hvalid :
       ValidCounts
         (targetHand hand
-          (countsOfTiles
+          (TileCounts.ofMultiset
             (mentsuHandTarget canonicalMentsuHandPair
               (canonicalMentsuHandMelds hand.fixedMelds)))) := by
     intro tile
@@ -103,7 +103,7 @@ lemma exists_mentsuHandShanten_as_min_validTargetDistance
         otherMelds.length + hand.fixedMelds = 4 →
           ValidCounts
             (targetHand hand
-              (countsOfTiles (mentsuHandTarget otherPair otherMelds))) →
+              (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds))) →
           mentsuHandTargetDistance hand pair melds ≤
             mentsuHandTargetDistance hand otherPair otherMelds := by
     intro otherPair otherMelds hotherMelds hotherValid
@@ -226,7 +226,7 @@ lemma MentsuHandBlockDecomposition.exists_isShapeShanten
     omega
   have hsum :
       (∑ tile : Tile,
-        countsOfTiles (mentsuHandTarget decomposition.pair melds) tile) =
+        TileCounts.ofMultiset (mentsuHandTarget decomposition.pair melds) tile) =
         (∑ tile : Tile, hand.counts tile) + 1 := by
     calc
       _ = (mentsuHandTarget decomposition.pair melds).card := by
@@ -238,7 +238,7 @@ lemma MentsuHandBlockDecomposition.exists_isShapeShanten
   have hvalid :
       ValidCounts
         (targetHand hand
-          (countsOfTiles (mentsuHandTarget decomposition.pair melds))) := by
+          (TileCounts.ofMultiset (mentsuHandTarget decomposition.pair melds))) := by
     rw [htarget]
     exact decomposition.validCounts_completedTarget
   exact exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget_one_more

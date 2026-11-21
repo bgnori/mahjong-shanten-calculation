@@ -159,7 +159,7 @@ theorem sevenPairsShanten_isShapeShanten
 lemma kokushi_deficit_accounting (hand : Hand) (pair : Tile)
     (hpair : pair ∈ orphanKinds) :
     countDeficit hand.counts
-        (countsOfTiles (orphanTiles + Multiset.replicate 1 pair)) +
+        (TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair)) +
       kokushiDistinctCount hand + (if 2 ≤ hand.counts pair then 1 else 0) = 14 := by
   have hpair' : pair ∈ kokushiKinds := by rwa [← orphanKinds_eq_kokushiKinds]
   have hpoint : ∀ tile,
@@ -174,10 +174,10 @@ lemma kokushi_deficit_accounting (hand : Hand) (pair : Tile)
       split <;> omega
     · simp [heq, ite_sub]
   have hdeficit : countDeficit hand.counts
-        (countsOfTiles (orphanTiles + Multiset.replicate 1 pair)) =
+        (TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair)) =
       (∑ tile ∈ kokushiKinds, (1 - hand.counts tile)) +
         (if 2 ≤ hand.counts pair then 0 else 1) := by
-    simp only [countDeficit, countsOfTiles, hpoint, Finset.sum_add_distrib]
+    simp only [countDeficit, TileCounts.ofMultiset, hpoint, Finset.sum_add_distrib]
     simp
   have hmissing : (∑ tile ∈ kokushiKinds, (1 - hand.counts tile)) +
       kokushiDistinctCount hand = 13 := by
@@ -216,7 +216,7 @@ theorem kokushiShanten_isShapeShanten
   obtain ⟨pair, hpair, hbest⟩ := hchoose
   have hcomplete := complete_thirteenOrphans_targetHand hand pair hfixed hpair
   have htotal : (∑ tile : Tile,
-      countsOfTiles (orphanTiles + Multiset.replicate 1 pair) tile) = 14 := by
+      TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair) tile) = 14 := by
     rw [countsOfTiles_sum_eq_card, Multiset.card_add, orphanTiles_card]
     simp
   have haccount := kokushi_deficit_accounting hand pair hpair
@@ -228,7 +228,7 @@ theorem kokushiShanten_isShapeShanten
   · intro after hafter
     obtain ⟨_, _, other, hother, htiles⟩ := hafter
     have hcounts : after.counts =
-        countsOfTiles (orphanTiles + Multiset.replicate 1 other) :=
+        TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 other) :=
       funext htiles
     rw [hcounts]
     have hotherAccount := kokushi_deficit_accounting hand other hother

@@ -72,14 +72,15 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 
 - **正規化 (normalization)** `[Go][Lean]`
   共通核における34種への正規化は上記用語集を参照してください。shantenでは
-  `Shanten.Input37.normalizeTile` と `normalizeCounts` が既存の符号付きInt37入力を
-  牌種へ射影します。これらの操作はCoreの `Int37Index.tile` と
-  `aggregateInt37` を直接使います。
+  Leanの`Input37`がCoreの `Int37Index.tile` と `aggregateInt37` を直接使い、
+  既存の符号付きInt37入力を牌種へ射影します。Go実装の入力規約はCoreの意味に
+  追随します。
 
 - **カウント (count)** `[一般][Go][Lean]`
-  牌種ごとの枚数。shanten Go契約の `Counts37` は符号付きInt37入力、
-  Leanの `MahjongDomain.TileCounts` は正規化後の自然数カウントです。共通核の符号付き
-  集約と総数保存については正本の用語集を参照してください。
+  牌種ごとの枚数。shanten Go契約の `Counts37` は符号付きInt37入力、Leanの
+  `MahjongDomain.Int37Counts` はその共有表現、`MahjongDomain.TileCounts` は
+  正規化後の自然数カウントです。共通核の符号付き集約と総数保存については正本の
+  用語集を参照してください。
 
 - **牌種容量 / 4枚制限 (copy limit)** `[麻雀][数学]`
   1牌種につき通常4枚までという制約。Int37スロットの容量と34種への保存則は

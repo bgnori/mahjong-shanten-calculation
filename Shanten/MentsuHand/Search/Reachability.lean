@@ -16,23 +16,23 @@ lemma mentsuHandTargetDistance_eq_zero_iff
       (∑ tile : Tile, hand.counts tile) =
         ∑ tile : Tile, (mentsuHandTarget pair melds).count tile) :
     mentsuHandTargetDistance hand pair melds = 0 ↔
-      hand.counts = countsOfTiles (mentsuHandTarget pair melds) := by
+      hand.counts = TileCounts.ofMultiset (mentsuHandTarget pair melds) := by
   constructor
   · intro hdistance
     have hdeficit :
         countDeficit hand.counts
-          (countsOfTiles (mentsuHandTarget pair melds)) = 0 := by
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds)) = 0 := by
       rw [← mentsuHandTargetDistance_eq_countDeficit]
       exact hdistance
     have hzero :
         ∀ tile ∈ (Finset.univ : Finset Tile),
-          (countsOfTiles (mentsuHandTarget pair melds)) tile -
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds)) tile -
               hand.counts tile = 0 := by
       apply (Finset.sum_eq_zero_iff_of_nonneg
         (fun tile _ => Nat.zero_le _)).mp
       exact hdeficit
     have hle :
-        ∀ tile, (countsOfTiles (mentsuHandTarget pair melds)) tile ≤
+        ∀ tile, (TileCounts.ofMultiset (mentsuHandTarget pair melds)) tile ≤
           hand.counts tile := by
       intro tile
       have hzeroTile := hzero tile (Finset.mem_univ tile)
@@ -41,10 +41,10 @@ lemma mentsuHandTargetDistance_eq_zero_iff
     intro tile
     have heq :
         ∀ tile ∈ (Finset.univ : Finset Tile),
-          (countsOfTiles (mentsuHandTarget pair melds)) tile =
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds)) tile =
             hand.counts tile := by
       apply (Finset.sum_eq_sum_iff_of_le (s := Finset.univ)
-        (f := countsOfTiles (mentsuHandTarget pair melds))
+        (f := TileCounts.ofMultiset (mentsuHandTarget pair melds))
         (g := hand.counts)
         (fun tile _ => hle tile)).mp
       exact hsum.symm
@@ -59,7 +59,7 @@ lemma mentsuHandTargetDistance_pos_iff
       (∑ tile : Tile, hand.counts tile) =
         ∑ tile : Tile, (mentsuHandTarget pair melds).count tile) :
     0 < mentsuHandTargetDistance hand pair melds ↔
-      hand.counts ≠ countsOfTiles (mentsuHandTarget pair melds) := by
+      hand.counts ≠ TileCounts.ofMultiset (mentsuHandTarget pair melds) := by
   constructor
   · intro hpos hcounts
     have hzero : mentsuHandTargetDistance hand pair melds = 0 :=
@@ -86,7 +86,7 @@ lemma mentsuHandTargetDistance_exchange
   rw [mentsuHandTargetDistance_eq_countDeficit,
     mentsuHandTargetDistance_eq_countDeficit]
   exact countDeficit_exchange
-    (countsOfTiles (mentsuHandTarget pair melds))
+    (TileCounts.ofMultiset (mentsuHandTarget pair melds))
     hand discarded drawn hdrawn hdiscarded hne
 
 lemma exists_mentsuHandTarget_exchange
@@ -95,7 +95,7 @@ lemma exists_mentsuHandTarget_exchange
       (∑ tile : Tile, hand.counts tile) =
         ∑ tile : Tile, (mentsuHandTarget pair melds).count tile)
     (hne :
-      hand.counts ≠ countsOfTiles (mentsuHandTarget pair melds)) :
+      hand.counts ≠ TileCounts.ofMultiset (mentsuHandTarget pair melds)) :
     ∃ discarded drawn,
       (mentsuHandTarget pair melds).count drawn > hand.counts drawn ∧
       hand.counts discarded >
@@ -106,7 +106,7 @@ lemma exists_mentsuHandTarget_exchange
         mentsuHandTargetDistance hand pair melds - 1 := by
   obtain ⟨discarded, drawn, hdrawn, hdiscarded, hneTiles⟩ :=
     exists_target_exchange_tiles hand
-      (countsOfTiles (mentsuHandTarget pair melds)) hsum hne
+      (TileCounts.ofMultiset (mentsuHandTarget pair melds)) hsum hne
   refine ⟨discarded, drawn, hdrawn, hdiscarded, hneTiles, ?_⟩
   exact mentsuHandTargetDistance_exchange
     hand pair melds discarded drawn hdrawn hdiscarded hneTiles
@@ -136,7 +136,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget
     (hvalid :
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))))
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))))
     (hmelds : melds.length + before.fixedMelds = 4)
     (hbeforeValid : ValidCounts before) :
     ReachesCompletion Complete .mentsuHand before
@@ -144,7 +144,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget
   rw [mentsuHandTargetDistance_eq_countDeficit]
   apply reachesCompletion_mentsuHand_of_equal_sum
     before
-    (countsOfTiles (mentsuHandTarget pair melds))
+    (TileCounts.ofMultiset (mentsuHandTarget pair melds))
     pair melds hsum hvalid hmelds
   · exact targetHand_hasTiles_countsOfTiles before
       (mentsuHandTarget pair melds)
@@ -176,7 +176,7 @@ lemma reachesCompletion_mentsuHand_of_blockDecomposition
           decomposition.completedTarget.card := by
         change
           (∑ tile : Tile,
-            countsOfTiles (mentsuHandTarget decomposition.pair melds) tile) =
+            TileCounts.ofMultiset (mentsuHandTarget decomposition.pair melds) tile) =
             decomposition.completedTarget.card
         rw [htarget, countsOfTiles_sum_eq_card]
       _ = 14 := by
@@ -221,7 +221,7 @@ lemma reachesCompletion_mentsuHand_of_blockDecomposition
       mentsuHandTargetDistance hand decomposition.pair melds ≤ 4 := by
     rw [mentsuHandTargetDistance_eq_countDeficit, htarget]
     change countDeficit hand.counts
-      (countsOfTiles
+      (TileCounts.ofMultiset
         (mentsuHandTargetWithTaatsu decomposition.pair
           decomposition.melds decomposition.taatsus +
           taatsuCompletionTiles decomposition.taatsus)) ≤ 4
@@ -235,7 +235,7 @@ lemma reachesCompletion_mentsuHand_of_blockDecomposition
     have hfixed := h13.1
     calc
       countDeficit hand.counts
-          (countsOfTiles
+          (TileCounts.ofMultiset
             (mentsuHandTargetWithTaatsu decomposition.pair
               decomposition.melds decomposition.taatsus +
               taatsuCompletionTiles decomposition.taatsus)) ≤
@@ -245,7 +245,7 @@ lemma reachesCompletion_mentsuHand_of_blockDecomposition
       _ ≤ 4 := by omega
   have hreach :=
     reachesCompletion_mentsuHand_of_one_more_target_tile
-      hand (countsOfTiles (mentsuHandTarget decomposition.pair melds))
+      hand (TileCounts.ofMultiset (mentsuHandTarget decomposition.pair melds))
       decomposition.pair melds hsumTarget h13.2.2
       (by
         rw [htarget]
@@ -265,46 +265,46 @@ lemma complete_mentsuHand_of_mentsuHandTarget_distance_zero
     (hvalid :
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))))
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))))
     (hmelds : melds.length + before.fixedMelds = 4) :
     Complete .mentsuHand before := by
   have hdeficit :
       countDeficit before.counts
-        (countsOfTiles (mentsuHandTarget pair melds)) = 0 := by
+        (TileCounts.ofMultiset (mentsuHandTarget pair melds)) = 0 := by
     rw [← mentsuHandTargetDistance_eq_countDeficit]
     exact hdistance
   have hzero :
       ∀ tile ∈ (Finset.univ : Finset Tile),
-        (countsOfTiles (mentsuHandTarget pair melds)) tile -
+        (TileCounts.ofMultiset (mentsuHandTarget pair melds)) tile -
             before.counts tile = 0 := by
     apply (Finset.sum_eq_zero_iff_of_nonneg
       (fun tile _ => Nat.zero_le _)).mp
     exact hdeficit
   have hle :
-      ∀ tile, (countsOfTiles (mentsuHandTarget pair melds)) tile ≤
+      ∀ tile, (TileCounts.ofMultiset (mentsuHandTarget pair melds)) tile ≤
         before.counts tile := by
     intro tile
     have hzeroTile := hzero tile (Finset.mem_univ tile)
     omega
   have heq :
       ∀ tile ∈ (Finset.univ : Finset Tile),
-        (countsOfTiles (mentsuHandTarget pair melds)) tile =
+        (TileCounts.ofMultiset (mentsuHandTarget pair melds)) tile =
           before.counts tile := by
     apply (Finset.sum_eq_sum_iff_of_le (s := Finset.univ)
-      (f := countsOfTiles (mentsuHandTarget pair melds))
+      (f := TileCounts.ofMultiset (mentsuHandTarget pair melds))
       (g := before.counts)
       (fun tile _ => hle tile)).mp
     exact hsum.symm
   have hcounts :
-      countsOfTiles (mentsuHandTarget pair melds) = before.counts := by
+      TileCounts.ofMultiset (mentsuHandTarget pair melds) = before.counts := by
     funext tile
     exact heq tile (Finset.mem_univ tile)
   have hcomplete :
       Complete .mentsuHand
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))) := by
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))) := by
     exact complete_mentsuHand_targetHand before
-      (countsOfTiles (mentsuHandTarget pair melds)) pair melds
+      (TileCounts.ofMultiset (mentsuHandTarget pair melds)) pair melds
       hvalid hmelds
       (targetHand_hasTiles_countsOfTiles before
         (mentsuHandTarget pair melds))
@@ -320,7 +320,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
     (hvalid :
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))))
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))))
     (hmelds : melds.length + before.fixedMelds = 4)
     (hbeforeValid : ValidCounts before) :
     ReachesCompletion Complete .mentsuHand before 1 := by
@@ -342,11 +342,11 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
   have hvalidNext :
       ValidCounts
         (targetHand (exchangeHand before discarded drawn)
-          (countsOfTiles (mentsuHandTarget pair melds))) := by
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))) := by
     change
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds)))
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds)))
     exact hvalid
   have hmeldsNext :
       melds.length + (exchangeHand before discarded drawn).fixedMelds = 4 := by
@@ -360,17 +360,17 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
       omega
     have hcountsNext :
         (exchangeHand before discarded drawn).counts =
-          countsOfTiles (mentsuHandTarget pair melds) :=
+          TileCounts.ofMultiset (mentsuHandTarget pair melds) :=
       (mentsuHandTargetDistance_eq_zero_iff
         (exchangeHand before discarded drawn) pair melds hsumNext).mp
         hzeroNext
     have htargetComplete :
         Complete .mentsuHand
           (targetHand (exchangeHand before discarded drawn)
-            (countsOfTiles (mentsuHandTarget pair melds))) :=
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds))) :=
       complete_mentsuHand_targetHand
         (exchangeHand before discarded drawn)
-        (countsOfTiles (mentsuHandTarget pair melds))
+        (TileCounts.ofMultiset (mentsuHandTarget pair melds))
         pair melds hvalidNext hmeldsNext
         (targetHand_hasTiles_countsOfTiles
           (exchangeHand before discarded drawn)
@@ -378,7 +378,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
     have hhand :
         exchangeHand before discarded drawn =
           targetHand (exchangeHand before discarded drawn)
-            (countsOfTiles (mentsuHandTarget pair melds)) := by
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds)) := by
       cases hnext : exchangeHand before discarded drawn with
       | mk counts fixed =>
           simp only [targetHand, hnext]
@@ -391,7 +391,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
     exact htargetComplete
   apply ReachesCompletion.step
   · exact mentsuHandTargetExchange_handStep
-      (countsOfTiles (mentsuHandTarget pair melds))
+      (TileCounts.ofMultiset (mentsuHandTarget pair melds))
       before discarded drawn hdrawn hdiscarded hne hbeforeValid hvalid
   · exact ReachesCompletion.done hcomplete
 
@@ -406,7 +406,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance
     (hvalid :
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))))
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))))
     (hmelds : melds.length + before.fixedMelds = 4)
     (hbeforeValid : ValidCounts before) :
     ReachesCompletion Complete .mentsuHand before distance := by
@@ -437,11 +437,11 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance
       have hvalidNext :
           ValidCounts
             (targetHand (exchangeHand before discarded drawn)
-              (countsOfTiles (mentsuHandTarget pair melds))) := by
+              (TileCounts.ofMultiset (mentsuHandTarget pair melds))) := by
         change
           ValidCounts
             (targetHand before
-              (countsOfTiles (mentsuHandTarget pair melds)))
+              (TileCounts.ofMultiset (mentsuHandTarget pair melds)))
         exact hvalid
       have hmeldsNext :
           melds.length + (exchangeHand before discarded drawn).fixedMelds = 4 := by
@@ -452,7 +452,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance
               (exchangeHand before discarded drawn) pair melds = distance := by
         omega
       have hstep := mentsuHandTargetExchange_handStep
-        (countsOfTiles (mentsuHandTarget pair melds))
+        (TileCounts.ofMultiset (mentsuHandTarget pair melds))
         before discarded drawn hdrawn hdiscarded hne hbeforeValid hvalid
       have hrest :=
         ih (exchangeHand before discarded drawn)
@@ -471,7 +471,7 @@ lemma isShapeShanten_mentsuHand_of_mentsuHandTarget_distance
     (hvalid :
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))))
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))))
     (hmelds : melds.length + before.fixedMelds = 4)
     (hminimal :
       ∀ smaller : Nat, smaller < distance →

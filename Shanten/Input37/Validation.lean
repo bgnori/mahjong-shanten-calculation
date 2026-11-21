@@ -18,7 +18,7 @@ structure NormalizedInput where
   hand : Hand
 
 def meldCandidates : List Capacity.FixedMeld :=
-  let tiles := (List.finRange 37).map normalizeTile
+  let tiles := (List.finRange 37).map Int37Index.tile
   tiles.map (fun tile => .meld (.koutsu tile)) ++
     ([Suit.man, .pin, .sou].flatMap fun suit =>
       (List.finRange 7).map fun start => .meld (.shuntsu ⟨suit, start⟩)) ++
@@ -28,14 +28,14 @@ lemma mem_meldCandidates (target : Capacity.FixedMeld) : target ∈ meldCandidat
   cases target with
   | kan tile =>
       simpa [meldCandidates] using
-        (show ∃ index, normalizeTile index = tile from
-          ⟨normalIndex tile, normalizeTile_normalIndex tile⟩)
+        (show ∃ index, Int37Index.tile index = tile from
+          ⟨tile.int37Index, Int37Index.tile_int37Index tile⟩)
   | meld value =>
       cases value with
       | koutsu tile =>
           simpa [meldCandidates] using
-            (show ∃ index, normalizeTile index = tile from
-              ⟨normalIndex tile, normalizeTile_normalIndex tile⟩)
+            (show ∃ index, Int37Index.tile index = tile from
+              ⟨tile.int37Index, Int37Index.tile_int37Index tile⟩)
       | shuntsu sequence =>
           obtain ⟨suit, start⟩ := sequence
           have hsuit : suit ∈ [Suit.man, .pin, .sou] := by cases suit <;> simp
@@ -59,7 +59,7 @@ lemma parseMeld_isSome_iff :
 
 def normalizedHand (input : Input) (_nonnegative : Nonnegative input.standing) : Hand :=
   { counts := fun tile =>
-      (normalizeCounts input.standing tile).toNat
+      (aggregateInt37 input.standing tile).toNat
     fixedMelds := input.melds.length }
 
 def parsedMelds (input : Input)
@@ -83,7 +83,7 @@ private lemma firstViolation_not {n : Nat} (p : Fin n → Prop) [DecidablePred p
 def validateAndNormalize (input : Input) : Except ValidationError NormalizedInput :=
   if hstanding : Nonnegative input.standing then
     if hmeldCounts : ∀ index : Fin input.melds.length, Nonnegative input.melds[index].tiles then
-      if hcapacity : ∀ index, totalCounts input index ≤ (capacity index : Int) then
+      if hcapacity : ∀ index, totalCounts input index ≤ (index.capacity : Int) then
         if hlength : input.melds.length ≤ 4 then
           if hsize : standingCount input + 3 * (input.melds.length : Int) = 13 ∨
               standingCount input + 3 * (input.melds.length : Int) = 14 then

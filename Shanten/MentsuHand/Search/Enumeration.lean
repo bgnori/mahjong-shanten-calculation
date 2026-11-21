@@ -28,7 +28,7 @@ lemma mentsuHandTargetDistance_eq_countDeficit
     (hand : Hand) (pair : Tile) (melds : List MentsuCandidate) :
     mentsuHandTargetDistance hand pair melds =
       countDeficit hand.counts
-        (countsOfTiles (mentsuHandTarget pair melds)) := by
+        (TileCounts.ofMultiset (mentsuHandTarget pair melds)) := by
   rfl
 
 def mentsuHandMeldListsOfLength : Nat → Finset (List MentsuCandidate)
@@ -77,14 +77,14 @@ lemma validCountsBool_eq_true_iff (hand : Hand) :
 
 def validTileMultisetBool (tiles : Multiset Tile) : Bool :=
   validCountsBool
-    { counts := countsOfTiles tiles
+    { counts := TileCounts.ofMultiset tiles
       fixedMelds := 0 }
 
 lemma validTileMultisetBool_eq_true_iff (tiles : Multiset Tile) :
     validTileMultisetBool tiles = true ↔
       ∀ tile, tiles.count tile ≤ 4 := by
   change validCountsBool
-    { counts := countsOfTiles tiles
+    { counts := TileCounts.ofMultiset tiles
       fixedMelds := 0 } = true ↔ _
   rw [validCountsBool_eq_true_iff]
   rfl
@@ -105,7 +105,7 @@ lemma validTileMultisetBool_add_left
 lemma validTileMultisetBool_eq_true_iff_targetHand
     (hand : Hand) (tiles : Multiset Tile) :
     validTileMultisetBool tiles = true ↔
-      ValidCounts (targetHand hand (countsOfTiles tiles)) := by
+      ValidCounts (targetHand hand (TileCounts.ofMultiset tiles)) := by
   rw [validTileMultisetBool_eq_true_iff]
   change (∀ tile, tiles.count tile ≤ 4) ↔
     (∀ tile, tiles.count tile ≤ 4)
@@ -127,7 +127,7 @@ def validMentsuHandTargetConfigurations (hand : Hand) :
     (fun candidate =>
       validCountsBool
         (targetHand hand
-          (countsOfTiles
+          (TileCounts.ofMultiset
             (mentsuHandTarget candidate.1 candidate.2))) = true)
 
 lemma mem_validMentsuHandTargetConfigurations_iff
@@ -137,7 +137,7 @@ lemma mem_validMentsuHandTargetConfigurations_iff
       melds.length + hand.fixedMelds = 4 ∧
       ValidCounts
         (targetHand hand
-          (countsOfTiles (mentsuHandTarget pair melds))) := by
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))) := by
   classical
   rw [validMentsuHandTargetConfigurations, Finset.mem_filter,
     mem_mentsuHandTargetConfigurations_iff
@@ -149,14 +149,14 @@ def mentsuHandMeldTileStatesDP : Nat → Finset (Multiset Tile)
   | meldCount + 1 =>
       (Finset.univ.biUnion fun meld =>
         (mentsuHandMeldTileStatesDP meldCount).image
-          (fun tiles => meldTiles meld + tiles)).filter
+          (fun tiles => MentsuCandidate.tiles meld + tiles)).filter
         (fun tiles => validTileMultisetBool tiles = true)
 
 lemma mem_mentsuHandMeldTileStatesDP_iff
     (meldCount : Nat) (tiles : Multiset Tile) :
     tiles ∈ mentsuHandMeldTileStatesDP meldCount ↔
       ∃ melds, melds.length = meldCount ∧
-        meldsTiles melds = tiles ∧ validTileMultisetBool tiles = true := by
+        MentsuCandidateList.tiles melds = tiles ∧ validTileMultisetBool tiles = true := by
   induction meldCount generalizing tiles with
   | zero =>
       change tiles ∈ ({0} : Finset (Multiset Tile)) ↔ _
@@ -170,7 +170,7 @@ lemma mem_mentsuHandMeldTileStatesDP_iff
       · rintro ⟨melds, hlength, htiles, _⟩
         cases melds with
         | nil =>
-            simpa [meldsTiles] using htiles.symm
+            simpa [MentsuCandidateList.tiles] using htiles.symm
         | cons meld melds =>
             simp at hlength
   | succ meldCount ih =>
@@ -184,9 +184,9 @@ lemma mem_mentsuHandMeldTileStatesDP_iff
         refine ⟨meld :: melds, ?_, ?_, hvalid⟩
         · simp [hlength]
         · calc
-            meldsTiles (meld :: melds) =
-                meldTiles meld + meldsTiles melds := rfl
-            _ = meldTiles meld + previous := by rw [htiles]
+            MentsuCandidateList.tiles (meld :: melds) =
+                MentsuCandidate.tiles meld + MentsuCandidateList.tiles melds := rfl
+            _ = MentsuCandidate.tiles meld + previous := by rw [htiles]
             _ = tiles := heq
       · rintro ⟨melds, hlength, htiles, hvalid⟩
         cases melds with
@@ -197,29 +197,29 @@ lemma mem_mentsuHandMeldTileStatesDP_iff
             have hvalidFull' := hvalid
             have hvalidFull :
                 validTileMultisetBool
-                  (meldTiles meld + meldsTiles melds) = true := by
+                  (MentsuCandidate.tiles meld + MentsuCandidateList.tiles melds) = true := by
               rw [← htiles] at hvalidFull'
-              simpa [meldsTiles] using hvalidFull'
+              simpa [MentsuCandidateList.tiles] using hvalidFull'
             have htailValid :
-                validTileMultisetBool (meldsTiles melds) = true := by
+                validTileMultisetBool (MentsuCandidateList.tiles melds) = true := by
               apply validTileMultisetBool_add_left
-                (meldsTiles melds) (meldTiles meld)
+                (MentsuCandidateList.tiles melds) (MentsuCandidate.tiles meld)
               simpa [Multiset.add_comm] using hvalidFull
             have hprevious :
-                meldsTiles melds ∈ mentsuHandMeldTileStatesDP meldCount :=
-              (ih (meldsTiles melds)).2
+                MentsuCandidateList.tiles melds ∈ mentsuHandMeldTileStatesDP meldCount :=
+              (ih (MentsuCandidateList.tiles melds)).2
                 ⟨melds, by omega, rfl, htailValid⟩
-            refine ⟨⟨meld, meldsTiles melds, hprevious, ?_⟩, hvalid⟩
+            refine ⟨⟨meld, MentsuCandidateList.tiles melds, hprevious, ?_⟩, hvalid⟩
             calc
-              meldTiles meld + meldsTiles melds =
-                  meldsTiles (meld :: melds) := rfl
+              MentsuCandidate.tiles meld + MentsuCandidateList.tiles melds =
+                  MentsuCandidateList.tiles (meld :: melds) := rfl
               _ = tiles := htiles
 
 def mentsuHandTargetTileStatesDP (fixedMelds : Nat) :
     Finset (Multiset Tile) :=
   (Finset.univ.biUnion fun pair =>
     (mentsuHandMeldTileStatesDP (4 - fixedMelds)).image
-      (fun meldTiles => pairTiles pair + meldTiles)).filter
+      (fun candidateTiles => pairTiles pair + candidateTiles)).filter
     (fun tiles => validTileMultisetBool tiles = true)
 
 lemma mem_mentsuHandTargetTileStatesDP_iff
@@ -234,34 +234,34 @@ lemma mem_mentsuHandTargetTileStatesDP_iff
   simp only [Finset.mem_filter, Finset.mem_biUnion,
     Finset.mem_univ, true_and, Finset.mem_image]
   constructor
-  · rintro ⟨⟨pair, meldTiles, hmeldTiles, rfl⟩, hvalid⟩
+  · rintro ⟨⟨pair, candidateTiles, hmeldTiles, rfl⟩, hvalid⟩
     obtain ⟨melds, hlength, rfl, _⟩ :=
-      (mem_mentsuHandMeldTileStatesDP_iff (4 - fixedMelds) meldTiles).mp
+      (mem_mentsuHandMeldTileStatesDP_iff (4 - fixedMelds) candidateTiles).mp
         hmeldTiles
     refine ⟨pair, melds, ?_, rfl, hvalid⟩
     omega
   · rintro ⟨pair, melds, hlength, rfl, hvalid⟩
     have hmeldValid :
-        validTileMultisetBool (meldsTiles melds) = true := by
+        validTileMultisetBool (MentsuCandidateList.tiles melds) = true := by
       apply validTileMultisetBool_add_left
-        (meldsTiles melds) (pairTiles pair)
+        (MentsuCandidateList.tiles melds) (pairTiles pair)
       simpa [mentsuHandTarget, Multiset.add_comm] using hvalid
-    refine ⟨⟨pair, meldsTiles melds, ?_, rfl⟩, hvalid⟩
+    refine ⟨⟨pair, MentsuCandidateList.tiles melds, ?_, rfl⟩, hvalid⟩
     · exact (mem_mentsuHandMeldTileStatesDP_iff (4 - fixedMelds)
-        (meldsTiles melds)).2
+        (MentsuCandidateList.tiles melds)).2
         ⟨melds, by omega, rfl, hmeldValid⟩
 
 def mentsuHandTargetCostStatesDP (hand : Hand) :
     Finset (Multiset Tile × Nat) :=
   (mentsuHandTargetTileStatesDP hand.fixedMelds).image
     (fun tiles =>
-      (tiles, countDeficit hand.counts (countsOfTiles tiles)))
+      (tiles, countDeficit hand.counts (TileCounts.ofMultiset tiles)))
 
 lemma mem_mentsuHandTargetCostStatesDP_iff
     (hand : Hand) (state : Multiset Tile × Nat) :
     state ∈ mentsuHandTargetCostStatesDP hand ↔
       state.1 ∈ mentsuHandTargetTileStatesDP hand.fixedMelds ∧
-      state.2 = countDeficit hand.counts (countsOfTiles state.1) := by
+      state.2 = countDeficit hand.counts (TileCounts.ofMultiset state.1) := by
   unfold mentsuHandTargetCostStatesDP
   simp only [Finset.mem_image]
   constructor
@@ -278,15 +278,15 @@ lemma mem_mentsuHandTargetCostStatesDP_iff
     exact Prod.ext rfl hcost.symm
 
 lemma countsOfTiles_add (tiles extra : Multiset Tile) :
-    countsOfTiles (tiles + extra) =
-      countsOfTiles tiles + countsOfTiles extra := by
+    TileCounts.ofMultiset (tiles + extra) =
+      TileCounts.ofMultiset tiles + TileCounts.ofMultiset extra := by
   funext tile
-  simp [countsOfTiles, Multiset.count_add]
+  simp [TileCounts.ofMultiset, Multiset.count_add]
 
 lemma countDeficit_tiles_add_mono
     (current : TileCounts) (tiles extra : Multiset Tile) :
-    countDeficit current (countsOfTiles tiles) ≤
-      countDeficit current (countsOfTiles (tiles + extra)) := by
+    countDeficit current (TileCounts.ofMultiset tiles) ≤
+      countDeficit current (TileCounts.ofMultiset (tiles + extra)) := by
   unfold countDeficit
   apply Finset.sum_le_sum
   intro tile _
@@ -296,19 +296,19 @@ lemma countDeficit_tiles_add_mono
 
 lemma countDeficit_add_le_card_of_le
     (current : TileCounts) (tiles extra : Multiset Tile)
-    (hbelow : ∀ tile, (countsOfTiles tiles) tile ≤ current tile) :
-    countDeficit current (countsOfTiles (tiles + extra)) ≤ extra.card := by
+    (hbelow : ∀ tile, (TileCounts.ofMultiset tiles) tile ≤ current tile) :
+    countDeficit current (TileCounts.ofMultiset (tiles + extra)) ≤ extra.card := by
   unfold countDeficit
   calc
-    ∑ tile : Tile, (countsOfTiles (tiles + extra) tile - current tile) =
+    ∑ tile : Tile, (TileCounts.ofMultiset (tiles + extra) tile - current tile) =
         ∑ tile : Tile,
-          (countsOfTiles tiles tile + countsOfTiles extra tile -
+          (TileCounts.ofMultiset tiles tile + TileCounts.ofMultiset extra tile -
             current tile) := by
       apply Finset.sum_congr rfl
       intro tile _
       rw [countsOfTiles_add]
       rfl
-    _ ≤ ∑ tile : Tile, countsOfTiles extra tile := by
+    _ ≤ ∑ tile : Tile, TileCounts.ofMultiset extra tile := by
       apply Finset.sum_le_sum
       intro tile _
       have htile := hbelow tile

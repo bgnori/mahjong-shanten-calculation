@@ -65,8 +65,8 @@ private lemma search_le_target
     (hresult : generalMentsuHandMinimumSearch fixed hand = some value)
     (hlength : melds.length + hand.fixedMelds = 4)
     (hcapacity : ValidHand fixed
-      (targetHand hand (countsOfTiles (mentsuHandTarget pair melds)))) :
-    value ≤ (countDeficit hand.counts (countsOfTiles (mentsuHandTarget pair melds)) : Int) - 1 := by
+      (targetHand hand (TileCounts.ofMultiset (mentsuHandTarget pair melds)))) :
+    value ≤ (countDeficit hand.counts (TileCounts.ofMultiset (mentsuHandTarget pair melds)) : Int) - 1 := by
   obtain ⟨state, _, hminimum, _, hminimal⟩ :=
     exists_optimal_state_of_size hvalid hsize (generalMentsuHandStates_nonempty hvalid)
   have hstate := (mem_generalMentsuHandStates_iff hvalid _).mpr
@@ -74,7 +74,7 @@ private lemma search_le_target
   have hbound := hminimal _ hstate
   have heq := Option.some.inj (hminimum.symm.trans hresult)
   change state.missing ≤ countDeficit hand.counts
-    (countsOfTiles (mentsuHandTarget pair melds)) at hbound
+    (TileCounts.ofMultiset (mentsuHandTarget pair melds)) at hbound
   omega
 
 theorem search_le_discard_search (h14 : IsFourteenTileEquivalentHand fixed hand)
@@ -88,10 +88,10 @@ theorem search_le_discard_search (h14 : IsFourteenTileEquivalentHand fixed hand)
     (mem_generalMentsuHandStates_iff h13.1 state).mp hstate
   have hbound := search_le_target h14.1 (Or.inr h14.2) hresult hlength hcapacity
   have hmono := countDeficit_le_discard (hand := hand) (discarded := discarded)
-    (target := countsOfTiles (mentsuHandTarget pair melds))
+    (target := TileCounts.ofMultiset (mentsuHandTarget pair melds))
   have heq := Option.some.inj (hminimum.symm.trans hdiscard)
   change (countDeficit (discardHand hand discarded).counts
-    (countsOfTiles (mentsuHandTarget pair melds)) : Int) - 1 = other at heq
+    (TileCounts.ofMultiset (mentsuHandTarget pair melds)) : Int) - 1 = other at heq
   omega
 
 /-- Every noncomplete fourteen-tile hand has an attaining legal discard. -/
@@ -104,10 +104,10 @@ theorem exists_discard_search_eq (h14 : IsFourteenTileEquivalentHand fixed hand)
     generalMentsuHandMinimumSearch_optimal_of_fourteen h14
   obtain ⟨pair, melds, hlength, hcapacity, rfl⟩ :=
     (mem_generalMentsuHandStates_iff h14.1 state).mp hstate
-  let target := countsOfTiles (mentsuHandTarget pair melds)
+  let target := TileCounts.ofMultiset (mentsuHandTarget pair melds)
   have hsum : (∑ tile : Tile, hand.counts tile) = ∑ tile : Tile, target tile := by
     rw [countsOfTiles_sum_eq_card]
-    change tileCount hand = (pairTiles pair + meldsTiles melds).card
+    change tileCount hand = (pairTiles pair + MentsuCandidateList.tiles melds).card
     rw [Multiset.card_add, pairTiles_card, meldsTiles_card]
     have := h14.1.1
     have := h14.2

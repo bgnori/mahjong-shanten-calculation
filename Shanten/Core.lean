@@ -18,26 +18,11 @@ structure Hand where
   counts : TileCounts
   fixedMelds : Nat
 
-/-- The tile multiset represented by one concealed meld. -/
-def meldTiles (meld : MentsuCandidate) : Multiset Tile :=
-  meld.tiles
-
-/-- The combined tiles represented by a list of concealed melds. -/
-def meldsTiles (melds : List MentsuCandidate) : Multiset Tile :=
-  melds.foldr (fun meld rest => meldTiles meld + rest) 0
-
-theorem meldsTiles_eq_candidates (melds : List MentsuCandidate) :
-    meldsTiles melds = MentsuCandidateList.tiles melds := by
-  induction melds with
-  | nil => rfl
-  | cons meld rest ih =>
-      simp [meldsTiles, MentsuCandidateList.tiles, meldTiles, ← ih]
-
 /-- A standing hand has exactly the multiplicities of the given tile multiset. -/
 def HasTiles (hand : Hand) (tiles : Multiset Tile) : Prop :=
   ∀ tile, hand.counts tile = tiles.count tile
 
-/-- The tile multiset of one pair. -/
+/-- Expand a tile-kind head choice as the shared pair of exactly two tiles. -/
 def pairTiles (tile : Tile) : Multiset Tile :=
   (Pair.mk tile).tiles
 

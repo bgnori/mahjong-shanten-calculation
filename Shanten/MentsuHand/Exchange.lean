@@ -30,7 +30,7 @@ lemma complete_mentsuHand_targetHand
     (hmelds : melds.length + before.fixedMelds = 4)
     (htiles :
       HasTiles (targetHand before target)
-        (pairTiles pair + meldsTiles melds)) :
+        (pairTiles pair + MentsuCandidateList.tiles melds)) :
     Complete .mentsuHand (targetHand before target) := by
   exact ⟨hvalid, pair, melds, hmelds, htiles⟩
 
@@ -43,7 +43,7 @@ lemma reachesCompletion_mentsuHand_of_equal_sum
     (hmelds : melds.length + before.fixedMelds = 4)
     (htiles :
       HasTiles (targetHand before target)
-        (pairTiles pair + meldsTiles melds))
+        (pairTiles pair + MentsuCandidateList.tiles melds))
     (hbeforeValid : ValidCounts before) :
     ReachesCompletion Complete .mentsuHand before
       (countDeficit before.counts target) := by
@@ -71,7 +71,7 @@ lemma reachesCompletion_mentsuHand_of_one_more_target_tile
     (hmelds : melds.length + before.fixedMelds = 4)
     (htiles :
       HasTiles (targetHand before target)
-        (pairTiles pair + meldsTiles melds)) :
+        (pairTiles pair + MentsuCandidateList.tiles melds)) :
     ∃ distance,
       distance = countDeficit before.counts target ∧
       ReachesCompletion Complete .mentsuHand before distance := by

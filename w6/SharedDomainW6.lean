@@ -300,8 +300,8 @@ theorem completeTileCount
     tileCount hand = 2 + 3 * (4 - fixed.length) := by
   obtain ⟨hvalid, hshape⟩ := hcomplete
   obtain ⟨_, pair, melds, hlength, htiles⟩ := hshape
-  have hcounts : hand.counts = countsOfTiles
-      (pairTiles pair + meldsTiles melds) := by
+  have hcounts : hand.counts = MahjongDomain.TileCounts.ofMultiset
+      (pairTiles pair + MahjongDomain.MentsuCandidateList.tiles melds) := by
     funext tile
     exact htiles tile
   rw [tileCount, hcounts, countsOfTiles_sum_eq_card, Multiset.card_add,

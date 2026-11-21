@@ -18,7 +18,7 @@ lemma mentsuHandTargetCostDistances_eq_tileDistances
     (hand : Hand) (hfixed : hand.fixedMelds ≤ 4) :
     validMentsuHandTargetDistances hand =
       (mentsuHandTargetTileStatesDP hand.fixedMelds).image
-        (fun tiles => countDeficit hand.counts (countsOfTiles tiles)) := by
+        (fun tiles => countDeficit hand.counts (TileCounts.ofMultiset tiles)) := by
   unfold validMentsuHandTargetDistances
   rw [recursiveMentsuHandTargetCostStatesDP_eq hand hfixed]
   ext distance
@@ -39,7 +39,7 @@ lemma mem_validMentsuHandTargetDistances_iff
         melds.length + hand.fixedMelds = 4 ∧
         ValidCounts
           (targetHand hand
-            (countsOfTiles (mentsuHandTarget pair melds))) ∧
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
         mentsuHandTargetDistance hand pair melds = distance := by
   classical
   rw [mentsuHandTargetCostDistances_eq_tileDistances hand hfixed]
@@ -77,7 +77,7 @@ lemma exists_min_validMentsuHandTargetDistance
         melds.length + hand.fixedMelds = 4 ∧
         ValidCounts
           (targetHand hand
-            (countsOfTiles (mentsuHandTarget pair melds)))) :
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds)))) :
     ∃ distance, distance ∈ validMentsuHandTargetDistances hand ∧
       ∀ otherDistance,
         otherDistance ∈ validMentsuHandTargetDistances hand →
@@ -104,14 +104,14 @@ lemma exists_mentsuHandTarget_distance_le_of_reachesCompletion
       melds.length + before.fixedMelds = 4 ∧
         ValidCounts
           (targetHand before
-            (countsOfTiles (mentsuHandTarget pair melds))) ∧
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
         mentsuHandTargetDistance before pair melds ≤ distance := by
   obtain ⟨after, hcomplete, hfixed, hdeficit⟩ :=
     exists_complete_mentsuHand_with_deficit_le before distance hreach
   rcases hcomplete with ⟨hvalidAfter, pair, melds, hmelds, htiles⟩
   have hcounts :
       after.counts =
-        countsOfTiles (mentsuHandTarget pair melds) := by
+        TileCounts.ofMultiset (mentsuHandTarget pair melds) := by
     funext tile
     change after.counts tile =
       (mentsuHandTarget pair melds).count tile
@@ -119,9 +119,9 @@ lemma exists_mentsuHandTarget_distance_le_of_reachesCompletion
   have hvalidTarget :
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))) := by
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))) := by
     intro tile
-    change (countsOfTiles (mentsuHandTarget pair melds)) tile ≤ 4
+    change (TileCounts.ofMultiset (mentsuHandTarget pair melds)) tile ≤ 4
     rw [← hcounts]
     exact hvalidAfter tile
   refine ⟨pair, melds, ?_, hvalidTarget, ?_⟩
@@ -139,7 +139,7 @@ lemma no_shorter_mentsuHand_completion_of_minimal_mentsuHandTargetDistance
         otherMelds.length + before.fixedMelds = 4 →
           ValidCounts
             (targetHand before
-              (countsOfTiles (mentsuHandTarget otherPair otherMelds))) →
+              (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds))) →
           mentsuHandTargetDistance before pair melds ≤
             mentsuHandTargetDistance before otherPair otherMelds) :
     ∀ smaller : Nat, smaller < distance →

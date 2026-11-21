@@ -27,7 +27,7 @@ lemma validCounts_completedTarget_of_copyLimit
     (pair : Tile) (hpair : state.pair = some pair) :
     ValidCounts
       (targetHand before
-        (countsOfTiles (completedTargetForState state pair))) := by
+        (TileCounts.ofMultiset (completedTargetForState state pair))) := by
   intro tile
   have htarget := hcopy tile
   change (completedTargetForState state pair).count tile ≤ 4
@@ -36,7 +36,7 @@ lemma validCounts_completedTarget_of_copyLimit
   exact htarget
 
 lemma completedMeldsForState_card (state : MentsuHandSearchState) :
-    (meldsTiles (completedMeldsForState state)).card =
+    (MentsuCandidateList.tiles (completedMeldsForState state)).card =
       3 * (state.meldHistory.length + state.taatsuHistory.length) := by
   rw [meldsTiles_card, completedMeldsForState_length]
 
@@ -49,7 +49,7 @@ lemma completedTargetForState_card
 
 lemma completedTargetForState_sum
     (state : MentsuHandSearchState) (pair : Tile) :
-    (∑ tile : Tile, countsOfTiles (completedTargetForState state pair) tile) =
+    (∑ tile : Tile, TileCounts.ofMultiset (completedTargetForState state pair) tile) =
       2 + 3 * (state.meldHistory.length + state.taatsuHistory.length) := by
   rw [countsOfTiles_sum_eq_card, completedTargetForState_card]
 
@@ -59,7 +59,7 @@ lemma completedTargetForState_sum_of_blockCount
     (hcount : state.melds + state.taatsu + before.fixedMelds = 4)
     (pair : Tile) :
     (∑ tile : Tile,
-      countsOfTiles (completedTargetForState state pair) tile) =
+      TileCounts.ofMultiset (completedTargetForState state pair) tile) =
         14 - 3 * before.fixedMelds := by
   have hmelds := reachableWithin_melds_eq_history_length
     before fuel state hreachable
@@ -75,7 +75,7 @@ lemma completedTargetForState_sum_eq_tileCount
     (hstanding : tileCount before = 14 - 3 * before.fixedMelds)
     (pair : Tile) :
     (∑ tile : Tile,
-      countsOfTiles (completedTargetForState state pair) tile) =
+      TileCounts.ofMultiset (completedTargetForState state pair) tile) =
         tileCount before := by
   rw [completedTargetForState_sum_of_blockCount
     before fuel state hreachable hcount pair]
@@ -84,10 +84,10 @@ lemma completedTargetForState_sum_eq_tileCount
 lemma complete_mentsuHand_completedTarget
     (before : Hand) (state : MentsuHandSearchState) (pair : Tile)
     (hvalid : ValidCounts
-      (targetHand before (countsOfTiles (completedTargetForState state pair))))
+      (targetHand before (TileCounts.ofMultiset (completedTargetForState state pair))))
     (hmelds : HasMentsuHandMeldCount before (completedMeldsForState state)) :
     Complete .mentsuHand
-      (targetHand before (countsOfTiles (completedTargetForState state pair))) := by
+      (targetHand before (TileCounts.ofMultiset (completedTargetForState state pair))) := by
   apply complete_mentsuHand_targetHand
   · exact hvalid
   · exact hmelds
@@ -177,11 +177,11 @@ lemma complete_mentsuHand_of_blockSearch
     (hvalid : ∀ pair, state.pair = some pair →
       ValidCounts
         (targetHand before
-          (countsOfTiles (completedTargetForState state pair)))) :
+          (TileCounts.ofMultiset (completedTargetForState state pair)))) :
     ∃ pair,
       Complete .mentsuHand
         (targetHand before
-          (countsOfTiles (completedTargetForState state pair))) := by
+          (TileCounts.ofMultiset (completedTargetForState state pair))) := by
   rcases hcomplete with ⟨hcount, hpair⟩
   cases hstatePair : state.pair with
   | none =>
@@ -201,7 +201,7 @@ lemma complete_mentsuHand_of_blockSearch_of_copyLimit
     ∃ pair,
       Complete .mentsuHand
         (targetHand before
-          (countsOfTiles (completedTargetForState state pair))) := by
+          (TileCounts.ofMultiset (completedTargetForState state pair))) := by
   rcases hcomplete with ⟨hcount, hpair⟩
   cases hstatePair : state.pair with
   | none =>
@@ -221,7 +221,7 @@ lemma complete_mentsuHand_of_constrainedBlockSearch
     ∃ pair,
       Complete .mentsuHand
         (targetHand before
-          (countsOfTiles (completedTargetForState state pair))) := by
+          (TileCounts.ofMultiset (completedTargetForState state pair))) := by
   exact complete_mentsuHand_of_blockSearch_of_copyLimit
     before fuel state
     (reachableWithinWithCopyLimit_to_reachableWithin
@@ -237,7 +237,7 @@ lemma validMentsuHandTargetDistance_mem_of_constrainedBlockSearch
       melds.length + before.fixedMelds = 4 ∧
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))) ∧
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
       mentsuHandTargetDistance before pair melds ∈
         validMentsuHandTargetDistances before := by
   have hreachable' :
@@ -262,7 +262,7 @@ lemma validMentsuHandTargetDistance_mem_of_constrainedBlockSearch
       have hvalid :
           ValidCounts
             (targetHand before
-              (countsOfTiles (mentsuHandTarget pair melds))) := by
+              (TileCounts.ofMultiset (mentsuHandTarget pair melds))) := by
         rw [htarget]
         exact validCounts_completedTarget_of_copyLimit
           before fuel state hreachable'
@@ -308,7 +308,7 @@ lemma exists_isShapeShanten_mentsuHand_of_constrainedBlockSearch
           before fuel state hreachable' hcount pair
       have hsum :
           (∑ tile : Tile,
-            countsOfTiles (mentsuHandTarget pair melds) tile) =
+            TileCounts.ofMultiset (mentsuHandTarget pair melds) tile) =
             (∑ tile : Tile, before.counts tile) + 1 := by
         calc
           _ = 14 - 3 * before.fixedMelds := by
@@ -320,7 +320,7 @@ lemma exists_isShapeShanten_mentsuHand_of_constrainedBlockSearch
             rfl
       have hvalid :
           ValidCounts
-            (targetHand before (countsOfTiles (mentsuHandTarget pair melds))) := by
+            (targetHand before (TileCounts.ofMultiset (mentsuHandTarget pair melds))) := by
         rw [htarget]
         exact validCounts_completedTarget_of_copyLimit
           before fuel state hreachable' hcopy pair hstatePair

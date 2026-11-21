@@ -22,9 +22,9 @@ private lemma honor_count_zero (meld : FixedMeld) (rank : Fin 7)
   | meld value =>
       cases value with
       | koutsu tile =>
-          cases tile <;> simp_all [honorKind, FixedMeld.tiles, meldTiles, MentsuCandidate.tiles, eq_comm]
+          cases tile <;> simp_all [honorKind, FixedMeld.tiles, MentsuCandidate.tiles, eq_comm]
       | shuntsu sequence =>
-          simp [FixedMeld.tiles, meldTiles, MentsuCandidate.tiles, Shuntsu.tiles]
+          simp [FixedMeld.tiles, MentsuCandidate.tiles, Shuntsu.tiles]
   | kan tile =>
       cases tile <;> simp_all [honorKind, FixedMeld.tiles, Kan.occupiedTiles, eq_comm]
 
@@ -44,11 +44,11 @@ private lemma fixedTiles_honor_count_zero (hfree : rank ∉ occupiedHonors fixed
       simpa [fixedTiles, Multiset.count_add, hhead] using htail
 
 private lemma triplet_list_counts (kinds : List Tile) (tile : Tile) :
-    (meldsTiles (kinds.map MentsuCandidate.koutsu)).count tile = 3 * kinds.count tile := by
+    (MentsuCandidateList.tiles (kinds.map MentsuCandidate.koutsu)).count tile = 3 * kinds.count tile := by
   induction kinds with
-  | nil => simp [meldsTiles]
+  | nil => simp [MentsuCandidateList.tiles]
   | cons head tail ih =>
-      change (Multiset.replicate 3 head + meldsTiles (tail.map MentsuCandidate.koutsu)).count tile =
+      change (Multiset.replicate 3 head + MentsuCandidateList.tiles (tail.map MentsuCandidate.koutsu)).count tile =
         3 * (head :: tail).count tile
       rw [Multiset.count_add, ih, Multiset.count_replicate]
       by_cases heq : head = tile
@@ -57,7 +57,7 @@ private lemma triplet_list_counts (kinds : List Tile) (tile : Tile) :
       · simp [heq]
 
 private lemma triplet_finset_counts (kinds : Finset Tile) (tile : Tile) :
-    (meldsTiles (kinds.toList.map MentsuCandidate.koutsu)).count tile =
+    (MentsuCandidateList.tiles (kinds.toList.map MentsuCandidate.koutsu)).count tile =
       if tile ∈ kinds then 3 else 0 := by
   rw [triplet_list_counts]
   by_cases hmem : tile ∈ kinds
@@ -70,7 +70,7 @@ private lemma triplet_finset_counts (kinds : Finset Tile) (tile : Tile) :
 lemma exists_complete_target (hvalid : ValidHand fixed hand) :
     ∃ pair melds,
       melds.length + hand.fixedMelds = 4 ∧
-      ValidHand fixed (targetHand hand (countsOfTiles (mentsuHandTarget pair melds))) := by
+      ValidHand fixed (targetHand hand (TileCounts.ofMultiset (mentsuHandTarget pair melds))) := by
   let available := (Finset.univ \ occupiedHonors fixed).image Tile.honor
   have hcard : available.card = 7 - (occupiedHonors fixed).card := by
     dsimp [available]
@@ -95,7 +95,7 @@ lemma exists_complete_target (hvalid : ValidHand fixed hand) :
     have := hvalid.2.1
     omega
   · change (mentsuHandTarget pair melds).count tile + (fixedTiles fixed).count tile ≤ 4
-    have hcount : (meldsTiles melds).count tile =
+    have hcount : (MentsuCandidateList.tiles melds).count tile =
         if tile ∈ kinds then 3 else 0 := triplet_finset_counts kinds tile
     simp only [mentsuHandTarget, Multiset.count_add, hcount,
       pairTiles, Pair.tiles, Multiset.count_replicate]

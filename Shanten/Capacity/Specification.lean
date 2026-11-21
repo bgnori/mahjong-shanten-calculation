@@ -3,6 +3,8 @@ import Shanten.Specification
 
 namespace Shanten.Capacity
 
+open MahjongDomain
+
 def Complete (fixed : List FixedMeld) (shape : Shape) (hand : Hand) : Prop :=
   ValidHand fixed hand ∧ Shanten.Complete shape hand
 
@@ -226,11 +228,11 @@ lemma complete_mentsuHand_iff_of_four_fixed (hlength : fixed.length = 4) :
     have hfixed : hand.fixedMelds = 4 := hvalid.1.trans hlength
     have hnil : melds = [] := List.length_eq_zero_iff.mp (by omega)
     subst melds
-    exact ⟨hvalid, pair, by simpa [meldsTiles] using htiles⟩
+    exact ⟨hvalid, pair, by simpa [MentsuCandidateList.tiles] using htiles⟩
   · rintro ⟨hvalid, pair, htiles⟩
     have hfixed : hand.fixedMelds = 4 := by
       rw [hvalid.1, hlength]
     exact ⟨hvalid, hvalid.validCounts, pair, [], by simp [hfixed],
-      by simpa [meldsTiles] using htiles⟩
+      by simpa [MentsuCandidateList.tiles] using htiles⟩
 
 end Shanten.Capacity

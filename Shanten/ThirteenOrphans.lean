@@ -41,7 +41,7 @@ lemma thirteenOrphans_completion_tileCount
   change (∑ tile : Tile, hand.counts tile) = 14
   simp_rw [hcounts]
   change (∑ tile : Tile,
-    countsOfTiles (orphanTiles + Multiset.replicate 1 pair) tile) = 14
+    TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair) tile) = 14
   rw [countsOfTiles_sum_eq_card, Multiset.card_add, orphanTiles_card]
   simp
 
@@ -49,7 +49,7 @@ lemma complete_thirteenOrphans_targetHand
     (hand : Hand) (pair : Tile)
     (hfixed : hand.fixedMelds = 0) (hpair : pair ∈ orphanKinds) :
     Complete .thirteenOrphans
-      (targetHand hand (countsOfTiles
+      (targetHand hand (TileCounts.ofMultiset
         (orphanTiles + Multiset.replicate 1 pair))) := by
   refine ⟨?_, hfixed, pair, hpair, ?_⟩
   · intro tile
@@ -65,7 +65,7 @@ lemma reaches_thirteenOrphans_completion
     ∃ distance : Nat, distance ≤ 14 ∧
       ReachesCompletion Complete .thirteenOrphans hand distance := by
   let pair : Tile := .honor ⟨0, by omega⟩
-  let target := countsOfTiles (orphanTiles + Multiset.replicate 1 pair)
+  let target := TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair)
   have hpair : pair ∈ orphanKinds := by
     simp only [orphanKinds, Finset.mem_filter, Finset.mem_univ, true_and]
     trivial

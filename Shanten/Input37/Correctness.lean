@@ -6,17 +6,17 @@ namespace Shanten.Input37
 open MahjongDomain
 
 lemma normalizedHand_counts_cast (h : Nonnegative input.standing) (tile : Tile) :
-    ((normalizedHand input h).counts tile : Int) = normalizeCounts input.standing tile :=
+    ((normalizedHand input h).counts tile : Int) = aggregateInt37 input.standing tile :=
   by
     simp only [normalizedHand]
     apply Int.natCast_toNat_eq_self.mpr
-    exact normalizeCounts_nonneg h tile
+    exact aggregateInt37_nonneg h tile
 
 lemma normalizedHand_tileCount (h : Nonnegative input.standing) :
     (tileCount (normalizedHand input h) : Int) = standingCount input := by
   simp only [tileCount, Nat.cast_sum]
   simp_rw [normalizedHand_counts_cast h]
-  exact normalizeCounts_sum input.standing
+  exact MahjongDomain.aggregateInt37_total input.standing
 
 private lemma fixedTiles_count (fixed : List Capacity.FixedMeld) (tile : Tile) :
     (Capacity.fixedTiles fixed).count tile =
@@ -25,29 +25,31 @@ private lemma fixedTiles_count (fixed : List Capacity.FixedMeld) (tile : Tile) :
   | nil => simp [Capacity.fixedTiles]
   | cons meld rest ih => simpa [Capacity.fixedTiles] using congrArg (meld.tiles.count tile + ·) ih
 
-private lemma normalizeCounts_meldCounts (melds : List MeldInput) (tile : Tile) :
-    normalizeCounts (meldCounts melds) tile =
-      (melds.map fun raw => normalizeCounts raw.tiles tile).sum := by
+private lemma aggregateInt37_meldCounts (melds : List MeldInput) (tile : Tile) :
+    aggregateInt37 (meldCounts melds) tile =
+      (melds.map fun raw => aggregateInt37 raw.tiles tile).sum := by
   induction melds with
-  | nil => simp [meldCounts, normalizeCounts, MahjongDomain.aggregateInt37]
-  | cons raw rest ih => simpa [meldCounts, normalizeCounts_add] using congrArg (normalizeCounts raw.tiles tile + ·) ih
+  | nil => simp [meldCounts, aggregateInt37]
+  | cons raw rest ih =>
+      simpa only [meldCounts, aggregateInt37_add, List.map_cons, List.sum_cons] using
+        congrArg (aggregateInt37 raw.tiles tile + ·) ih
 
 lemma parsedMelds_counts
     (hparsed : ∀ index : Fin input.melds.length,
       (parseMeld input.melds[index]).isSome = true) (tile : Tile) :
     ((Capacity.fixedTiles (parsedMelds input hparsed)).count tile : Int) =
-      normalizeCounts (meldCounts input.melds) tile := by
-  rw [fixedTiles_count, Nat.cast_list_sum, List.map_map, normalizeCounts_meldCounts]
+      aggregateInt37 (meldCounts input.melds) tile := by
+  rw [fixedTiles_count, Nat.cast_list_sum, List.map_map, aggregateInt37_meldCounts]
   apply congrArg List.sum
   calc
     _ = List.ofFn (fun index : Fin input.melds.length =>
-        normalizeCounts input.melds[index].tiles tile) := by
+        aggregateInt37 input.melds[index].tiles tile) := by
       simp only [parsedMelds, List.map_ofFn]
       apply congrArg List.ofFn
       funext index
       exact ((parseMeld_some_matches (Option.some_get (hparsed index)).symm).2 tile).symm
     _ = _ := by
-      change List.ofFn ((fun raw => normalizeCounts raw.tiles tile) ∘ input.melds.get) = _
+      change List.ofFn ((fun raw => aggregateInt37 raw.tiles tile) ∘ input.melds.get) = _
       rw [← List.map_ofFn, List.ofFn_get]
 
 theorem validateAndNormalize_valid
@@ -63,12 +65,12 @@ theorem validateAndNormalize_valid
     simp [parsedMelds]
   refine ⟨⟨hlength.symm, by rw [hlength]; exact hvalid.2.2.2.1, ?_⟩, ?_⟩
   · intro tile
-    have hbound := normalizeCounts_le_four hvalid.2.2.1 tile
-    have htotal : normalizeCounts (totalCounts input) tile =
+    have hbound := MahjongDomain.aggregateInt37_le_four _ hvalid.2.2.1 tile
+    have htotal : aggregateInt37 (totalCounts input) tile =
         ((normalizedHand input hvalid.1).counts tile : Int) +
           ((Capacity.fixedTiles (parsedMelds input hparsed)).count tile : Int) := by
       rw [normalizedHand_counts_cast hvalid.1, parsedMelds_counts hparsed]
-      exact normalizeCounts_add _ _ tile
+      exact congrFun (MahjongDomain.aggregateInt37_add _ _) tile
     rw [htotal] at hbound
     omega
   · have hcount := normalizedHand_tileCount hvalid.1
@@ -97,13 +99,13 @@ theorem validated_overall_exists_unique
 
 /-- Red identity may vary, but fixed-meld kinds and normalized tile contents may not. -/
 def Equivalent (left right : Input) : Prop :=
-  normalizeCounts left.standing = normalizeCounts right.standing ∧
-    left.melds.map (fun raw => (raw.kind, normalizeCounts raw.tiles)) =
-      right.melds.map (fun raw => (raw.kind, normalizeCounts raw.tiles))
+  aggregateInt37 left.standing = aggregateInt37 right.standing ∧
+    left.melds.map (fun raw => (raw.kind, aggregateInt37 raw.tiles)) =
+      right.melds.map (fun raw => (raw.kind, aggregateInt37 raw.tiles))
 
 lemma parseMeld_congr
     (hkind : left.kind = right.kind)
-    (hcounts : normalizeCounts left.tiles = normalizeCounts right.tiles) :
+    (hcounts : aggregateInt37 left.tiles = aggregateInt37 right.tiles) :
     parseMeld left = parseMeld right := by
   unfold parseMeld
   congr 1
@@ -111,8 +113,8 @@ lemma parseMeld_congr
   simp only [MatchesMeld, hkind, hcounts]
 
 private lemma parseMelds_congr {left right : List MeldInput}
-    (heq : left.map (fun raw => (raw.kind, normalizeCounts raw.tiles)) =
-      right.map (fun raw => (raw.kind, normalizeCounts raw.tiles))) :
+    (heq : left.map (fun raw => (raw.kind, aggregateInt37 raw.tiles)) =
+      right.map (fun raw => (raw.kind, aggregateInt37 raw.tiles))) :
     left.map parseMeld = right.map parseMeld := by
   induction left generalizing right with
   | nil =>

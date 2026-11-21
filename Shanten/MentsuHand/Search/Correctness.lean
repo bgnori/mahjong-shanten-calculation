@@ -20,14 +20,14 @@ lemma isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance
     (hvalid :
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))))
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))))
     (hmelds : melds.length + before.fixedMelds = 4)
     (hminimalTarget :
       ∀ otherPair otherMelds,
         otherMelds.length + before.fixedMelds = 4 →
           ValidCounts
             (targetHand before
-              (countsOfTiles (mentsuHandTarget otherPair otherMelds))) →
+              (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds))) →
           mentsuHandTargetDistance before pair melds ≤
             mentsuHandTargetDistance before otherPair otherMelds)
     (hbeforeValid : ValidCounts before) :
@@ -44,26 +44,26 @@ lemma isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance_one_more
     (hdistance : mentsuHandTargetDistance before pair melds = distance)
     (hsum :
       (∑ tile : Tile,
-        countsOfTiles (mentsuHandTarget pair melds) tile) =
+        TileCounts.ofMultiset (mentsuHandTarget pair melds) tile) =
         (∑ tile : Tile, before.counts tile) + 1)
     (hbeforeValid : ValidCounts before)
     (hvalid :
       ValidCounts
         (targetHand before
-          (countsOfTiles (mentsuHandTarget pair melds))))
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))))
     (hmelds : melds.length + before.fixedMelds = 4)
     (hminimalTarget :
       ∀ otherPair otherMelds,
         otherMelds.length + before.fixedMelds = 4 →
           ValidCounts
             (targetHand before
-              (countsOfTiles (mentsuHandTarget otherPair otherMelds))) →
+              (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds))) →
           mentsuHandTargetDistance before pair melds ≤
             mentsuHandTargetDistance before otherPair otherMelds) :
     IsShapeShanten before .mentsuHand ((distance : Int) - 1) := by
   obtain ⟨reachedDistance, htargetDistance, hreach⟩ :=
     reachesCompletion_mentsuHand_of_one_more_target_tile
-      before (countsOfTiles (mentsuHandTarget pair melds))
+      before (TileCounts.ofMultiset (mentsuHandTarget pair melds))
       pair melds hsum hbeforeValid hvalid hmelds
       (targetHand_hasTiles_countsOfTiles before
         (mentsuHandTarget pair melds))
@@ -72,7 +72,7 @@ lemma isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance_one_more
     calc
       reachedDistance =
           countDeficit before.counts
-            (countsOfTiles (mentsuHandTarget pair melds)) :=
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds)) :=
         htargetDistance
       _ = mentsuHandTargetDistance before pair melds :=
         (mentsuHandTargetDistance_eq_countDeficit before pair melds).symm
@@ -104,7 +104,7 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget
             ∑ tile : Tile, (mentsuHandTarget pair melds).count tile ∧
           ValidCounts
             (targetHand before
-              (countsOfTiles (mentsuHandTarget pair melds)))) :
+              (TileCounts.ofMultiset (mentsuHandTarget pair melds)))) :
     ∃ value : Int, IsShapeShanten before .mentsuHand value := by
   classical
   let candidateDistance : Nat → Prop := fun distance =>
@@ -114,7 +114,7 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget
           ∑ tile : Tile, (mentsuHandTarget pair melds).count tile ∧
         ValidCounts
           (targetHand before
-            (countsOfTiles (mentsuHandTarget pair melds))) ∧
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
         mentsuHandTargetDistance before pair melds = distance
   have hexists : ∃ distance, candidateDistance distance := by
     obtain ⟨pair, melds, hmelds, hsum, hvalid⟩ := hcandidate
@@ -128,7 +128,7 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget
         otherMelds.length + before.fixedMelds = 4 →
           ValidCounts
             (targetHand before
-              (countsOfTiles (mentsuHandTarget otherPair otherMelds))) →
+              (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds))) →
           mentsuHandTargetDistance before pair melds ≤
             mentsuHandTargetDistance before otherPair otherMelds := by
     intro otherPair otherMelds hotherMelds hotherValid
@@ -140,14 +140,14 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget
         (∑ tile : Tile, before.counts tile) =
             ∑ tile : Tile, (mentsuHandTarget pair melds).count tile := hsum
         _ = (mentsuHandTarget pair melds).card := by
-          simpa [countsOfTiles] using
+          simpa [TileCounts.ofMultiset] using
             (countsOfTiles_sum_eq_card (mentsuHandTarget pair melds))
         _ = (mentsuHandTarget otherPair otherMelds).card := by
           simp [mentsuHandTarget, Multiset.card_add, pairTiles_card,
             meldsTiles_card, hlength]
         _ = ∑ tile : Tile, (mentsuHandTarget otherPair otherMelds).count tile := by
           symm
-          simpa [countsOfTiles] using
+          simpa [TileCounts.ofMultiset] using
             (countsOfTiles_sum_eq_card (mentsuHandTarget otherPair otherMelds))
     have hotherCandidate :
         candidateDistance (mentsuHandTargetDistance before otherPair otherMelds) :=
@@ -171,22 +171,22 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget_one_more
       ∃ pair melds,
         melds.length + before.fixedMelds = 4 ∧
           (∑ tile : Tile,
-            countsOfTiles (mentsuHandTarget pair melds) tile) =
+            TileCounts.ofMultiset (mentsuHandTarget pair melds) tile) =
             (∑ tile : Tile, before.counts tile) + 1 ∧
           ValidCounts
             (targetHand before
-              (countsOfTiles (mentsuHandTarget pair melds)))) :
+              (TileCounts.ofMultiset (mentsuHandTarget pair melds)))) :
     ∃ value : Int, IsShapeShanten before .mentsuHand value := by
   classical
   let candidateDistance : Nat → Prop := fun distance =>
     ∃ pair melds,
       melds.length + before.fixedMelds = 4 ∧
         (∑ tile : Tile,
-          countsOfTiles (mentsuHandTarget pair melds) tile) =
+          TileCounts.ofMultiset (mentsuHandTarget pair melds) tile) =
           (∑ tile : Tile, before.counts tile) + 1 ∧
         ValidCounts
           (targetHand before
-            (countsOfTiles (mentsuHandTarget pair melds))) ∧
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
         mentsuHandTargetDistance before pair melds = distance
   have hexists : ∃ distance, candidateDistance distance := by
     obtain ⟨pair, melds, hmelds, hsum, hvalid⟩ := hcandidate
@@ -200,28 +200,28 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget_one_more
         otherMelds.length + before.fixedMelds = 4 →
           ValidCounts
             (targetHand before
-              (countsOfTiles (mentsuHandTarget otherPair otherMelds))) →
+              (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds))) →
           mentsuHandTargetDistance before pair melds ≤
             mentsuHandTargetDistance before otherPair otherMelds := by
     intro otherPair otherMelds hotherMelds hotherValid
     have hlength : melds.length = otherMelds.length := by omega
     have hsumOther :
         (∑ tile : Tile,
-          countsOfTiles (mentsuHandTarget otherPair otherMelds) tile) =
+          TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds) tile) =
           (∑ tile : Tile, before.counts tile) + 1 := by
       calc
         (∑ tile : Tile,
-            countsOfTiles (mentsuHandTarget otherPair otherMelds) tile) =
+            TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds) tile) =
             (mentsuHandTarget otherPair otherMelds).card := by
-          simpa [countsOfTiles] using
+          simpa [TileCounts.ofMultiset] using
             (countsOfTiles_sum_eq_card (mentsuHandTarget otherPair otherMelds))
         _ = (mentsuHandTarget pair melds).card := by
           simp [mentsuHandTarget, Multiset.card_add, pairTiles_card,
             meldsTiles_card, hlength]
         _ = ∑ tile : Tile,
-            countsOfTiles (mentsuHandTarget pair melds) tile := by
+            TileCounts.ofMultiset (mentsuHandTarget pair melds) tile := by
           symm
-          simpa [countsOfTiles] using
+          simpa [TileCounts.ofMultiset] using
             (countsOfTiles_sum_eq_card (mentsuHandTarget pair melds))
         _ = (∑ tile : Tile, before.counts tile) + 1 := hsum
     have hotherCandidate :
@@ -245,7 +245,7 @@ lemma sum_countsOfTiles_mentsuHandTarget_of_thirteen_tile_count
     (hstanding : tileCount hand + 3 * hand.fixedMelds = 13)
     (pair : Tile) (melds : List MentsuCandidate)
     (hmelds : melds.length + hand.fixedMelds = 4) :
-    (∑ tile : Tile, countsOfTiles (mentsuHandTarget pair melds) tile) =
+    (∑ tile : Tile, TileCounts.ofMultiset (mentsuHandTarget pair melds) tile) =
       (∑ tile : Tile, hand.counts tile) + 1 := by
   calc
     _ = (mentsuHandTarget pair melds).card := by
@@ -266,7 +266,7 @@ lemma exists_mentsuHandTarget_reaching_isShapeShanten_distance
       melds.length + hand.fixedMelds = 4 ∧
       ValidCounts
         (targetHand hand
-          (countsOfTiles (mentsuHandTarget pair melds))) ∧
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
       mentsuHandTargetDistance hand pair melds = distance ∧
       ReachesCompletion Complete .mentsuHand hand distance := by
   rcases hshape with ⟨_, distance, hvalue, hreach, hminimal⟩
@@ -278,7 +278,7 @@ lemma exists_mentsuHandTarget_reaching_isShapeShanten_distance
       hand hstanding pair melds hmelds
   obtain ⟨targetDistance, htargetDistance, htargetReach⟩ :=
     reachesCompletion_mentsuHand_of_one_more_target_tile
-      hand (countsOfTiles (mentsuHandTarget pair melds)) pair melds
+      hand (TileCounts.ofMultiset (mentsuHandTarget pair melds)) pair melds
       hsum hbeforeValid hvalid hmelds
       (targetHand_hasTiles_countsOfTiles hand
         (mentsuHandTarget pair melds))
@@ -287,7 +287,7 @@ lemma exists_mentsuHandTarget_reaching_isShapeShanten_distance
     calc
       targetDistance =
           countDeficit hand.counts
-            (countsOfTiles (mentsuHandTarget pair melds)) :=
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds)) :=
         htargetDistance
       _ = mentsuHandTargetDistance hand pair melds :=
         (mentsuHandTargetDistance_eq_countDeficit hand pair melds).symm
@@ -322,14 +322,14 @@ lemma exists_minimal_mentsuHandTarget_of_isShapeShanten_mentsuHand
       melds.length + hand.fixedMelds = 4 ∧
       ValidCounts
         (targetHand hand
-          (countsOfTiles (mentsuHandTarget pair melds))) ∧
+          (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
       mentsuHandTargetDistance hand pair melds = distance ∧
       ReachesCompletion Complete .mentsuHand hand distance ∧
       ∀ otherPair otherMelds,
         otherMelds.length + hand.fixedMelds = 4 →
         ValidCounts
           (targetHand hand
-            (countsOfTiles (mentsuHandTarget otherPair otherMelds))) →
+            (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds))) →
         mentsuHandTargetDistance hand pair melds ≤
           mentsuHandTargetDistance hand otherPair otherMelds := by
   obtain ⟨distance, pair, melds, hvalue, hmelds, hvalid,
@@ -346,7 +346,7 @@ lemma exists_minimal_mentsuHandTarget_of_isShapeShanten_mentsuHand
       hand hstanding otherPair otherMelds hotherMelds
   obtain ⟨otherDistance, hotherDistance, hotherReach⟩ :=
     reachesCompletion_mentsuHand_of_one_more_target_tile
-      hand (countsOfTiles (mentsuHandTarget otherPair otherMelds))
+      hand (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds))
       otherPair otherMelds hsumOther hbeforeValid hotherValid
       hotherMelds
       (targetHand_hasTiles_countsOfTiles hand
@@ -357,7 +357,7 @@ lemma exists_minimal_mentsuHandTarget_of_isShapeShanten_mentsuHand
     calc
       otherDistance =
           countDeficit hand.counts
-            (countsOfTiles (mentsuHandTarget otherPair otherMelds)) :=
+            (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds)) :=
         hotherDistance
       _ = mentsuHandTargetDistance hand otherPair otherMelds :=
         (mentsuHandTargetDistance_eq_countDeficit hand otherPair otherMelds).symm
@@ -375,17 +375,17 @@ lemma isShapeShanten_mentsuHand_iff_exists_minimal_mentsuHandTarget
         (distance : Int) = value + 1 ∧
         melds.length + hand.fixedMelds = 4 ∧
         (∑ tile : Tile,
-          countsOfTiles (mentsuHandTarget pair melds) tile) =
+          TileCounts.ofMultiset (mentsuHandTarget pair melds) tile) =
           (∑ tile : Tile, hand.counts tile) + 1 ∧
         ValidCounts
           (targetHand hand
-            (countsOfTiles (mentsuHandTarget pair melds))) ∧
+            (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
         mentsuHandTargetDistance hand pair melds = distance ∧
         ∀ otherPair otherMelds,
           otherMelds.length + hand.fixedMelds = 4 →
           ValidCounts
             (targetHand hand
-              (countsOfTiles (mentsuHandTarget otherPair otherMelds))) →
+              (TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds))) →
           mentsuHandTargetDistance hand pair melds ≤
             mentsuHandTargetDistance hand otherPair otherMelds := by
   constructor

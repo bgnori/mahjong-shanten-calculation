@@ -46,11 +46,11 @@ lemma mentsuHandChoiceRepresentative_mem
       | koutsu meldTile =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile
-          simp [choiceTiles, meldTiles, MentsuCandidate.tiles]
+          simp [choiceTiles, MentsuCandidate.tiles]
       | shuntsu sequence =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile
-          simp [choiceTiles, meldTiles, MentsuCandidate.tiles, Shuntsu.tiles]
+          simp [choiceTiles, MentsuCandidate.tiles, Shuntsu.tiles]
 
 def mentsuHandChoicesForTile
     (tile : Tile) : List MentsuHandChoice → List MentsuHandChoice

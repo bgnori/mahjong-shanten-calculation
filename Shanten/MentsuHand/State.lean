@@ -170,21 +170,21 @@ def taatsuCompletionTiles : List Taatsu → Multiset Tile
 lemma taatsuHistoryTiles_add_completionTiles
     (taatsus : List Taatsu) :
     taatsuHistoryTiles taatsus + taatsuCompletionTiles taatsus =
-      meldsTiles (taatsuCompletionMelds taatsus) := by
+      MentsuCandidateList.tiles (taatsuCompletionMelds taatsus) := by
   induction taatsus with
   | nil =>
       rfl
   | cons taatsu taatsus ih =>
       simp only [taatsuHistoryTiles, taatsuCompletionTiles,
-        taatsuCompletionMelds, meldsTiles]
+        taatsuCompletionMelds, MentsuCandidateList.tiles]
       calc
         _ =
             (taatsuTiles taatsu +
                 Multiset.replicate 1 (taatsuCompletionTile taatsu)) +
               (taatsuHistoryTiles taatsus + taatsuCompletionTiles taatsus) := by
                 ac_rfl
-        _ = meldTiles (taatsuCompletionMeld taatsu) +
-              meldsTiles (taatsuCompletionMelds taatsus) := by
+        _ = MentsuCandidate.tiles (taatsuCompletionMeld taatsu) +
+              MentsuCandidateList.tiles (taatsuCompletionMelds taatsus) := by
                 rw [taatsuTiles_add_completionTile, ih]
         _ = _ := by rfl
 
@@ -241,18 +241,15 @@ lemma pairTiles_card (tile : Tile) :
     (pairTiles tile).card = 2 := by
   exact Pair.tiles_card ⟨tile⟩
 
-lemma meldTiles_card (meld : MentsuCandidate) : (meldTiles meld).card = 3 := by
-  exact MentsuCandidate.tiles_card meld
-
 lemma meldsTiles_card (melds : List MentsuCandidate) :
-    (meldsTiles melds).card = 3 * melds.length := by
+    (MentsuCandidateList.tiles melds).card = 3 * melds.length := by
   induction melds with
   | nil =>
       rfl
   | cons meld melds ih =>
-      change (meldTiles meld + meldsTiles melds).card =
+      change (MentsuCandidate.tiles meld + MentsuCandidateList.tiles melds).card =
         3 * (melds.length + 1)
-      rw [Multiset.card_add, meldTiles_card, ih]
+      rw [Multiset.card_add, MentsuCandidate.tiles_card, ih]
       omega
 
 def completedMeldsForState (state : MentsuHandSearchState) : List MentsuCandidate :=
@@ -267,19 +264,19 @@ lemma completedMeldsForState_length
     Nat.add_comm]
 
 lemma meldsTiles_append (left right : List MentsuCandidate) :
-    meldsTiles (left ++ right) = meldsTiles left + meldsTiles right := by
+    MentsuCandidateList.tiles (left ++ right) = MentsuCandidateList.tiles left + MentsuCandidateList.tiles right := by
   induction left with
   | nil =>
-      simp [meldsTiles]
+      simp [MentsuCandidateList.tiles]
   | cons meld left ih =>
-      change meldTiles meld + meldsTiles (left ++ right) =
-        (meldTiles meld + meldsTiles left) + meldsTiles right
+      change MentsuCandidate.tiles meld + MentsuCandidateList.tiles (left ++ right) =
+        (MentsuCandidate.tiles meld + MentsuCandidateList.tiles left) + MentsuCandidateList.tiles right
       rw [ih]
       ac_rfl
 
 def stateHistoryTiles (state : MentsuHandSearchState) : Multiset Tile :=
   pairHistoryTiles state.pair +
-    meldsTiles state.meldHistory.reverse +
+    MentsuCandidateList.tiles state.meldHistory.reverse +
     taatsuHistoryTiles state.taatsuHistory.reverse
 
 lemma taatsuHistoryTiles_append_single (history : List Taatsu) (taatsu : Taatsu) :
@@ -291,22 +288,9 @@ lemma taatsuHistoryTiles_append_single (history : List Taatsu) (taatsu : Taatsu)
       simp [taatsuHistoryTiles, ih, Multiset.add_assoc]
 
 lemma meldsTiles_append_single (history : List MentsuCandidate) (meld : MentsuCandidate) :
-    meldsTiles (history ++ [meld]) =
-      meldsTiles history + meldTiles meld := by
-  have aux : ∀ (items : List MentsuCandidate) (acc : Multiset Tile),
-      List.foldr (fun item rest => meldTiles item + rest) acc items =
-        List.foldr (fun item rest => meldTiles item + rest) 0 items + acc := by
-    intro items
-    induction items with
-    | nil =>
-        intro acc
-        simp
-    | cons head tail ih =>
-        intro acc
-        simp only [List.foldr]
-        rw [ih]
-        ac_rfl
-  simpa [meldsTiles, List.foldr_append] using aux history (meldTiles meld)
+    MentsuCandidateList.tiles (history ++ [meld]) =
+      MentsuCandidateList.tiles history + MentsuCandidate.tiles meld := by
+  simpa [MentsuCandidateList.tiles] using meldsTiles_append history [meld]
 
 lemma applyMentsuHandChoice_used_eq_historyTiles
     (hand : Hand) (state : MentsuHandSearchState) (choice : MentsuHandChoice)
@@ -341,7 +325,7 @@ lemma applyMentsuHandChoice_used_eq_historyTiles
       ac_rfl
   | meld meld =>
       simp only [applyMentsuHandChoice]
-      change state.used + meldTiles meld = _
+      change state.used + MentsuCandidate.tiles meld = _
       rw [hstate]
       simp [applyMentsuHandChoice, stateHistoryTiles, pairHistoryTiles,
         taatsuHistoryTiles, choiceTiles, List.reverse_cons,

@@ -59,15 +59,15 @@ def taatsuCompletionMeld : Taatsu → MentsuCandidate
 lemma taatsuTiles_add_completionTile
     (taatsu : Taatsu) :
     taatsuTiles taatsu + Multiset.replicate 1 (taatsuCompletionTile taatsu) =
-      meldTiles (taatsuCompletionMeld taatsu) := by
+      MentsuCandidate.tiles (taatsuCompletionMeld taatsu) := by
   cases taatsu with
   | pair tile =>
       simp [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,
-        pairTiles, Pair.tiles, meldTiles, MentsuCandidate.tiles, Multiset.replicate_succ]
+        pairTiles, Pair.tiles, MentsuCandidate.tiles, Multiset.replicate_succ]
   | sequence suit start =>
       by_cases hstart : start.val ≤ 6
       · simp only [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,
-          meldTiles, MentsuCandidate.tiles, Shuntsu.tiles, dif_pos hstart]
+          MentsuCandidate.tiles, Shuntsu.tiles, dif_pos hstart]
         change Multiset.ofList
             [ Tile.suited suit ⟨start.val, by omega⟩
             , Tile.suited suit ⟨start.val + 1, by omega⟩ ] +
@@ -80,7 +80,7 @@ lemma taatsuTiles_add_completionTile
         rfl
       · have hstart' : start.val = 7 := by omega
         simp only [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,
-          meldTiles, MentsuCandidate.tiles, Shuntsu.tiles, dif_neg hstart, hstart', dif_neg (by omega)]
+          MentsuCandidate.tiles, Shuntsu.tiles, dif_neg hstart, hstart', dif_neg (by omega)]
         change Multiset.ofList
             [ Tile.suited suit ⟨7, by omega⟩
             , Tile.suited suit ⟨8, by omega⟩ ] +
@@ -99,6 +99,6 @@ def choiceTiles : MentsuHandChoice → Multiset Tile
   | .skip => 0
   | .pair tile => pairTiles tile
   | .taatsu taatsu => taatsuTiles taatsu
-  | .meld meld => meldTiles meld
+  | .meld meld => MentsuCandidate.tiles meld
 
 end Shanten

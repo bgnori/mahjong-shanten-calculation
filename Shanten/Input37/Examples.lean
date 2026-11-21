@@ -6,7 +6,7 @@ open MahjongDomain
 
 set_option maxRecDepth 4096
 
-private def counts (entries : List (Fin 37 × Int)) : Counts37 :=
+private def counts (entries : List (Fin 37 × Int)) : Int37Counts :=
   fun index => (entries.map fun entry => if entry.1 = index then entry.2 else 0).sum
 
 private def produces (input : Input) (fixed : List Capacity.FixedMeld)
@@ -43,7 +43,7 @@ theorem fourteen_normalizes :
         | .honor rank => if rank.val = 0 ∨ rank.val = 6 then 1 else 0) := by
   decide
 
-private def standingTen : Counts37 := counts [(30, 4), (31, 4), (32, 2)]
+private def standingTen : Int37Counts := counts [(30, 4), (31, 4), (32, 2)]
 
 private def normalizedTen : TileCounts :=
   fun tile => match tile with
@@ -109,10 +109,10 @@ theorem red_identity_invariant :
       Capacity.overallMinimumSearch left.fixed left.hand =
         Capacity.overallMinimumSearch right.fixed right.hand := by
   have hleft : produces (redVariant true) []
-      (fun tile => (normalizeCounts (redVariant true).standing tile).toNat) := by
+      (fun tile => (aggregateInt37 (redVariant true).standing tile).toNat) := by
     decide
   have hright : produces (redVariant false) []
-      (fun tile => (normalizeCounts (redVariant false).standing tile).toNat) := by
+      (fun tile => (aggregateInt37 (redVariant false).standing tile).toNat) := by
     decide
   obtain ⟨left, hl⟩ := produces_success hleft
   obtain ⟨right, hr⟩ := produces_success hright

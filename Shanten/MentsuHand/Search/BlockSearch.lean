@@ -42,12 +42,12 @@ def generalMentsuHandStateFor (hand : Hand) (tiles : Multiset Tile) :
     GeneralMentsuHandState :=
   { completed := tiles
     used := tiles ∩ mentsuHandSupply hand
-    missing := countDeficit hand.counts (countsOfTiles tiles) }
+    missing := countDeficit hand.counts (TileCounts.ofMultiset tiles) }
 
 lemma generalMentsuHandStateFor_zero (hand : Hand) :
     generalMentsuHandStateFor hand 0 = initialGeneralMentsuHandState := by
   simp [generalMentsuHandStateFor, initialGeneralMentsuHandState,
-    countDeficit, countsOfTiles]
+    countDeficit, TileCounts.ofMultiset]
 
 lemma generalMentsuHandAddBlock_stateFor
     (hand : Hand) (tiles block : Multiset Tile) :
@@ -61,15 +61,15 @@ lemma generalMentsuHandAddBlock_stateFor
       Multiset.count_add, Multiset.count_inter, Multiset.count_sub,
       mentsuHandSupply_count]
     omega
-  · change countDeficit hand.counts (countsOfTiles tiles) +
+  · change countDeficit hand.counts (TileCounts.ofMultiset tiles) +
         (block - (mentsuHandSupply hand - tiles ∩ mentsuHandSupply hand)).card =
-      countDeficit hand.counts (countsOfTiles (tiles + block))
+      countDeficit hand.counts (TileCounts.ofMultiset (tiles + block))
     rw [← countsOfTiles_sum_eq_card]
     unfold countDeficit
     rw [← Finset.sum_add_distrib]
     apply Finset.sum_congr rfl
     intro tile _
-    simp only [countsOfTiles, Multiset.count_add, Multiset.count_sub,
+    simp only [TileCounts.ofMultiset, Multiset.count_add, Multiset.count_sub,
       Multiset.count_inter, mentsuHandSupply_count]
     omega
 
@@ -83,13 +83,13 @@ lemma generalMentsuHandStateFor_accounting
     (generalMentsuHandStateFor hand tiles).used.card +
       (generalMentsuHandStateFor hand tiles).missing = tiles.card := by
   change (tiles ∩ mentsuHandSupply hand).card +
-    countDeficit hand.counts (countsOfTiles tiles) = tiles.card
+    countDeficit hand.counts (TileCounts.ofMultiset tiles) = tiles.card
   rw [← countsOfTiles_sum_eq_card, ← countsOfTiles_sum_eq_card tiles]
   unfold countDeficit
   rw [← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl
   intro tile _
-  simp only [countsOfTiles, Multiset.count_inter, mentsuHandSupply_count]
+  simp only [TileCounts.ofMultiset, Multiset.count_inter, mentsuHandSupply_count]
   omega
 
 def generalMentsuHandMeldStates (hand : Hand) (initialTiles : Multiset Tile) :
@@ -101,7 +101,7 @@ def generalMentsuHandMeldStates (hand : Hand) (initialTiles : Multiset Tile) :
   | count + 1 =>
       (Finset.univ.biUnion fun meld =>
         (generalMentsuHandMeldStates hand initialTiles count).image
-          (fun state => generalMentsuHandAddBlock hand state (meldTiles meld)))
+          (fun state => generalMentsuHandAddBlock hand state (MentsuCandidate.tiles meld)))
         |>.filter (fun state => validTileMultisetBool state.completed = true)
 
 def generalMentsuHandStates (hand : Hand) : Finset GeneralMentsuHandState :=
@@ -148,7 +148,7 @@ lemma mem_generalMentsuHandMeldStates_iff
           Finset.mem_image] at hstate
         obtain ⟨⟨meld, previous, hprevious, rfl⟩, hvalid⟩ := hstate
         obtain ⟨costState, hcostState, rfl⟩ := (ih previous).mp hprevious
-        refine ⟨mentsuHandCostStateAdd hand costState (meldTiles meld), ?_, ?_⟩
+        refine ⟨mentsuHandCostStateAdd hand costState (MentsuCandidate.tiles meld), ?_, ?_⟩
         · simp only [mentsuHandMeldCostStatesDP, Finset.mem_filter,
             Finset.mem_biUnion, Finset.mem_univ, true_and, Finset.mem_image]
           exact ⟨⟨meld, costState, hcostState, rfl⟩, hvalid⟩
@@ -203,7 +203,7 @@ lemma mem_generalMentsuHandStates_iff
     state ∈ generalMentsuHandStates hand ↔
       ∃ pair melds,
         melds.length + hand.fixedMelds = 4 ∧
-        ValidCounts (targetHand hand (countsOfTiles (mentsuHandTarget pair melds))) ∧
+        ValidCounts (targetHand hand (TileCounts.ofMultiset (mentsuHandTarget pair melds))) ∧
         state = generalMentsuHandStateFor hand (mentsuHandTarget pair melds) := by
   rw [mem_generalMentsuHandStates_iff_costState,
     recursiveMentsuHandTargetCostStatesDP_eq hand hfixed]
@@ -218,7 +218,7 @@ lemma mem_generalMentsuHandStates_iff
     · rw [htarget]
   · rintro ⟨pair, melds, hlength, hvalid, rfl⟩
     let tiles := mentsuHandTarget pair melds
-    refine ⟨(tiles, countDeficit hand.counts (countsOfTiles tiles)), ?_, rfl⟩
+    refine ⟨(tiles, countDeficit hand.counts (TileCounts.ofMultiset tiles)), ?_, rfl⟩
     apply (mem_mentsuHandTargetCostStatesDP_iff hand _).mpr
     refine ⟨?_, rfl⟩
     apply (mem_mentsuHandTargetTileStatesDP_iff hand.fixedMelds hfixed tiles).mpr

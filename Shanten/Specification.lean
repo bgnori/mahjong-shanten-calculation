@@ -23,7 +23,7 @@ def Complete : Shape → Hand → Prop
       ValidCounts hand ∧
         ∃ pair melds,
           melds.length + hand.fixedMelds = 4 ∧
-          HasTiles hand (pairTiles pair + meldsTiles melds)
+          HasTiles hand (pairTiles pair + MentsuCandidateList.tiles melds)
   | .sevenPairs, hand =>
       ValidCounts hand ∧
         hand.fixedMelds = 0 ∧
@@ -42,20 +42,20 @@ theorem standardCompletion_iff_shantenParts
     StandardCompletion (4 - fixedMelds) counts ↔
       ∃ pair : Tile, ∃ melds : List MentsuCandidate,
         melds.length + fixedMelds = 4 ∧
-          ∀ tile, counts tile = (pairTiles pair + meldsTiles melds).count tile := by
+          ∀ tile, counts tile = (pairTiles pair + MentsuCandidateList.tiles melds).count tile := by
   rw [standardCompletion_iff_parts]
   constructor
   · rintro ⟨⟨pair⟩, melds, hlength, hcounts⟩
     refine ⟨pair, melds, by omega, ?_⟩
     intro tile
     have h := congrFun hcounts tile
-    simpa [pairTiles, MentsuCandidateList.counts, ← meldsTiles_eq_candidates,
+    simpa [pairTiles, MentsuCandidateList.counts,
       Multiset.count_add] using h.symm
   · rintro ⟨pair, melds, hlength, hcounts⟩
     refine ⟨⟨pair⟩, melds, by omega, ?_⟩
     funext tile
     have h := hcounts tile
-    simpa [pairTiles, MentsuCandidateList.counts, ← meldsTiles_eq_candidates,
+    simpa [pairTiles, MentsuCandidateList.counts,
       Multiset.count_add] using h.symm
 
 theorem mentsuComplete_iff_standardCompletion (hand : Hand) :

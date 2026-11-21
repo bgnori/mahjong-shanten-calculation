@@ -16,16 +16,16 @@ def mentsuHandCostStateAdd (hand : Hand)
     Multiset Tile × Nat :=
   let tiles := state.1 + extra
   (tiles,
-    state.2 + (countDeficit hand.counts (countsOfTiles tiles) -
-      countDeficit hand.counts (countsOfTiles state.1)))
+    state.2 + (countDeficit hand.counts (TileCounts.ofMultiset tiles) -
+      countDeficit hand.counts (TileCounts.ofMultiset state.1)))
 
 lemma mentsuHandCostStateAdd_cost
     (hand : Hand) (state : Multiset Tile × Nat) (extra : Multiset Tile)
     (hcost :
-      state.2 = countDeficit hand.counts (countsOfTiles state.1)) :
+      state.2 = countDeficit hand.counts (TileCounts.ofMultiset state.1)) :
     (mentsuHandCostStateAdd hand state extra).2 =
       countDeficit hand.counts
-        (countsOfTiles ((mentsuHandCostStateAdd hand state extra).1)) := by
+        (TileCounts.ofMultiset ((mentsuHandCostStateAdd hand state extra).1)) := by
   unfold mentsuHandCostStateAdd
   dsimp only
   rw [hcost]
@@ -39,19 +39,19 @@ def mentsuHandMeldCostStatesDP (hand : Hand) (initialTiles : Multiset Tile) :
       Finset.filter
         (fun state => validTileMultisetBool state.1 = true)
         ({(initialTiles,
-            countDeficit hand.counts (countsOfTiles initialTiles))} :
+            countDeficit hand.counts (TileCounts.ofMultiset initialTiles))} :
           Finset (Multiset Tile × Nat))
   | meldCount + 1 =>
       (Finset.univ.biUnion fun meld =>
         (mentsuHandMeldCostStatesDP hand initialTiles meldCount).image
-          (fun state => mentsuHandCostStateAdd hand state (meldTiles meld)))
+          (fun state => mentsuHandCostStateAdd hand state (MentsuCandidate.tiles meld)))
         |>.filter (fun state => validTileMultisetBool state.1 = true)
 
 lemma mentsuHandMeldCostStatesDP_cost
     (hand : Hand) (initialTiles : Multiset Tile) (meldCount : Nat)
     (state : Multiset Tile × Nat)
     (hstate : state ∈ mentsuHandMeldCostStatesDP hand initialTiles meldCount) :
-    state.2 = countDeficit hand.counts (countsOfTiles state.1) := by
+    state.2 = countDeficit hand.counts (TileCounts.ofMultiset state.1) := by
   induction meldCount generalizing state with
   | zero =>
       simp only [mentsuHandMeldCostStatesDP, Finset.mem_filter,
@@ -64,17 +64,17 @@ lemma mentsuHandMeldCostStatesDP_cost
       rcases hstate with ⟨⟨meld, previous, hprevious, heq⟩, _⟩
       have hpreviousCost := ih previous hprevious
       have hnextCost :=
-        mentsuHandCostStateAdd_cost hand previous (meldTiles meld)
+        mentsuHandCostStateAdd_cost hand previous (MentsuCandidate.tiles meld)
           hpreviousCost
       calc
         state.2 =
-            (mentsuHandCostStateAdd hand previous (meldTiles meld)).2 :=
+            (mentsuHandCostStateAdd hand previous (MentsuCandidate.tiles meld)).2 :=
           (congrArg Prod.snd heq).symm
         _ = countDeficit hand.counts
-            (countsOfTiles
-              (mentsuHandCostStateAdd hand previous (meldTiles meld)).1) :=
+            (TileCounts.ofMultiset
+              (mentsuHandCostStateAdd hand previous (MentsuCandidate.tiles meld)).1) :=
           hnextCost
-        _ = countDeficit hand.counts (countsOfTiles state.1) := by
+        _ = countDeficit hand.counts (TileCounts.ofMultiset state.1) := by
           rw [congrArg Prod.fst heq]
 
 lemma mem_mentsuHandMeldCostStatesDP_iff
@@ -83,8 +83,8 @@ lemma mem_mentsuHandMeldCostStatesDP_iff
     state ∈ mentsuHandMeldCostStatesDP hand initialTiles meldCount ↔
       ∃ melds,
         melds.length = meldCount ∧
-        meldsTiles melds + initialTiles = state.1 ∧
-        state.2 = countDeficit hand.counts (countsOfTiles state.1) ∧
+        MentsuCandidateList.tiles melds + initialTiles = state.1 ∧
+        state.2 = countDeficit hand.counts (TileCounts.ofMultiset state.1) ∧
         validTileMultisetBool state.1 = true := by
   induction meldCount generalizing state with
   | zero =>
@@ -93,22 +93,22 @@ lemma mem_mentsuHandMeldCostStatesDP_iff
       constructor
       · rintro ⟨rfl, hvalid⟩
         refine ⟨[], rfl, ?_, rfl, hvalid⟩
-        simp [meldsTiles]
+        simp [MentsuCandidateList.tiles]
       · rintro ⟨melds, hlength, htiles, hcost, hvalid⟩
         cases melds with
         | nil =>
             simp only [List.length_nil] at hlength
-            simp [meldsTiles] at htiles
+            simp [MentsuCandidateList.tiles] at htiles
             have hstate : state =
                 (initialTiles,
-                  countDeficit hand.counts (countsOfTiles initialTiles)) := by
+                  countDeficit hand.counts (TileCounts.ofMultiset initialTiles)) := by
               apply Prod.ext
               · exact htiles.symm
               · calc
                   state.2 =
-                      countDeficit hand.counts (countsOfTiles state.1) := hcost
+                      countDeficit hand.counts (TileCounts.ofMultiset state.1) := hcost
                   _ = countDeficit hand.counts
-                      (countsOfTiles initialTiles) := by rw [htiles]
+                      (TileCounts.ofMultiset initialTiles) := by rw [htiles]
             exact ⟨hstate, hvalid⟩
         | cons meld melds =>
             simp at hlength
@@ -123,32 +123,32 @@ lemma mem_mentsuHandMeldCostStatesDP_iff
           mentsuHandMeldCostStatesDP_cost hand initialTiles meldCount
             previous hprevious
         have hnextCost :=
-          mentsuHandCostStateAdd_cost hand previous (meldTiles meld)
+          mentsuHandCostStateAdd_cost hand previous (MentsuCandidate.tiles meld)
             hpreviousCost
         have hcost : state.2 =
-            countDeficit hand.counts (countsOfTiles state.1) := by
+            countDeficit hand.counts (TileCounts.ofMultiset state.1) := by
           calc
             state.2 =
-                (mentsuHandCostStateAdd hand previous (meldTiles meld)).2 :=
+                (mentsuHandCostStateAdd hand previous (MentsuCandidate.tiles meld)).2 :=
               (congrArg Prod.snd heq).symm
             _ = countDeficit hand.counts
-                (countsOfTiles
-                  (mentsuHandCostStateAdd hand previous (meldTiles meld)).1) :=
+                (TileCounts.ofMultiset
+                  (mentsuHandCostStateAdd hand previous (MentsuCandidate.tiles meld)).1) :=
               hnextCost
-            _ = countDeficit hand.counts (countsOfTiles state.1) := by
+            _ = countDeficit hand.counts (TileCounts.ofMultiset state.1) := by
               rw [congrArg Prod.fst heq]
         obtain ⟨melds, hlength, htiles, _, _⟩ :=
           (ih previous).mp hprevious
         have hfst := congrArg Prod.fst heq
         refine ⟨meld :: melds, by simp [hlength], ?_, hcost, hvalid⟩
         calc
-          meldsTiles (meld :: melds) + initialTiles =
-              meldTiles meld + (meldsTiles melds + initialTiles) := by
-                rw [show meldsTiles (meld :: melds) =
-                    meldTiles meld + meldsTiles melds by rfl]
+          MentsuCandidateList.tiles (meld :: melds) + initialTiles =
+              MentsuCandidate.tiles meld + (MentsuCandidateList.tiles melds + initialTiles) := by
+                rw [show MentsuCandidateList.tiles (meld :: melds) =
+                    MentsuCandidate.tiles meld + MentsuCandidateList.tiles melds by rfl]
                 ac_rfl
-          _ = meldTiles meld + previous.1 := by rw [htiles]
-          _ = (mentsuHandCostStateAdd hand previous (meldTiles meld)).1 := by
+          _ = MentsuCandidate.tiles meld + previous.1 := by rw [htiles]
+          _ = (mentsuHandCostStateAdd hand previous (MentsuCandidate.tiles meld)).1 := by
                 simp [mentsuHandCostStateAdd, Multiset.add_comm]
           _ = state.1 := hfst
       · rintro ⟨melds, hlength, htiles, hcost, hvalid⟩
@@ -158,51 +158,51 @@ lemma mem_mentsuHandMeldCostStatesDP_iff
         | cons meld melds =>
             simp only [List.length_cons] at hlength
             have htilesShape :
-                meldsTiles (meld :: melds) + initialTiles =
-                  (meldsTiles melds + initialTiles) + meldTiles meld := by
-              rw [show meldsTiles (meld :: melds) =
-                  meldTiles meld + meldsTiles melds by rfl]
+                MentsuCandidateList.tiles (meld :: melds) + initialTiles =
+                  (MentsuCandidateList.tiles melds + initialTiles) + MentsuCandidate.tiles meld := by
+              rw [show MentsuCandidateList.tiles (meld :: melds) =
+                  MentsuCandidate.tiles meld + MentsuCandidateList.tiles melds by rfl]
               ac_rfl
             have hpreviousValid :
                 validTileMultisetBool
-                  (meldsTiles melds + initialTiles) = true := by
+                  (MentsuCandidateList.tiles melds + initialTiles) = true := by
               apply validTileMultisetBool_add_left
-                (meldsTiles melds + initialTiles) (meldTiles meld)
+                (MentsuCandidateList.tiles melds + initialTiles) (MentsuCandidate.tiles meld)
               have hfinalValid := hvalid
               rw [← htiles] at hfinalValid
               rw [htilesShape] at hfinalValid
               exact hfinalValid
             let previous : Multiset Tile × Nat :=
-              (meldsTiles melds + initialTiles,
+              (MentsuCandidateList.tiles melds + initialTiles,
                 countDeficit hand.counts
-                  (countsOfTiles (meldsTiles melds + initialTiles)))
+                  (TileCounts.ofMultiset (MentsuCandidateList.tiles melds + initialTiles)))
             have hprevious :
                 previous ∈ mentsuHandMeldCostStatesDP hand initialTiles meldCount :=
               (ih previous).2
                 ⟨melds, by omega, rfl, rfl, hpreviousValid⟩
             have hnextCost :=
-              mentsuHandCostStateAdd_cost hand previous (meldTiles meld) rfl
+              mentsuHandCostStateAdd_cost hand previous (MentsuCandidate.tiles meld) rfl
             have hfirst :
-                (mentsuHandCostStateAdd hand previous (meldTiles meld)).1 =
+                (mentsuHandCostStateAdd hand previous (MentsuCandidate.tiles meld)).1 =
                   state.1 := by
               calc
-                (mentsuHandCostStateAdd hand previous (meldTiles meld)).1 =
-                    (meldsTiles melds + initialTiles) + meldTiles meld := by
+                (mentsuHandCostStateAdd hand previous (MentsuCandidate.tiles meld)).1 =
+                    (MentsuCandidateList.tiles melds + initialTiles) + MentsuCandidate.tiles meld := by
                       simp [mentsuHandCostStateAdd, previous]
-                _ = meldsTiles (meld :: melds) + initialTiles :=
+                _ = MentsuCandidateList.tiles (meld :: melds) + initialTiles :=
                   htilesShape.symm
                 _ = state.1 := htiles
             refine ⟨⟨meld, previous, hprevious, ?_⟩, hvalid⟩
             apply Prod.ext
             · exact hfirst
             · calc
-                (mentsuHandCostStateAdd hand previous (meldTiles meld)).2 =
+                (mentsuHandCostStateAdd hand previous (MentsuCandidate.tiles meld)).2 =
                     countDeficit hand.counts
-                      (countsOfTiles
-                        (mentsuHandCostStateAdd hand previous (meldTiles meld)).1) :=
+                      (TileCounts.ofMultiset
+                        (mentsuHandCostStateAdd hand previous (MentsuCandidate.tiles meld)).1) :=
                   hnextCost
                 _ = countDeficit hand.counts
-                    (countsOfTiles state.1) := by
+                    (TileCounts.ofMultiset state.1) := by
                       rw [hfirst]
                 _ = state.2 := hcost.symm
 
@@ -231,8 +231,8 @@ lemma recursiveMentsuHandTargetCostStatesDP_eq
         mentsuHandTarget pair melds = state.1 := by
       rw [mentsuHandTarget]
       calc
-        pairTiles pair + meldsTiles melds =
-            meldsTiles melds + pairTiles pair := by ac_rfl
+        pairTiles pair + MentsuCandidateList.tiles melds =
+            MentsuCandidateList.tiles melds + pairTiles pair := by ac_rfl
         _ = state.1 := htiles
     have htilesTarget :
         state.1 ∈ mentsuHandTargetTileStatesDP hand.fixedMelds :=

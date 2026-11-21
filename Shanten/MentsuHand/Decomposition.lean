@@ -398,12 +398,12 @@ lemma MentsuHandBlockDecomposition.blockChoices_ne_skip
 lemma mentsuHandChoiceTiles_map_meld
     (melds : List MentsuCandidate) :
     mentsuHandChoiceTiles (melds.map MentsuHandChoice.meld) =
-      meldsTiles melds := by
+      MentsuCandidateList.tiles melds := by
   induction melds with
   | nil =>
       rfl
   | cons meld melds ih =>
-      simp [mentsuHandChoiceTiles, choiceTiles, meldsTiles, ih]
+      simp [mentsuHandChoiceTiles, choiceTiles, MentsuCandidateList.tiles, ih]
 
 lemma mentsuHandChoiceTiles_map_taatsu
     (taatsus : List Taatsu) :
@@ -513,7 +513,7 @@ lemma MentsuHandBlockDecomposition.completedTarget_eq
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     decomposition.completedTarget =
       pairTiles decomposition.pair +
-        meldsTiles
+        MentsuCandidateList.tiles
           (decomposition.melds ++
             taatsuCompletionMelds decomposition.taatsus) := by
   unfold MentsuHandBlockDecomposition.completedTarget
@@ -525,7 +525,7 @@ lemma MentsuHandBlockDecomposition.completedTarget_eq
 lemma MentsuHandBlockDecomposition.validCounts_completedTarget
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     ValidCounts
-      (targetHand hand (countsOfTiles decomposition.completedTarget)) := by
+      (targetHand hand (TileCounts.ofMultiset decomposition.completedTarget)) := by
   intro tile
   exact decomposition.completionCopyLimit tile
 
@@ -540,7 +540,7 @@ lemma MentsuHandBlockDecomposition.completedMeldCount
 
 def completedTargetForState (state : MentsuHandSearchState) (pair : Tile) :
     Multiset Tile :=
-  pairTiles pair + meldsTiles (completedMeldsForState state)
+  pairTiles pair + MentsuCandidateList.tiles (completedMeldsForState state)
 
 def CompletionRespectsCopyLimit (state : MentsuHandSearchState) : Prop :=
   ∀ tile,

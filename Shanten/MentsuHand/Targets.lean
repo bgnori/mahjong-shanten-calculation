@@ -15,7 +15,7 @@ open MahjongDomain
 
 
 def mentsuHandTarget (pair : Tile) (melds : List MentsuCandidate) : Multiset Tile :=
-  pairTiles pair + meldsTiles melds
+  pairTiles pair + MentsuCandidateList.tiles melds
 
 def mentsuHandTargetWithTaatsu
     (pair : Tile) (melds : List MentsuCandidate) (taatsus : List Taatsu) : Multiset Tile :=
@@ -24,7 +24,7 @@ def mentsuHandTargetWithTaatsu
 lemma completedMeldsForState_tiles
     (state : MentsuHandSearchState) (pair : Tile)
     (hpair : state.pair = some pair) :
-    pairTiles pair + meldsTiles (completedMeldsForState state) =
+    pairTiles pair + MentsuCandidateList.tiles (completedMeldsForState state) =
       mentsuHandTargetWithTaatsu pair state.meldHistory.reverse
           state.taatsuHistory.reverse +
         taatsuCompletionTiles state.taatsuHistory.reverse := by

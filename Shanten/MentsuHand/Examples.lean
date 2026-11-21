@@ -71,7 +71,7 @@ private def reviewExampleTaatsu : Taatsu :=
   .sequence .man ⟨0, by omega⟩
 
 private def reviewExampleHand : Hand :=
-  { counts := countsOfTiles
+  { counts := TileCounts.ofMultiset
       (mentsuHandTargetWithTaatsu reviewExampleEast []
           (List.replicate 4 reviewExampleTaatsu) +
         Multiset.replicate 1 (.suited .pin ⟨8, by omega⟩) +
@@ -87,7 +87,7 @@ private def reviewExampleDecomposition :
     blocks := by simp [reviewExampleHand]
     targetWithinHand := by
       intro tile
-      simp [reviewExampleHand, countsOfTiles, mentsuHandTargetWithTaatsu,
+      simp [reviewExampleHand, TileCounts.ofMultiset, mentsuHandTargetWithTaatsu,
         mentsuHandTarget, Multiset.count_add] <;> omega
     completionCopyLimit := by
       intro tile
@@ -98,14 +98,14 @@ private def reviewExampleDecomposition :
             reviewExampleMan2, reviewExampleTaatsu,
             mentsuHandTargetWithTaatsu, mentsuHandTarget, taatsuHistoryTiles,
               taatsuTiles, taatsuCompletionTiles, taatsuCompletionTile,
-              pairTiles, Pair.tiles, meldsTiles] <;> omega
+              pairTiles, Pair.tiles, MentsuCandidateList.tiles] <;> omega
       | honor rank =>
         fin_cases rank <;>
         simp [reviewExampleHand, reviewExampleEast, reviewExampleMan1,
           reviewExampleMan2, reviewExampleTaatsu,
           mentsuHandTargetWithTaatsu, mentsuHandTarget, taatsuHistoryTiles,
           taatsuTiles, taatsuCompletionTiles, taatsuCompletionTile,
-          pairTiles, Pair.tiles, meldsTiles] <;> omega }
+          pairTiles, Pair.tiles, MentsuCandidateList.tiles] <;> omega }
 
 example :
     ∃ final,
@@ -155,7 +155,7 @@ example :
     let head := generalMentsuHandAddBlock isolatedMentsuHand initialGeneralMentsuHandState
       (pairTiles (.suited .man ⟨4, by omega⟩))
     let meld := generalMentsuHandAddBlock isolatedMentsuHand head
-      (meldTiles (.shuntsu ⟨.man, ⟨3, by omega⟩⟩))
+      (MentsuCandidate.tiles (.shuntsu ⟨.man, ⟨3, by omega⟩⟩))
     head.used.card = 0 ∧ head.missing = 2 ∧
       meld.used.card = 0 ∧ meld.missing = 5 := by
   decide
@@ -176,15 +176,15 @@ private def gappedMentsuHand : Hand :=
 
 example :
     let state := generalMentsuHandAddBlock gappedMentsuHand initialGeneralMentsuHandState
-      (meldTiles (.shuntsu ⟨.man, ⟨0, by omega⟩⟩))
+      (MentsuCandidate.tiles (.shuntsu ⟨.man, ⟨0, by omega⟩⟩))
     state.used.card = 2 ∧ state.missing = 1 := by
   decide
 
 example :
     let first := generalMentsuHandAddBlock gappedMentsuHand initialGeneralMentsuHandState
-      (meldTiles (.shuntsu ⟨.man, ⟨0, by omega⟩⟩))
+      (MentsuCandidate.tiles (.shuntsu ⟨.man, ⟨0, by omega⟩⟩))
     let second := generalMentsuHandAddBlock gappedMentsuHand first
-      (meldTiles (.shuntsu ⟨.man, ⟨0, by omega⟩⟩))
+      (MentsuCandidate.tiles (.shuntsu ⟨.man, ⟨0, by omega⟩⟩))
     second.used.card = 2 ∧ second.missing = 4 := by
   decide
 
@@ -192,7 +192,7 @@ example :
     let first := generalMentsuHandAddBlock missingHeadMentsuHand initialGeneralMentsuHandState
       (pairTiles (.honor ⟨0, by omega⟩))
     let second := generalMentsuHandAddBlock missingHeadMentsuHand first
-      (meldTiles (.koutsu (.honor ⟨0, by omega⟩)))
+      (MentsuCandidate.tiles (.koutsu (.honor ⟨0, by omega⟩)))
     validTileMultisetBool second.completed = false := by
   decide
 

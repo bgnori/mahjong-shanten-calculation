@@ -17,7 +17,7 @@ inductive FixedMeld
   deriving DecidableEq
 
 def FixedMeld.tiles : FixedMeld → Multiset Tile
-  | .meld value => meldTiles value
+  | .meld value => MentsuCandidate.tiles value
   | .kan tile => Kan.occupiedTiles tile
 
 def fixedTiles (fixed : List FixedMeld) : Multiset Tile :=

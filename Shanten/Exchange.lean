@@ -384,9 +384,6 @@ def targetHand (before : Hand) (target : TileCounts) : Hand :=
   { counts := target
     fixedMelds := before.fixedMelds }
 
-def countsOfTiles (tiles : Multiset Tile) : TileCounts :=
-  fun tile => tiles.count tile
-
 lemma countDeficit_draw
     (before : Hand) (target : TileCounts) (drawn : Tile)
     (hdrawn : target drawn > before.counts drawn) :
@@ -406,17 +403,17 @@ lemma countDeficit_draw
 
 lemma targetHand_hasTiles_countsOfTiles
     (before : Hand) (tiles : Multiset Tile) :
-    HasTiles (targetHand before (countsOfTiles tiles)) tiles := by
+    HasTiles (targetHand before (TileCounts.ofMultiset tiles)) tiles := by
   intro tile
   rfl
 
 lemma countsOfTiles_sum_eq_card (tiles : Multiset Tile) :
-    (∑ tile : Tile, countsOfTiles tiles tile) = tiles.card := by
+    (∑ tile : Tile, TileCounts.ofMultiset tiles tile) = tiles.card := by
   induction tiles using Multiset.induction_on with
   | empty =>
-      simp [countsOfTiles]
+      simp [TileCounts.ofMultiset]
   | @cons tile tiles ih =>
-      simp [countsOfTiles, ih, Finset.sum_add_distrib]
+      simp [TileCounts.ofMultiset, ih, Finset.sum_add_distrib]
 
 lemma reachesTargetExchange_targetHand_of_equal_sum
     (before : Hand) (target : TileCounts)

@@ -238,8 +238,11 @@ Input validation remains a separate prerequisite, and the underlying mentsu
 enumeration is not optimized. See the [Lean source structure](./docs/SHANTEN_LEAN_STRUCTURE.md).
 
 [Shanten/Input37.lean](./Shanten/Input37.lean) is the Lean-only input layer under
-`Shanten.Input37`. `Counts37` is `Fin 37 → Int`, preserving signed values and the
-contract's exact index layout. `Input` contains standing counts and a list of
+`Shanten.Input37`. Its standing and meld counts use Core's `Int37Counts`
+(`Fin 37 → Int`), preserving signed values and the contract's exact index layout.
+The layer uses Core's `Int37Index.tile`, `Int37Index.capacity`, and
+`aggregateInt37` directly rather than maintaining local aliases or wrappers.
+`Input` contains standing counts and a list of
 `MeldInput` records with a kind string and all physical tiles.
 The Lean model uses Core's tile kinds, counts, pair tiles, and mentsu candidates
 directly. Fixed kan occupancy remains separate from standing tile counts.
