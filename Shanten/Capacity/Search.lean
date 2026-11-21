@@ -3,6 +3,8 @@ import Shanten.MentsuHand.Search.BlockSearch
 
 namespace Shanten.Capacity
 
+open MahjongDomain
+
 /-- Reuse block consumption and costs, retaining only targets that fit the fixed context. -/
 def generalMentsuHandStates (fixed : List FixedMeld) (hand : Hand) :
     Finset GeneralMentsuHandState :=

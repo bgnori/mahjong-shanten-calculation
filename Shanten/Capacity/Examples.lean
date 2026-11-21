@@ -4,6 +4,8 @@ import Shanten.Capacity.Overall
 
 namespace Shanten.Capacity.Examples
 
+open MahjongDomain
+
 def east : Tile := .honor ⟨0, by omega⟩
 def south : Tile := .honor ⟨1, by omega⟩
 def white : Tile := .honor ⟨4, by omega⟩
@@ -49,7 +51,7 @@ private lemma not_complete (fixed : List FixedMeld) (hlength : fixed.length = 4)
   obtain ⟨_, pair, htiles⟩ :=
     (complete_mentsuHand_iff_of_four_fixed hlength).mp hcomplete
   have hcount := htiles pair
-  simp only [pairTiles, Multiset.count_replicate_self] at hcount
+  simp only [pairTiles, Pair.tiles, Multiset.count_replicate_self] at hcount
   change (if pair = east then 1 else 0) = 2 at hcount
   split at hcount <;> omega
 
@@ -58,7 +60,7 @@ private lemma one_step_pair_is_east
     pair = east := by
   by_contra hne
   have hpair := htiles pair
-  simp only [pairTiles, Multiset.count_replicate_self] at hpair
+  simp only [pairTiles, Pair.tiles, Multiset.count_replicate_self] at hpair
   have hbefore : standing.counts pair = 0 := by simp [standing, hne]
   rcases hstep.2 with ⟨drawn, _, hcounts⟩ |
     ⟨discarded, drawn, _, _, _, hcounts⟩
@@ -76,7 +78,7 @@ private lemma inputA_no_one_step :
   have hpair := one_step_pair_is_east hstep.toAbstract htiles
   subst pair
   have hcount := htiles east
-  simp only [pairTiles, Multiset.count_replicate_self] at hcount
+  simp only [pairTiles, Pair.tiles, Multiset.count_replicate_self] at hcount
   have hcapacity := hvalid.2.2 east
   have hfixed : (fixedTiles fixedA).count east = 3 := by decide
   omega

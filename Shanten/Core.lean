@@ -4,32 +4,14 @@ public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Data.Fintype.Sigma
 public import Mathlib.Data.Fintype.Sum
 public import Mathlib.Data.Multiset.Replicate
+public import MahjongDomain.Parts
 import Mathlib.Tactic.DeriveFintype
 
 @[expose] public section
 
 namespace Shanten
 
-inductive Suit
-  | man
-  | pin
-  | sou
-  deriving DecidableEq
-
-instance : Fintype Suit where
-  elems := {.man, .pin, .sou}
-  complete := by
-    intro suit
-    cases suit <;> simp
-
-/-- A normalized tile kind (the three red fives are merged into their fives). -/
-inductive Tile
-  | suited (suit : Suit) (rank : Fin 9)
-  | honor (rank : Fin 7)
-  deriving DecidableEq, Fintype
-
-/-- A standing hand represented by its count of each tile kind. -/
-abbrev TileCounts := Tile → Nat
+open MahjongDomain
 
 /-- The standing tiles and the number of fixed melds. -/
 structure Hand where
@@ -62,7 +44,7 @@ def HasTiles (hand : Hand) (tiles : Multiset Tile) : Prop :=
 
 /-- The tile multiset of one pair. -/
 def pairTiles (tile : Tile) : Multiset Tile :=
-  Multiset.replicate 2 tile
+  (Pair.mk tile).tiles
 
 /-- All 13 terminal and honor tile kinds. -/
 noncomputable def orphanKinds : Finset Tile :=

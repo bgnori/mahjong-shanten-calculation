@@ -9,6 +9,8 @@ Shape-independent count deficits, tile exchanges, and fixed-target reachability.
 
 namespace Shanten
 
+open MahjongDomain
+
 /-- The number of tiles still missing from a target count vector. -/
 def countDeficit (current target : TileCounts) : Nat :=
   ∑ tile : Tile, (target tile - current tile)

@@ -9,6 +9,8 @@ Completed targets and their relationship to search-state histories.
 
 namespace Shanten
 
+open MahjongDomain
+
 /-- A mentsu-hand-form target before the fixed melds are added. -/
 
 

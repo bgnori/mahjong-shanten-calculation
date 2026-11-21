@@ -2,6 +2,8 @@ import Shanten.Input37.Correctness
 
 namespace Shanten.Input37.Examples
 
+open MahjongDomain
+
 set_option maxRecDepth 4096
 
 private def counts (entries : List (Fin 37 × Int)) : Counts37 :=

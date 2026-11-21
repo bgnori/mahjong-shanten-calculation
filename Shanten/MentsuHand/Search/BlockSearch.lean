@@ -9,6 +9,8 @@ Completed-block search with hand-tile consumption and missing-tile costs.
 
 namespace Shanten
 
+open MahjongDomain
+
 def mentsuHandSupply (hand : Hand) : Multiset Tile :=
   ∑ tile : Tile, Multiset.replicate (hand.counts tile) tile
 

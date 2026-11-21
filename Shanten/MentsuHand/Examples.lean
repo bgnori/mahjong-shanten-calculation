@@ -9,6 +9,8 @@ Regression proofs for repeated blocks, missing heads, isolated tiles, and copy l
 
 namespace Shanten
 
+open MahjongDomain
+
 private def reviewExampleEast : Tile :=
   .honor ⟨0, by omega⟩
 
@@ -96,14 +98,14 @@ private def reviewExampleDecomposition :
             reviewExampleMan2, reviewExampleTaatsu,
             mentsuHandTargetWithTaatsu, mentsuHandTarget, taatsuHistoryTiles,
               taatsuTiles, taatsuCompletionTiles, taatsuCompletionTile,
-              pairTiles, meldsTiles] <;> omega
+              pairTiles, Pair.tiles, meldsTiles] <;> omega
       | honor rank =>
         fin_cases rank <;>
         simp [reviewExampleHand, reviewExampleEast, reviewExampleMan1,
           reviewExampleMan2, reviewExampleTaatsu,
           mentsuHandTargetWithTaatsu, mentsuHandTarget, taatsuHistoryTiles,
           taatsuTiles, taatsuCompletionTiles, taatsuCompletionTile,
-          pairTiles, meldsTiles] <;> omega }
+          pairTiles, Pair.tiles, meldsTiles] <;> omega }
 
 example :
     ∃ final,
@@ -137,7 +139,7 @@ example : ¬ Nonempty (MentsuHandBlockDecomposition isolatedMentsuHand) := by
     change (if decomposition.pair ∈ kokushiKinds then 1 else 0) ≤ 1
     split <;> omega
   simp only [mentsuHandTargetWithTaatsu, mentsuHandTarget, Multiset.count_add,
-    pairTiles, Multiset.count_replicate_self] at hcount
+    pairTiles, Pair.tiles, Multiset.count_replicate_self] at hcount
   omega
 
 example :

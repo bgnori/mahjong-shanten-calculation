@@ -10,6 +10,8 @@ suited tiles; 30..36 are honors. Normalization is linear over integers.
 
 namespace Shanten.Input37
 
+open MahjongDomain
+
 abbrev Counts37 := MahjongDomain.Int37Counts
 
 structure MeldInput where

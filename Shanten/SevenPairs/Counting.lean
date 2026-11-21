@@ -9,6 +9,8 @@ Filtered cardinalities, singleton and surplus witnesses, and thirteen-tile bound
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma card_filter_eq_add_one_of
     {α : Type} [Fintype α] [DecidableEq α]
     (p q : α → Prop) [DecidablePred p] [DecidablePred q]

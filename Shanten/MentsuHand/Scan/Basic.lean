@@ -8,6 +8,8 @@ Copy-limited transitions, tile batches, grouped scans, and reachability.
 
 namespace Shanten
 
+open MahjongDomain
+
 def ValidMentsuHandChoiceWithCopyLimit
     (hand : Hand) (state : MentsuHandSearchState) (choice : MentsuHandChoice) : Prop :=
   ∃ hvalid : ValidMentsuHandChoice hand state choice,

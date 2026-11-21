@@ -8,6 +8,8 @@ Constructing legal copy-limited paths from arbitrary decomposition permutations.
 
 namespace Shanten
 
+open MahjongDomain
+
 def mentsuHandChoicePairCount : List MentsuHandChoice → Nat
   | [] => 0
   | .pair _ :: choices => mentsuHandChoicePairCount choices + 1

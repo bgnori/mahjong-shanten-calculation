@@ -2,6 +2,8 @@ import Shanten.Input37.DomainAdapter
 
 namespace Shanten.Input37
 
+open MahjongDomain
+
 inductive ValidationError
   | negativeStanding (tile : Fin 37)
   | negativeMeld (meldIndex : Nat) (tile : Fin 37)

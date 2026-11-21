@@ -3,6 +3,8 @@ import Shanten.Capacity.Overall
 
 namespace Shanten.Input37
 
+open MahjongDomain
+
 lemma normalizedHand_counts_cast (h : Nonnegative input.standing) (tile : Tile) :
     ((normalizedHand input h).counts tile : Int) = normalizeCounts input.standing tile :=
   by

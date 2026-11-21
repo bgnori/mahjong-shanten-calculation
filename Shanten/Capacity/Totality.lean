@@ -2,6 +2,8 @@ import Shanten.Capacity.Search
 
 namespace Shanten.Capacity
 
+open MahjongDomain
+
 private def honorKind : FixedMeld → Option (Fin 7)
   | .meld (.triplet (.honor rank)) | .kan (.honor rank) => some rank
   | _ => none
@@ -96,7 +98,7 @@ lemma exists_complete_target (hvalid : ValidHand fixed hand) :
     have hcount : (meldsTiles melds).count tile =
         if tile ∈ kinds then 3 else 0 := triplet_finset_counts kinds tile
     simp only [mentsuHandTarget, Multiset.count_add, hcount,
-      pairTiles, Multiset.count_replicate]
+      pairTiles, Pair.tiles, Multiset.count_replicate]
     by_cases hmem : tile ∈ chosen
     · obtain ⟨rank, hrank, rfl⟩ := Finset.mem_image.mp (hsubset hmem)
       have hfree := (Finset.mem_sdiff.mp hrank).2

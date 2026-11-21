@@ -9,6 +9,8 @@ Completion targets and conditional soundness of the copy-limited scan.
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma completedTargetForState_eq_used_add_completion
     (state : MentsuHandSearchState) (pair : Tile)
     (hpair : state.pair = some pair) :

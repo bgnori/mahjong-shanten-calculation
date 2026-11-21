@@ -2,6 +2,8 @@ import Shanten.Capacity.Specification
 
 namespace Shanten.Capacity
 
+open MahjongDomain
+
 lemma handStep_of_targetExchange
     (hstep : Shanten.TargetExchange target before after)
     (hvalid : ValidHand fixed before)

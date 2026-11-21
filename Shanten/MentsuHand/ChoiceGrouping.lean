@@ -8,6 +8,8 @@ Multiplicity-preserving grouping of choice lists by representative tile.
 
 namespace Shanten
 
+open MahjongDomain
+
 def mentsuHandChoiceRepresentative : MentsuHandChoice → Option Tile
   | .skip => none
   | .pair tile => some tile
@@ -28,13 +30,13 @@ lemma mentsuHandChoiceRepresentative_mem
   | pair pairTile =>
       simp [mentsuHandChoiceRepresentative] at hrep
       subst tile
-      simp [choiceTiles, pairTiles]
+      simp [choiceTiles, pairTiles, Pair.tiles]
   | taatsu taatsu =>
       cases taatsu with
       | pair pairTile =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile
-          simp [choiceTiles, taatsuTiles, pairTiles]
+          simp [choiceTiles, taatsuTiles, pairTiles, Pair.tiles]
       | sequence suit start =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile

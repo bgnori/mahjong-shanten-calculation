@@ -9,6 +9,8 @@ Choosing seven protected kinds and making pairs while maintaining their invarian
 
 namespace Shanten
 
+open MahjongDomain
+
 /-- Every protected pair-making exchange from valid counts is an ordinary hand step. -/
 lemma ProtectedPairMakingExchange.handStep
         (h : ProtectedPairMakingExchange protectedTiles before after)

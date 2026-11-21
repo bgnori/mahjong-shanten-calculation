@@ -8,6 +8,8 @@ Tile deficits, exchanges, and realization of a fixed completion target.
 
 namespace Shanten
 
+open MahjongDomain
+
 /-- The number of copies of each tile still required by a target. -/
 def targetDeficit (hand : Hand) (target : Multiset Tile) : Nat :=
   ∑ tile : Tile, (target.count tile - hand.counts tile)

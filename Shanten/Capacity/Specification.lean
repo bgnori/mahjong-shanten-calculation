@@ -245,7 +245,7 @@ lemma complete_mentsuHand_iff_of_four_fixed (hlength : fixed.length = 4) :
     have hcount :
         (pairTiles (Shanten.DomainAdapter.ofDomainPair pair)).count tile =
           hand.counts tile := by
-      simpa [Shanten.DomainAdapter.toDomainCounts,
+      simpa [Shanten.DomainAdapter.toDomainCounts, Shanten.DomainAdapter.toDomainTile,
         Shanten.DomainAdapter.ofDomainTile_toDomainTile, meldsTiles,
         MahjongDomain.MentsuCandidateList.counts, MahjongDomain.MentsuCandidateList.tiles] using
           hconvert.trans hshared

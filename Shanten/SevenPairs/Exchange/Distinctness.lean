@@ -9,6 +9,8 @@ One-step exchanges that add a tile kind while preserving every existing pair.
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma DistinctnessExchange.isThirteenTileHand
     (h13 : IsThirteenTileHand before)
     (h : DistinctnessExchange before after) :

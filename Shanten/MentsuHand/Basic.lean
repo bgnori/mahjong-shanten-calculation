@@ -8,6 +8,8 @@ Taatsu, search states, choices, and local block completion.
 
 namespace Shanten
 
+open MahjongDomain
+
 inductive Taatsu
   | pair (tile : Tile)
   | sequence (suit : Suit) (start : Fin 8)
@@ -61,7 +63,7 @@ lemma taatsuTiles_add_completionTile
   cases taatsu with
   | pair tile =>
       simp [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,
-        pairTiles, meldTiles, Multiset.replicate_succ]
+        pairTiles, Pair.tiles, meldTiles, Multiset.replicate_succ]
   | sequence suit start =>
       by_cases hstart : start.val ≤ 6
       · simp only [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,

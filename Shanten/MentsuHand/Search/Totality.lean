@@ -9,6 +9,8 @@ Existence, uniqueness, and specification correctness for all valid 13-tile-equiv
 
 namespace Shanten
 
+open MahjongDomain
+
 private def canonicalMentsuHandPair : Tile :=
   .honor ⟨0, by omega⟩
 
@@ -53,11 +55,11 @@ private lemma canonicalMentsuHandTarget_validCounts
     | suited suit rank =>
         cases suit <;> fin_cases rank <;>
           simp [canonicalMentsuHandPair, canonicalMentsuHandMelds,
-            mentsuHandTarget, pairTiles, meldsTiles, meldTiles]
+            mentsuHandTarget, pairTiles, Pair.tiles, meldsTiles, meldTiles]
     | honor rank =>
         fin_cases rank <;>
           simp [canonicalMentsuHandPair, canonicalMentsuHandMelds,
-            mentsuHandTarget, pairTiles, meldsTiles, meldTiles]
+            mentsuHandTarget, pairTiles, Pair.tiles, meldsTiles, meldTiles]
 
 set_option maxHeartbeats 1000000 in
 lemma exists_mentsuHandShanten_as_min_validTargetDistance

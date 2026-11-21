@@ -3,6 +3,8 @@ import Mathlib.Tactic.Convert
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma reaches_sevenPairs_completion
     (hand : Hand) (h13 : IsThirteenTileHand hand) :
     ∃ distance : Nat, distance ≤ 7 ∧

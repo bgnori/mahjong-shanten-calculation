@@ -8,6 +8,8 @@ Characterizing mathematical shanten by minimal valid target distance.
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance
     (distance : Nat)
     (before : Hand) (pair : Tile) (melds : List Meld)

@@ -8,6 +8,8 @@ Realizing a target distance by legal draws and exchanges.
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma mentsuHandTargetDistance_eq_zero_iff
     (hand : Hand) (pair : Tile) (melds : List Meld)
     (hsum :
@@ -191,7 +193,7 @@ lemma reachesCompletion_mentsuHand_of_blockDecomposition
                 rfl
             | cons taatsu taatsus ih =>
                 cases taatsu <;>
-                  simp [taatsuHistoryTiles, taatsuTiles, pairTiles, ih,
+                  simp [taatsuHistoryTiles, taatsuTiles, pairTiles, Pair.tiles, ih,
                     Multiset.card_add] <;> omega
           unfold mentsuHandTargetWithTaatsu mentsuHandTarget
           rw [Multiset.card_add, Multiset.card_add, pairTiles_card,

@@ -10,6 +10,8 @@ Finite exchange chains, their invariants, and constructive paths to seven kinds 
 
 namespace Shanten
 
+open MahjongDomain
+
 /-- Repeated pairing exchanges, with the number of exchanges explicit. -/
 inductive ReachesPairing : Hand → Hand → Nat → Prop
   | done {hand} : ReachesPairing hand hand 0

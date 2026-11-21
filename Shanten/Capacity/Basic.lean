@@ -9,6 +9,8 @@ but validity includes every tile occupied by the fixed melds.
 
 namespace Shanten.Capacity
 
+open MahjongDomain
+
 inductive FixedMeld
   | meld (value : Meld)
   | kan (tile : Tile)

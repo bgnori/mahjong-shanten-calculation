@@ -9,6 +9,8 @@ Choice transitions, history invariants, reachability, and the 34-tile order.
 
 namespace Shanten
 
+open MahjongDomain
+
 def choiceUsesMeld : MentsuHandChoice → Bool
   | .meld _ => true
   | _ => false
@@ -237,7 +239,7 @@ lemma taatsuCompletionTiles_of_perm
 
 lemma pairTiles_card (tile : Tile) :
     (pairTiles tile).card = 2 := by
-  simp [pairTiles]
+  exact Pair.tiles_card ⟨tile⟩
 
 lemma meldTiles_card (meld : Meld) : (meldTiles meld).card = 3 := by
   cases meld <;> simp [meldTiles]

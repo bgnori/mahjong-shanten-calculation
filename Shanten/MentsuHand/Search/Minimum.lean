@@ -8,6 +8,8 @@ Minimum target distances and lower bounds on completion paths.
 
 namespace Shanten
 
+open MahjongDomain
+
 def validMentsuHandTargetDistances (hand : Hand) :
     Finset Nat :=
   (recursiveMentsuHandTargetCostStatesDP hand).image Prod.snd

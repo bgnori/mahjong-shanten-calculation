@@ -8,6 +8,8 @@ Tenpai and completion count vectors, tenpai conditions, and target counts.
 
 namespace Shanten
 
+open MahjongDomain
+
 def sevenPairsTenpaiTargetCounts (pairs : Finset Tile) (single : Tile) : TileCounts :=
   fun tile => if tile ∈ pairs then 2 else if tile = single then 1 else 0
 

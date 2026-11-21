@@ -9,6 +9,8 @@ One-step exchanges that turn a singleton into a pair without removing tile kinds
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma PairMakingExchange.isThirteenTileHand
     (h13 : IsThirteenTileHand before)
     (h : PairMakingExchange before after) :

@@ -11,6 +11,8 @@ and fourteen-tile concealed hands. No enumeration of seven-kind subsets is neede
 
 namespace Shanten
 
+open MahjongDomain
+
 private theorem isShapeShanten_of_minimum_deficit
     (hvalid : ValidCounts hand)
     (hsize : tileCount hand = 13 ∨ tileCount hand = 14)

@@ -8,6 +8,8 @@ Incremental target-cost dynamic programming and its state characterization.
 
 namespace Shanten
 
+open MahjongDomain
+
 /-- Extend a target state and add only the newly incurred deficit. -/
 def mentsuHandCostStateAdd (hand : Hand)
     (state : Multiset Tile × Nat) (extra : Multiset Tile) :

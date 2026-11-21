@@ -8,6 +8,8 @@ Pairing candidates and the distinctness, pair-making, and protected exchange rel
 
 namespace Shanten
 
+open MahjongDomain
+
 /--
 A tile kind that is not yet a pair.  A zero-count tile is also a candidate:
 the first exchange creates its singleton, and a later exchange can complete

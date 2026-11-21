@@ -8,6 +8,8 @@ Finite completion configurations, tile-state enumeration, and validity checks.
 
 namespace Shanten
 
+open MahjongDomain
+
 /-- A target is a valid mentsu-hand-form completion for the standing tiles. -/
 
 

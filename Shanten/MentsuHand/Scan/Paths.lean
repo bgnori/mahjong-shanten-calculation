@@ -8,6 +8,8 @@ Forward choice paths, state/history invariants, and batch conversions.
 
 namespace Shanten
 
+open MahjongDomain
+
 def MentsuHandChoiceStateMatches
     (state : MentsuHandSearchState)
     (choices : List MentsuHandChoice) : Prop :=

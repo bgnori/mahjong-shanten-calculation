@@ -4,6 +4,8 @@ import Mathlib.Data.Nat.Find
 
 namespace Shanten
 
+open MahjongDomain
+
 inductive Shape
   | mentsuHand
   | sevenPairs

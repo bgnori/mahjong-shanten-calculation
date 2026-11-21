@@ -8,6 +8,8 @@ Constructing the complete 34-tile batch scan from a given decomposition.
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma MentsuHandBlockDecomposition.blockChoices_representatives_in_tileOrder
       {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
       ∀ choice, choice ∈ decomposition.blockChoices →

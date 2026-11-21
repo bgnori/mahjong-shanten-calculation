@@ -11,6 +11,8 @@ shape-specific shanten number is thirteen.
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma orphanKinds_eq_kokushiKinds : orphanKinds = kokushiKinds := by
   ext tile
   cases tile with

@@ -2,6 +2,8 @@ import Shanten.Capacity.Fourteen
 
 namespace Shanten.Capacity
 
+open MahjongDomain
+
 def discardHand (hand : Hand) (discarded : Tile) : Hand :=
   { counts := fun tile => hand.counts tile - (if tile = discarded then 1 else 0)
     fixedMelds := hand.fixedMelds }

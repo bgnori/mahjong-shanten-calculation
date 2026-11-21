@@ -8,6 +8,8 @@ Decomposition of tenpai hands and completion by the final draw.
 
 namespace Shanten
 
+open MahjongDomain
+
 lemma sevenPairsTenpai_decomposition
     (hand : Hand) (h13 : IsThirteenTileHand hand)
     (htenpai : IsSevenPairsTenpai hand) :
@@ -145,8 +147,8 @@ lemma multiset_count_fold_pairTiles_list
           (pairTiles pair).count tile = if tile = pair then 2 else 0 := by
         by_cases htile : tile = pair
         · subst tile
-          simp [pairTiles, Multiset.count_cons]
-        · simp [pairTiles, htile, Multiset.count_cons]
+          simp [pairTiles, Pair.tiles, Multiset.count_cons]
+        · simp [pairTiles, Pair.tiles, htile, Multiset.count_cons]
       rw [hcount, ih hnodup']
       by_cases htile : tile = pair
       · subst tile

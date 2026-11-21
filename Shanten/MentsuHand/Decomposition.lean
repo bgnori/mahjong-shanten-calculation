@@ -9,6 +9,8 @@ Four-block decompositions, choice multiplicities, and completion copy limits.
 
 namespace Shanten
 
+open MahjongDomain
+
 /-- A target has the required number of concealed melds for a hand. -/
 def HasMentsuHandMeldCount (hand : Hand) (melds : List Meld) : Prop :=
   melds.length + hand.fixedMelds = 4
