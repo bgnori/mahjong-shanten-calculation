@@ -3,8 +3,6 @@ import Shanten.ThirteenOrphans
 import Shanten.Bounds
 import Shanten.Capacity
 import Shanten.Input37
-import Shanten.Input37.DomainAdapter
-import Shanten.DomainAdapter
 import Mathlib.Util.AssertNoSorry
 
 /-!
@@ -103,16 +101,9 @@ assert_no_sorry Input37.Examples.negative_count_rejections
 assert_no_sorry Input37.Examples.malformed_meld_rejections
 assert_no_sorry Input37.Examples.hand_size_rejections
 assert_no_sorry Input37.Examples.red_identity_invariant
-assert_no_sorry DomainAdapter.normalizeTile_matches_domain
-assert_no_sorry DomainAdapter.capacity_matches_domain
-assert_no_sorry DomainAdapter.normalIndex_matches_domain
-assert_no_sorry DomainAdapter.normalizeCounts_matches_domain
-assert_no_sorry DomainAdapter.toDomainMeld_ofDomainMeld
-assert_no_sorry DomainAdapter.ofDomainMeld_toDomainMeld
-assert_no_sorry DomainAdapter.toDomain_pairTiles_map
-assert_no_sorry DomainAdapter.toDomain_meldTiles_map
-assert_no_sorry DomainAdapter.toDomain_pairMeldCounts
-assert_no_sorry DomainAdapter.standardCompletion_iff_shantenParts
+assert_no_sorry MahjongDomain.Pair.counts_eq_pair_add_remaining
+assert_no_sorry meldsTiles_eq_candidates
+assert_no_sorry standardCompletion_iff_shantenParts
 assert_no_sorry mentsuComplete_iff_standardCompletion
 assert_no_sorry Capacity.Complete.mentsuHand_iff_standardCompletion
 assert_no_sorry Capacity.complete_mentsuHand_iff_of_four_fixed

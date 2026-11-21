@@ -6,38 +6,37 @@ namespace SharedDomainW6
 
 open Shanten Shanten.Capacity
 
-def IsFixedContextWait (fixed : List FixedMeld) (hand : Hand) (tile : Shanten.Tile) : Prop :=
+def IsFixedContextWait (fixed : List FixedMeld) (hand : Hand) (tile : MahjongDomain.Tile) : Prop :=
   hand.counts tile < remainingCapacity fixed tile ∧
     Complete fixed .mentsuHand (drawHand hand tile)
 
-def shantenTileOfClassification (tile : _root_.Tile) : Shanten.Tile :=
-  Shanten.DomainAdapter.ofDomainTile (Mahjong.DomainAdapter.toDomainTile tile)
+def shantenTileOfClassification (tile : _root_.Tile) : MahjongDomain.Tile :=
+  Mahjong.DomainAdapter.toDomainTile tile
 
-def classificationTileOfShanten (tile : Shanten.Tile) : _root_.Tile :=
-  Mahjong.DomainAdapter.ofDomainTile (Shanten.DomainAdapter.toDomainTile tile)
+def classificationTileOfShanten (tile : MahjongDomain.Tile) : _root_.Tile :=
+  Mahjong.DomainAdapter.ofDomainTile tile
 
 def CountsMatch (hand : Shanten.Hand) (tiles : List _root_.Tile) : Prop :=
-  ∀ tile : Shanten.Tile, tiles.count (classificationTileOfShanten tile) = hand.counts tile
+  ∀ tile : MahjongDomain.Tile, tiles.count (classificationTileOfShanten tile) = hand.counts tile
 
 theorem shantenTileOfClassification_roundTrip (tile : _root_.Tile) :
     classificationTileOfShanten (shantenTileOfClassification tile) = tile := by
   simp [shantenTileOfClassification, classificationTileOfShanten,
-    Shanten.DomainAdapter.toDomainTile_ofDomainTile,
     Mahjong.DomainAdapter.ofDomainTile_toDomainTile]
 
-theorem classificationTileOfShanten_roundTrip (tile : Shanten.Tile) :
+theorem classificationTileOfShanten_roundTrip (tile : MahjongDomain.Tile) :
     shantenTileOfClassification (classificationTileOfShanten tile) = tile := by
   simp [shantenTileOfClassification, classificationTileOfShanten,
     Mahjong.DomainAdapter.toDomainTile_ofDomainTile]
 
-def classificationTileEquiv : Shanten.Tile ≃ _root_.Tile where
+def classificationTileEquiv : MahjongDomain.Tile ≃ _root_.Tile where
   toFun := classificationTileOfShanten
   invFun := shantenTileOfClassification
   left_inv := classificationTileOfShanten_roundTrip
   right_inv := shantenTileOfClassification_roundTrip
 
 theorem classificationTile_eq_iff
-    (candidate : _root_.Tile) (tile : Shanten.Tile) :
+    (candidate : _root_.Tile) (tile : MahjongDomain.Tile) :
     candidate = classificationTileOfShanten tile ↔
       shantenTileOfClassification candidate = tile := by
   constructor
@@ -64,14 +63,11 @@ theorem list_length_eq_sum_count {α : Type} [Fintype α] [DecidableEq α]
 
 theorem CountsMatch.toDomain
     (hcounts : CountsMatch hand tiles) :
-    Mahjong.DomainAdapter.tileListCounts tiles =
-      Shanten.DomainAdapter.toDomainCounts hand.counts := by
+    Mahjong.DomainAdapter.tileListCounts tiles = hand.counts := by
   funext tile
   rw [Mahjong.DomainAdapter.tileListCounts,
     Mahjong.DomainAdapter.toDomainTileList_count]
-  simpa [Shanten.DomainAdapter.toDomainCounts, classificationTileOfShanten,
-    Shanten.DomainAdapter.toDomainTile_ofDomainTile] using
-    hcounts (Shanten.DomainAdapter.ofDomainTile tile)
+  simpa [classificationTileOfShanten] using hcounts tile
 
 theorem CountsMatch.length_eq
     (hcounts : CountsMatch hand tiles) :
@@ -79,15 +75,15 @@ theorem CountsMatch.length_eq
   calc
     tiles.length = ∑ tile : _root_.Tile, tiles.count tile :=
       list_length_eq_sum_count tiles
-    _ = ∑ tile : Shanten.Tile, tiles.count (classificationTileOfShanten tile) :=
+    _ = ∑ tile : MahjongDomain.Tile, tiles.count (classificationTileOfShanten tile) :=
       Fintype.sum_equiv classificationTileEquiv.symm
         (fun tile : _root_.Tile => tiles.count tile)
-        (fun tile : Shanten.Tile => tiles.count (classificationTileOfShanten tile))
+        (fun tile : MahjongDomain.Tile => tiles.count (classificationTileOfShanten tile))
         (fun tile => by
           change tiles.count tile =
             tiles.count (classificationTileOfShanten (shantenTileOfClassification tile))
           rw [shantenTileOfClassification_roundTrip])
-    _ = ∑ tile : Shanten.Tile, hand.counts tile := by
+    _ = ∑ tile : MahjongDomain.Tile, hand.counts tile := by
       apply Finset.sum_congr rfl
       intro tile _
       exact hcounts tile
@@ -142,7 +138,7 @@ theorem standardCompletion_toStandardAgari {tiles : List _root_.Tile}
       (Mahjong.DomainAdapter.toDomainTile tile)
     rw [← hdecomposition, Mahjong.DomainAdapter.toDomainDecomposition,
       Mahjong.DomainAdapter.toDomainPair_count,
-      Mahjong.DomainAdapter.toDomainMelds_count,
+      Mahjong.DomainAdapter.toDomainMentsuCandidates_count,
       Mahjong.DomainAdapter.tileListCounts,
       Mahjong.DomainAdapter.toDomainTileList_count,
       Mahjong.DomainAdapter.ofDomainTile_toDomainTile] at hcount
@@ -207,7 +203,7 @@ theorem standardAgari_toDomainCompletion_fixed
         (Mahjong.DomainAdapter.tileListCounts (candidate :: tiles)) := by
     refine ⟨Mahjong.DomainAdapter.toDomainDecomposition pair melds, ?_, ?_⟩
     · simp [Mahjong.DomainAdapter.toDomainDecomposition,
-        Mahjong.DomainAdapter.toDomainMelds]
+        Mahjong.DomainAdapter.toDomainMentsuCandidates]
     · rw [MahjongDomain.StandardDecomposition.counts_eq_parts]
       simp only [Mahjong.DomainAdapter.toDomainDecomposition]
       funext tile
@@ -225,7 +221,7 @@ theorem standardAgari_toDomainCompletion_fixed
         simpa only [localParts] using tilesPerm.map Mahjong.DomainAdapter.toDomainTile
       have countsPermuted := domainPermutation.count tile
       rw [Mahjong.DomainAdapter.toDomainPair_count,
-        Mahjong.DomainAdapter.toDomainMelds_count,
+        Mahjong.DomainAdapter.toDomainMentsuCandidates_count,
         ← Mahjong.DomainAdapter.toDomainTileList_count pair.tiles tile,
         ← Mahjong.DomainAdapter.toDomainTileList_count
           (melds.flatMap MentsuCandidate.tiles) tile]
@@ -345,7 +341,7 @@ theorem handStepTileCount
         (fun tile => after.counts tile + (if tile = discarded then 1 else 0)) =
         (fun tile => before.counts tile + (if tile = drawn then 1 else 0)) :=
       funext hcounts
-    have hsum := congrArg (fun counts : Shanten.Tile → Nat => ∑ tile, counts tile) hcountsEq
+    have hsum := congrArg (fun counts : MahjongDomain.Tile → Nat => ∑ tile, counts tile) hcountsEq
     simp [Finset.sum_add_distrib] at hsum
     exact hsum
 
@@ -393,7 +389,7 @@ theorem isShapeShanten_zero_iff_exists_fixedContextWait
             (fun tile => hand.counts tile + (if tile = drawn then 1 else 0)) :=
           funext hcounts
         have hsum := congrArg
-          (fun counts : Shanten.Tile → Nat => ∑ tile, counts tile) hcountsEq
+          (fun counts : MahjongDomain.Tile → Nat => ∑ tile, counts tile) hcountsEq
         simp [Finset.sum_add_distrib] at hsum
         exact hsum
       omega
@@ -434,21 +430,21 @@ theorem isShapeShanten_zero_iff_exists_classificationWait
     refine ⟨shantenTileOfClassification candidate, ?_⟩
     exact (fixedContextWait_iff_classificationWait h13 hcounts candidate).mpr hwait
 
-def man1 : Shanten.Tile := .suited .man ⟨0, by omega⟩
-def pin1 : Shanten.Tile := .suited .pin ⟨0, by omega⟩
-def sou1 : Shanten.Tile := .suited .sou ⟨0, by omega⟩
-def east : Shanten.Tile := .honor ⟨0, by omega⟩
-def south : Shanten.Tile := .honor ⟨1, by omega⟩
+def man1 : MahjongDomain.Tile := .suited .man ⟨0, by omega⟩
+def pin1 : MahjongDomain.Tile := .suited .pin ⟨0, by omega⟩
+def sou1 : MahjongDomain.Tile := .suited .sou ⟨0, by omega⟩
+def east : MahjongDomain.Tile := .honor ⟨0, by omega⟩
+def south : MahjongDomain.Tile := .honor ⟨1, by omega⟩
 
 def fixedSequences : List FixedMeld :=
-  [ .meld (.sequence .pin ⟨0, by omega⟩)
-  , .meld (.sequence .sou ⟨0, by omega⟩) ]
+  [ .meld (.shuntsu ⟨.pin, ⟨0, by omega⟩⟩)
+  , .meld (.shuntsu ⟨.sou, ⟨0, by omega⟩⟩) ]
 
 def fixedA : List FixedMeld :=
-  .meld (.triplet east) :: fixedSequences
+  .meld (.koutsu east) :: fixedSequences
 
 def fixedB : List FixedMeld :=
-  .meld (.triplet south) :: fixedSequences
+  .meld (.koutsu south) :: fixedSequences
 
 def standingAB : Hand :=
   { counts := fun tile =>

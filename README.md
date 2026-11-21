@@ -241,6 +241,8 @@ enumeration is not optimized. See the [Lean source structure](./docs/SHANTEN_LEA
 `Shanten.Input37`. `Counts37` is `Fin 37 → Int`, preserving signed values and the
 contract's exact index layout. `Input` contains standing counts and a list of
 `MeldInput` records with a kind string and all physical tiles.
+The Lean model uses Core's tile kinds, counts, pair tiles, and mentsu candidates
+directly. Fixed kan occupancy remains separate from standing tile counts.
 `validateAndNormalize` returns `Except ValidationError NormalizedInput`.
 It rejects negative counts in each source field, combined physical-copy
 capacity violations, more than four melds, inconsistent standing size, and

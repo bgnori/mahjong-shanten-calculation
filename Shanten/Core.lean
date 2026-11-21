@@ -26,6 +26,13 @@ def meldTiles (meld : MentsuCandidate) : Multiset Tile :=
 def meldsTiles (melds : List MentsuCandidate) : Multiset Tile :=
   melds.foldr (fun meld rest => meldTiles meld + rest) 0
 
+theorem meldsTiles_eq_candidates (melds : List MentsuCandidate) :
+    meldsTiles melds = MentsuCandidateList.tiles melds := by
+  induction melds with
+  | nil => rfl
+  | cons meld rest ih =>
+      simp [meldsTiles, MentsuCandidateList.tiles, meldTiles, ← ih]
+
 /-- A standing hand has exactly the multiplicities of the given tile multiset. -/
 def HasTiles (hand : Hand) (tiles : Multiset Tile) : Prop :=
   ∀ tile, hand.counts tile = tiles.count tile

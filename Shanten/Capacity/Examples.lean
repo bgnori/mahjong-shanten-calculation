@@ -224,6 +224,16 @@ def sevenPairsQuads : Hand :=
       | .suited _ _ => 0
     fixedMelds := 0 }
 
+example :
+    pairCount sevenPairsQuads = 3 ∧
+      Pair.remainingCounts sevenPairsQuads.counts ⟨east⟩ east = 2 ∧
+      remainingCapacity fixedKan east = 0 := by
+  decide
+
+example :
+    Pair.remainingCounts (fun tile => if tile = east then 3 else 0) ⟨east⟩ east = 1 := by
+  decide
+
 theorem sevenPairsFormula_search :
     IsThirteenTileEquivalentHand [] sevenPairsReady ∧
       sevenPairsSearch sevenPairsReady = some 0 ∧

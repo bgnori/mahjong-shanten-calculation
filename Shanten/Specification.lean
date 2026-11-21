@@ -1,5 +1,4 @@
 import Shanten.Core
-import Shanten.DomainAdapter
 import Mathlib.Data.Nat.Find
 
 namespace Shanten
@@ -38,21 +37,42 @@ def Complete : Shape → Hand → Prop
           ∃ pair, pair ∈ orphanKinds ∧
             HasTiles hand (orphanTiles + Multiset.replicate 1 pair)
 
+theorem standardCompletion_iff_shantenParts
+    (counts : TileCounts) (fixedMelds : Nat) (hfixed : fixedMelds ≤ 4) :
+    StandardCompletion (4 - fixedMelds) counts ↔
+      ∃ pair : Tile, ∃ melds : List MentsuCandidate,
+        melds.length + fixedMelds = 4 ∧
+          ∀ tile, counts tile = (pairTiles pair + meldsTiles melds).count tile := by
+  rw [standardCompletion_iff_parts]
+  constructor
+  · rintro ⟨⟨pair⟩, melds, hlength, hcounts⟩
+    refine ⟨pair, melds, by omega, ?_⟩
+    intro tile
+    have h := congrFun hcounts tile
+    simpa [pairTiles, MentsuCandidateList.counts, ← meldsTiles_eq_candidates,
+      Multiset.count_add] using h.symm
+  · rintro ⟨pair, melds, hlength, hcounts⟩
+    refine ⟨⟨pair⟩, melds, by omega, ?_⟩
+    funext tile
+    have h := hcounts tile
+    simpa [pairTiles, MentsuCandidateList.counts, ← meldsTiles_eq_candidates,
+      Multiset.count_add] using h.symm
+
 theorem mentsuComplete_iff_standardCompletion (hand : Hand) :
     Complete .mentsuHand hand ↔
       ValidCounts hand ∧
         hand.fixedMelds ≤ 4 ∧
         MahjongDomain.StandardCompletion (4 - hand.fixedMelds)
-          (DomainAdapter.toDomainCounts hand.counts) := by
+          hand.counts := by
   constructor
   · rintro ⟨hvalid, pair, melds, hlength, htiles⟩
     have hfixed : hand.fixedMelds ≤ 4 := by omega
     refine ⟨hvalid, hfixed, ?_⟩
-    exact (DomainAdapter.standardCompletion_iff_shantenParts
+    exact (standardCompletion_iff_shantenParts
       hand.counts hand.fixedMelds hfixed).mpr ⟨pair, melds, by omega, htiles⟩
   · rintro ⟨hvalid, hfixed, hcompletion⟩
     obtain ⟨pair, melds, hlength, htiles⟩ :=
-      (DomainAdapter.standardCompletion_iff_shantenParts
+      (standardCompletion_iff_shantenParts
         hand.counts hand.fixedMelds hfixed).mp hcompletion
     exact ⟨hvalid, pair, melds, by omega, htiles⟩
 

@@ -18,7 +18,7 @@ inductive FixedMeld
 
 def FixedMeld.tiles : FixedMeld → Multiset Tile
   | .meld value => meldTiles value
-  | .kan tile => Multiset.replicate 4 tile
+  | .kan tile => Kan.occupiedTiles tile
 
 def fixedTiles (fixed : List FixedMeld) : Multiset Tile :=
   fixed.foldr (fun meld rest => meld.tiles + rest) 0

@@ -10,7 +10,6 @@
 |---|---|
 | [Shanten.lean](../Shanten.lean) | 主要モジュールをまとめる公開入口（直接importは下記参照）。 |
 | [Core.lean](../Shanten/Core.lean) | Coreの牌種・カウント・面子候補を使う手牌モデル、Pair展開や基本述語。 |
-| [DomainAdapter.lean](../Shanten/DomainAdapter.lean) | 共有型へ移行した後の通常完成対応を保持する移行用アダプタ。恒等変換の整理は未完了。 |
 | [Specification.lean](../Shanten/Specification.lean) | 形、完成形、到達関係、形シャンテンと総合値の宣言的仕様。通常形完成を共有`StandardCompletion`へ接続する。 |
 | [Exchange.lean](../Shanten/Exchange.lean) | 形に依存しない不足枚数、交換操作、固定目標への到達、到達距離の下界。 |
 | [SevenPairs.lean](../Shanten/SevenPairs.lean) | 七対子の公開import入口。実装は下表のモジュールに分割。 |
@@ -31,7 +30,6 @@
 | [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/B、14枚相当の最適打牌、特殊形・総合値、容量超過・槓の回帰例。 |
 | [Input37.lean](../Shanten/Input37.lean) | 符号付き37種入力のLean側の公開入口。Go実装ではない。 |
 | [Input37/Basic.lean](../Shanten/Input37/Basic.lean) | aka37添字・物理容量、整数上の赤5統合、総枚数保存、統合後容量、入力妥当性の宣言的仕様。 |
-| [Input37/DomainAdapter.lean](../Shanten/Input37/DomainAdapter.lean) | Int37添字・牌種容量・符号付き集約と共通核の対応。 |
 | [Input37/Validation.lean](../Shanten/Input37/Validation.lean) | 共有集約による正規化、正規化前の検証と位置付きエラー、受理と入力仕様の同値。 |
 | [Input37/Correctness.lean](../Shanten/Input37/Correctness.lean) | 枚数・固定牌の保存、容量付き入力への接続、正規化の保存と赤の割当て変更に対する値不変性。 |
 | [Input37/Examples.lean](../Shanten/Input37/Examples.lean) | 13・14枚の赤混在、赤を含む面子・槓、容量超過・負数・不正面子・枚数の回帰検査。 |
@@ -84,8 +82,7 @@
 ## モジュール間の依存
 
 ```text
-Specification -> Core, DomainAdapter
-DomainAdapter -> Core, MahjongDomain
+Specification -> Core
 Exchange      -> Specification
 ThirteenOrphans -> Exchange
 SevenPairs.Basic -> Exchange
@@ -100,7 +97,7 @@ MentsuHand.Targets -> MentsuHand.State, Exchange
 Bounds        -> SevenPairs
 Special       -> SevenPairs.Completion, SevenPairs.Counting, ThirteenOrphans
 Capacity.Basic -> Exchange
-Capacity.Specification -> Capacity.Basic, DomainAdapter, Specification
+Capacity.Specification -> Capacity.Basic, Specification
 Capacity.Reachability -> Capacity.Specification
 Capacity.Search -> Capacity.Reachability, MentsuHand.Search.BlockSearch
 Capacity.Totality -> Capacity.Search
@@ -113,8 +110,7 @@ Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Reachability,
                  Capacity.Search, Capacity.Totality, Capacity.Fourteen,
                  Capacity.Discard, Capacity.Special, Capacity.Overall, Capacity.Examples
 Input37.Basic -> Capacity.Basic
-Input37.DomainAdapter -> Input37.Basic, DomainAdapter
-Input37.Validation -> Input37.DomainAdapter
+Input37.Validation -> Input37.Basic
 Input37.Correctness -> Input37.Validation, Capacity.Overall
 Input37.Examples -> Input37.Correctness
 Input37       -> Input37.Basic, Input37.Validation, Input37.Correctness, Input37.Examples

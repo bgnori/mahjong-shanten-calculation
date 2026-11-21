@@ -1,4 +1,4 @@
-import Shanten.Input37.DomainAdapter
+import Shanten.Input37.Basic
 
 namespace Shanten.Input37
 
@@ -59,8 +59,7 @@ lemma parseMeld_isSome_iff :
 
 def normalizedHand (input : Input) (_nonnegative : Nonnegative input.standing) : Hand :=
   { counts := fun tile =>
-      (MahjongDomain.aggregateInt37 (fun index => input.standing index)
-        (Shanten.DomainAdapter.toDomainTile tile)).toNat
+      (normalizeCounts input.standing tile).toNat
     fixedMelds := input.melds.length }
 
 def parsedMelds (input : Input)

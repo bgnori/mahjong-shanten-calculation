@@ -1,5 +1,4 @@
 import Shanten.Capacity.Basic
-import Shanten.DomainAdapter
 import Shanten.Specification
 
 namespace Shanten.Capacity
@@ -11,7 +10,7 @@ theorem Complete.mentsuHand_iff_standardCompletion :
     Complete fixed .mentsuHand hand ↔
       ValidHand fixed hand ∧
         MahjongDomain.StandardCompletion (4 - fixed.length)
-          (Shanten.DomainAdapter.toDomainCounts hand.counts) := by
+          hand.counts := by
   constructor
   · rintro ⟨hvalid, hcomplete⟩
     obtain ⟨_, _, hcompletion⟩ :=
@@ -26,7 +25,7 @@ theorem Complete.mentsuHand_iff_standardCompletion :
       exact hvalid.2.1
     have hstandard :
         MahjongDomain.StandardCompletion (4 - hand.fixedMelds)
-          (Shanten.DomainAdapter.toDomainCounts hand.counts) := by
+          hand.counts := by
       rw [hfixed]
       exact hcompletion
     exact ⟨hvalid, (Shanten.mentsuComplete_iff_standardCompletion hand).mpr
@@ -223,45 +222,15 @@ lemma complete_mentsuHand_iff_of_four_fixed (hlength : fixed.length = 4) :
     Complete fixed .mentsuHand hand ↔
       ValidHand fixed hand ∧ ∃ pair, HasTiles hand (pairTiles pair) := by
   constructor
-  · intro hcomplete
-    obtain ⟨hvalid, hstandard⟩ :=
-      Complete.mentsuHand_iff_standardCompletion.mp hcomplete
-    have hstandard0 : MahjongDomain.StandardCompletion 0
-        (Shanten.DomainAdapter.toDomainCounts hand.counts) := by
-      simpa [hlength] using hstandard
-    obtain ⟨pair, melds, hmelds, hcounts⟩ :=
-      (MahjongDomain.standardCompletion_iff_parts 0
-        (Shanten.DomainAdapter.toDomainCounts hand.counts)).mp hstandard0
-    have hnil : melds = [] := List.length_eq_zero_iff.mp hmelds
+  · rintro ⟨hvalid, _, pair, melds, hmelds, htiles⟩
+    have hfixed : hand.fixedMelds = 4 := hvalid.1.trans hlength
+    have hnil : melds = [] := List.length_eq_zero_iff.mp (by omega)
     subst melds
-    refine ⟨hvalid, Shanten.DomainAdapter.ofDomainPair pair, ?_⟩
-    intro tile
-    have hshared := congrFun hcounts (Shanten.DomainAdapter.toDomainTile tile)
-    have hconvert := congrFun
-      (Shanten.DomainAdapter.toDomain_pairMeldCounts
-        (Shanten.DomainAdapter.ofDomainPair pair) [])
-      (Shanten.DomainAdapter.toDomainTile tile)
-    rw [Shanten.DomainAdapter.toDomainPair_ofDomainPair] at hconvert
-    have hcount :
-        (pairTiles (Shanten.DomainAdapter.ofDomainPair pair)).count tile =
-          hand.counts tile := by
-      simpa [Shanten.DomainAdapter.toDomainCounts, Shanten.DomainAdapter.toDomainTile,
-        Shanten.DomainAdapter.ofDomainTile_toDomainTile, meldsTiles,
-        MahjongDomain.MentsuCandidateList.counts, MahjongDomain.MentsuCandidateList.tiles] using
-          hconvert.trans hshared
-    exact hcount.symm
+    exact ⟨hvalid, pair, by simpa [meldsTiles] using htiles⟩
   · rintro ⟨hvalid, pair, htiles⟩
     have hfixed : hand.fixedMelds = 4 := by
       rw [hvalid.1, hlength]
-    have hstandard :
-        MahjongDomain.StandardCompletion (4 - hand.fixedMelds)
-          (Shanten.DomainAdapter.toDomainCounts hand.counts) :=
-      (Shanten.DomainAdapter.standardCompletion_iff_shantenParts
-        hand.counts hand.fixedMelds (by omega)).mpr
-        ⟨pair, [], by simp [hfixed], by simpa [HasTiles, meldsTiles] using htiles⟩
-    have hcomplete :=
-      (Shanten.mentsuComplete_iff_standardCompletion hand).mpr
-        ⟨hvalid.validCounts, by omega, hstandard⟩
-    exact ⟨hvalid, hcomplete⟩
+    exact ⟨hvalid, hvalid.validCounts, pair, [], by simp [hfixed],
+      by simpa [meldsTiles] using htiles⟩
 
 end Shanten.Capacity

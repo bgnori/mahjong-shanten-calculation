@@ -1,4 +1,4 @@
-import Shanten.DomainAdapter
+import MahjongDomain.Representation
 import Shanten.Capacity.Basic
 
 /-!
@@ -23,27 +23,20 @@ structure Input where
   melds : List MeldInput
 
 def normalizeTile (index : Fin 37) : Tile :=
-  Shanten.DomainAdapter.ofDomainTile (MahjongDomain.Int37Index.tile index)
+  MahjongDomain.Int37Index.tile index
 
 def capacity (index : Fin 37) : Nat :=
   MahjongDomain.Int37Index.capacity index
 
 def normalIndex : Tile → Fin 37
-  | tile => (Shanten.DomainAdapter.toDomainTile tile).int37Index
+  | tile => tile.int37Index
 
 lemma normalizeTile_normalIndex : ∀ tile, normalizeTile (normalIndex tile) = tile := by
   intro tile
-  simp [normalizeTile, normalIndex, MahjongDomain.Int37Index.tile_int37Index,
-    Shanten.DomainAdapter.ofDomainTile_toDomainTile]
+  exact MahjongDomain.Int37Index.tile_int37Index tile
 
 def normalizeCounts (counts : Counts37) (tile : Tile) : Int :=
-  MahjongDomain.aggregateInt37 counts (Shanten.DomainAdapter.toDomainTile tile)
-
-private def tileEquiv : Tile ≃ MahjongDomain.Tile where
-  toFun := Shanten.DomainAdapter.toDomainTile
-  invFun := Shanten.DomainAdapter.ofDomainTile
-  left_inv := Shanten.DomainAdapter.ofDomainTile_toDomainTile
-  right_inv := Shanten.DomainAdapter.toDomainTile_ofDomainTile
+  MahjongDomain.aggregateInt37 counts tile
 
 def meldCounts : List MeldInput → Counts37
   | [] => fun _ => 0
@@ -73,19 +66,11 @@ lemma normalizeCounts_nonneg (h : Nonnegative counts) (tile : Tile) :
 lemma normalizeCounts_add (left right : Counts37) (tile : Tile) :
     normalizeCounts (fun index => left index + right index) tile =
       normalizeCounts left tile + normalizeCounts right tile := by
-  exact congrFun (MahjongDomain.aggregateInt37_add left right)
-    (Shanten.DomainAdapter.toDomainTile tile)
+  exact congrFun (MahjongDomain.aggregateInt37_add left right) tile
 
 lemma normalizeCounts_sum (counts : Counts37) :
     (∑ tile : Tile, normalizeCounts counts tile) = ∑ index, counts index := by
-  calc
-    (∑ tile : Tile, normalizeCounts counts tile) =
-        ∑ tile : MahjongDomain.Tile, MahjongDomain.aggregateInt37 counts tile :=
-      Fintype.sum_equiv tileEquiv
-        (fun tile : Tile => normalizeCounts counts tile)
-        (fun tile : MahjongDomain.Tile => MahjongDomain.aggregateInt37 counts tile)
-        (fun _ => rfl)
-    _ = ∑ index, counts index := MahjongDomain.aggregateInt37_total counts
+  exact MahjongDomain.aggregateInt37_total counts
 
 set_option maxRecDepth 4096 in
 lemma capacity_fiber :
@@ -93,9 +78,8 @@ lemma capacity_fiber :
   intro tile
   change MahjongDomain.aggregateInt37
     (fun index => (MahjongDomain.Int37Index.capacity index : Int))
-    (Shanten.DomainAdapter.toDomainTile tile) = 4
-  exact congrFun MahjongDomain.aggregateInt37_capacity
-    (Shanten.DomainAdapter.toDomainTile tile)
+    tile = 4
+  exact congrFun MahjongDomain.aggregateInt37_capacity tile
 
 lemma normalizeCounts_le_four
     (hcapacity : ∀ index, counts index ≤ (capacity index : Int)) (tile : Tile) :

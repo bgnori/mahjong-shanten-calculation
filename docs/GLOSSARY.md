@@ -41,7 +41,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 |---|---|
 | **面子** と **ブロック** | 面子は完成した3枚組（槓はゲーム上4枚でも1面子）。ブロックは完成面子または搭子で、未完成の面子手にも使う。 |
 | **雀頭** と **対子形搭子** | どちらも同じ牌2枚だが、雀頭は面子手で別枠の1組として選んだもの。対子形搭子は面子系ブロックの候補。 |
-| **固定面子** と Leanの `Meld` | Go契約の固定面子は副露・暗槓など入力に含まれる面子。Leanの `Meld` は現在、探索中の（主に門前の）完成面子を表す。 |
+| **固定面子** と `MentsuCandidate` | Go契約の固定面子は副露・暗槓など入力に含まれる面子。Coreの `MentsuCandidate` は固定・副露状態を含まない順子または刻子の形を表す。 |
 | **牌種** と **牌** | 牌種は「5萬」のような種類。牌は実物1枚を指すことがある。Leanの `Tile` は牌種で、個々の牌の識別子ではない。 |
 | **シャンテン数** と **距離** | 距離0は完成、距離1はテンパイ。シャンテン数は距離から1を引いた値なので、完成は-1、テンパイは0。 |
 | **適用不可** と **未実装・非対応** | 七対子・国士無双が固定面子のため対象外なのは適用不可。計算器が機能を持たないのは非対応（`ErrUnsupported`）。 |
@@ -53,7 +53,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 
 - **牌種 (tile kind)** `[麻雀][Lean]`
   牌の種類。共通核の34種と正規化の定義は上記の用語集を参照してください。
-  shantenの `Shanten.Tile` はアダプタで共通核の `MahjongDomain.Tile` と往復でき、
+  shantenは共通核の `MahjongDomain.Tile` を直接使い、
   赤5は同じ色の通常5へ集約します。
 
 - **牌 (tile)** `[麻雀]`
@@ -73,12 +73,12 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 - **正規化 (normalization)** `[Go][Lean]`
   共通核における34種への正規化は上記用語集を参照してください。shantenでは
   `Shanten.Input37.normalizeTile` と `normalizeCounts` が既存の符号付きInt37入力を
-  牌種へ射影し、`DomainAdapter.normalizeTile_matches_domain` と
-  `normalizeCounts_matches_domain` が共通定義との一致を保証します。
+  牌種へ射影します。これらの操作はCoreの `Int37Index.tile` と
+  `aggregateInt37` を直接使います。
 
 - **カウント (count)** `[一般][Go][Lean]`
   牌種ごとの枚数。shanten Go契約の `Counts37` は符号付きInt37入力、
-  Leanの `Shanten.TileCounts` は正規化後の自然数カウントです。共通核の符号付き
+  Leanの `MahjongDomain.TileCounts` は正規化後の自然数カウントです。共通核の符号付き
   集約と総数保存については正本の用語集を参照してください。
 
 - **牌種容量 / 4枚制限 (copy limit)** `[麻雀][数学]`
@@ -124,10 +124,10 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 
 - **順子 (sequence / chi)** `[麻雀][Go][Lean]`
   同じ種類の連続した3枚。例は3・4・5萬。Goの `Chi` は固定順子、
-  Leanの `Meld.sequence` は順子の牌種集合を表す。
+  Leanの `MentsuCandidate.shuntsu` は共有 `Shuntsu` で順子の牌種集合を表す。
 
 - **刻子 (triplet / pon)** `[麻雀][Go][Lean]`
-  同じ牌種3枚。Goの `Pon` は固定刻子、Leanの `Meld.triplet` は完成した
+  同じ牌種3枚。Goの `Pon` は固定刻子、Leanの `MentsuCandidate.koutsu` は完成した
   刻子を表す。
 
 - **槓 (kan)** `[麻雀][Go]`
@@ -255,7 +255,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
   フィールドが満たすべき命題を持つ構造体は、データと不変条件を一緒に扱える。
 
 - **帰納型 (inductive type)** `[Lean][数学]`
-  コンストラクタで値を構成する型。`Shape`、`Meld`、`Taatsu` や
+  コンストラクタで値を構成する型。`Shape`、`MentsuCandidate`、`Taatsu` や
   `ReachesCompletion` が該当する。帰納型の各コンストラクタに対する場合分けや
   帰納法で証明する。
 
@@ -335,8 +335,8 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 | `Counts37` | 赤5を別要素として保持する37要素のGoカウント配列。計算前に通常5へ合算する。 | [`shanten.go`](../shanten.go) |
 | `Result.MentsuHand` | Go契約における面子手のシャンテン値。常に適用可能で、完成は`-1`。 | [`shanten.go`](../shanten.go) |
 | `Hand` | Leanの手牌抽象モデル。`counts` と固定面子数を持つ。固定面子の牌内容はまだ持たない。 | [`Shanten/Core.lean`](../Shanten/Core.lean) |
-| `Tile` | Leanの正規化済み牌種。34種類相当で、赤5を分離しない。 | [`Shanten/Core.lean`](../Shanten/Core.lean) |
-| `Meld` | Leanで表す完成面子。`triplet` または `sequence`。Goの入力固定面子と同義ではない。 | [`Shanten/Core.lean`](../Shanten/Core.lean) |
+| `MahjongDomain.Tile` | Leanの正規化済み牌種。34種類で、赤5を分離しない。 | [Core用語集](https://github.com/bgnori/mahjong-domain-core/blob/main/docs/GLOSSARY.md) |
+| `MahjongDomain.MentsuCandidate` | 副露状態を含まない順子または刻子の形。Goの入力固定面子と同義ではない。 | [Core用語集](https://github.com/bgnori/mahjong-domain-core/blob/main/docs/GLOSSARY.md) |
 | `Taatsu` | Leanで表す未完成の2枚組。対子形または順子形。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |
 | `ValidCounts` | 各牌種のカウントが4以下であるという述語。 | [`Shanten/Core.lean`](../Shanten/Core.lean) |
 | `IsThirteenTileHand` | 固定面子なし、手元牌13枚、かつ4枚制限を満たすという述語。 | [`Shanten/Core.lean`](../Shanten/Core.lean) |
@@ -372,8 +372,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
    「4ブロック＋雀頭」と書く。
 2. 「距離」と「シャンテン数」を同じ数として説明しない。必要なら
    `shanten = distance - 1` と明記する。
-3. Goの `Meld` は入力の固定面子、Leanの `Meld` は現行モデルの完成面子として、
-   文脈または修飾語を付ける。
+3. Goの `Meld` は入力の固定面子、Coreの `MentsuCandidate` は順子・刻子の形として区別する。
 4. 「適用不可」は特殊形の仕様上の対象外に限り、未実装・バックエンド非対応には
    「非対応」または `ErrUnsupported` を使う。
 5. 「牌」は実物の枚数を、「牌種」は種類の集合・カウントを説明するときに使い分ける。

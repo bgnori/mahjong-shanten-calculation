@@ -26,7 +26,7 @@ private lemma honor_count_zero (meld : FixedMeld) (rank : Fin 7)
       | shuntsu sequence =>
           simp [FixedMeld.tiles, meldTiles, MentsuCandidate.tiles, Shuntsu.tiles]
   | kan tile =>
-      cases tile <;> simp_all [honorKind, FixedMeld.tiles, eq_comm]
+      cases tile <;> simp_all [honorKind, FixedMeld.tiles, Kan.occupiedTiles, eq_comm]
 
 private lemma fixedTiles_honor_count_zero (hfree : rank ∉ occupiedHonors fixed) :
     (fixedTiles fixed).count (.honor rank) = 0 := by
