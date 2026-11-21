@@ -19,9 +19,9 @@ structure NormalizedInput where
 
 def meldCandidates : List Capacity.FixedMeld :=
   let tiles := (List.finRange 37).map normalizeTile
-  tiles.map (fun tile => .meld (.triplet tile)) ++
+  tiles.map (fun tile => .meld (.koutsu tile)) ++
     ([Suit.man, .pin, .sou].flatMap fun suit =>
-      (List.finRange 7).map fun start => .meld (.sequence suit start)) ++
+      (List.finRange 7).map fun start => .meld (.shuntsu ⟨suit, start⟩)) ++
     tiles.map Capacity.FixedMeld.kan
 
 lemma mem_meldCandidates (target : Capacity.FixedMeld) : target ∈ meldCandidates := by
@@ -32,11 +32,12 @@ lemma mem_meldCandidates (target : Capacity.FixedMeld) : target ∈ meldCandidat
           ⟨normalIndex tile, normalizeTile_normalIndex tile⟩)
   | meld value =>
       cases value with
-      | triplet tile =>
+      | koutsu tile =>
           simpa [meldCandidates] using
             (show ∃ index, normalizeTile index = tile from
               ⟨normalIndex tile, normalizeTile_normalIndex tile⟩)
-      | sequence suit start =>
+      | shuntsu sequence =>
+          obtain ⟨suit, start⟩ := sequence
           have hsuit : suit ∈ [Suit.man, .pin, .sou] := by cases suit <;> simp
           apply List.mem_append_left
           apply List.mem_append_right

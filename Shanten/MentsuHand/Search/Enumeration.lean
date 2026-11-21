@@ -14,31 +14,31 @@ open MahjongDomain
 
 
 def IsMentsuHandTarget
-    (hand : Hand) (pair : Tile) (melds : List Meld) : Prop :=
+    (hand : Hand) (pair : Tile) (melds : List MentsuCandidate) : Prop :=
   HasMentsuHandMeldCount hand melds ∧
     ∀ tile, hand.counts tile ≤
       (mentsuHandTarget pair melds).count tile
 
 /-- The number of additional tiles needed to realize a mentsuHand target. -/
 def mentsuHandTargetDistance
-    (hand : Hand) (pair : Tile) (melds : List Meld) : Nat :=
+    (hand : Hand) (pair : Tile) (melds : List MentsuCandidate) : Nat :=
   targetDeficit hand (mentsuHandTarget pair melds)
 
 lemma mentsuHandTargetDistance_eq_countDeficit
-    (hand : Hand) (pair : Tile) (melds : List Meld) :
+    (hand : Hand) (pair : Tile) (melds : List MentsuCandidate) :
     mentsuHandTargetDistance hand pair melds =
       countDeficit hand.counts
         (countsOfTiles (mentsuHandTarget pair melds)) := by
   rfl
 
-def mentsuHandMeldListsOfLength : Nat → Finset (List Meld)
+def mentsuHandMeldListsOfLength : Nat → Finset (List MentsuCandidate)
   | 0 => {[]}
   | length + 1 =>
       Finset.univ.biUnion fun meld =>
         (mentsuHandMeldListsOfLength length).image (meld :: ·)
 
 lemma mem_mentsuHandMeldListsOfLength_iff
-    (length : Nat) (melds : List Meld) :
+    (length : Nat) (melds : List MentsuCandidate) :
     melds ∈ mentsuHandMeldListsOfLength length ↔ melds.length = length := by
   induction length generalizing melds with
   | zero =>
@@ -61,7 +61,7 @@ lemma mem_mentsuHandMeldListsOfLength_iff
             exact ih tail |>.2 (by omega)
 
 def mentsuHandTargetConfigurations (fixedMelds : Nat) :
-    Finset (Tile × List Meld) :=
+    Finset (Tile × List MentsuCandidate) :=
   Finset.univ ×ˢ mentsuHandMeldListsOfLength (4 - fixedMelds)
 
 def validCountsDecidable (hand : Hand) : Decidable (ValidCounts hand) := by
@@ -113,7 +113,7 @@ lemma validTileMultisetBool_eq_true_iff_targetHand
 
 lemma mem_mentsuHandTargetConfigurations_iff
     (fixedMelds : Nat) (hfixed : fixedMelds ≤ 4)
-    (pair : Tile) (melds : List Meld) :
+    (pair : Tile) (melds : List MentsuCandidate) :
     (pair, melds) ∈ mentsuHandTargetConfigurations fixedMelds ↔
       melds.length + fixedMelds = 4 := by
   rw [mentsuHandTargetConfigurations, Finset.mem_product]
@@ -122,7 +122,7 @@ lemma mem_mentsuHandTargetConfigurations_iff
   omega
 
 def validMentsuHandTargetConfigurations (hand : Hand) :
-    Finset (Tile × List Meld) :=
+    Finset (Tile × List MentsuCandidate) :=
   (mentsuHandTargetConfigurations hand.fixedMelds).filter
     (fun candidate =>
       validCountsBool
@@ -132,7 +132,7 @@ def validMentsuHandTargetConfigurations (hand : Hand) :
 
 lemma mem_validMentsuHandTargetConfigurations_iff
     (hand : Hand) (hfixed : hand.fixedMelds ≤ 4)
-    (pair : Tile) (melds : List Meld) :
+    (pair : Tile) (melds : List MentsuCandidate) :
     (pair, melds) ∈ validMentsuHandTargetConfigurations hand ↔
       melds.length + hand.fixedMelds = 4 ∧
       ValidCounts

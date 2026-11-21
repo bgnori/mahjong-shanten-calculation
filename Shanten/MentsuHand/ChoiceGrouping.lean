@@ -16,9 +16,9 @@ def mentsuHandChoiceRepresentative : MentsuHandChoice → Option Tile
   | .taatsu (.pair tile) => some tile
   | .taatsu (.sequence suit start) =>
       some (Tile.suited suit ⟨start.val, by omega⟩)
-  | .meld (.triplet tile) => some tile
-  | .meld (.sequence suit start) =>
-      some (Tile.suited suit ⟨start.val, by omega⟩)
+  | .meld (.koutsu tile) => some tile
+  | .meld (.shuntsu sequence) =>
+      some (Tile.suited sequence.suit ⟨sequence.start.val, by omega⟩)
 
 lemma mentsuHandChoiceRepresentative_mem
     {choice : MentsuHandChoice} {tile : Tile}
@@ -43,14 +43,14 @@ lemma mentsuHandChoiceRepresentative_mem
           simp [choiceTiles, taatsuTiles]
   | meld meld =>
       cases meld with
-      | triplet meldTile =>
+      | koutsu meldTile =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile
-          simp [choiceTiles, meldTiles]
-      | sequence suit start =>
+          simp [choiceTiles, meldTiles, MentsuCandidate.tiles]
+      | shuntsu sequence =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile
-          simp [choiceTiles, meldTiles]
+          simp [choiceTiles, meldTiles, MentsuCandidate.tiles, Shuntsu.tiles]
 
 def mentsuHandChoicesForTile
     (tile : Tile) : List MentsuHandChoice → List MentsuHandChoice

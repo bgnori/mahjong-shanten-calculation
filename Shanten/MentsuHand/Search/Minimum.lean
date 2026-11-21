@@ -131,7 +131,7 @@ lemma exists_mentsuHandTarget_distance_le_of_reachesCompletion
     simpa [hcounts] using hdeficit
 
 lemma no_shorter_mentsuHand_completion_of_minimal_mentsuHandTargetDistance
-    (before : Hand) (pair : Tile) (melds : List Meld)
+    (before : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (distance : Nat)
     (hdistance : mentsuHandTargetDistance before pair melds = distance)
     (hminimalTarget :

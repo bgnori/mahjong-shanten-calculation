@@ -25,7 +25,7 @@ lemma exists_complete_mentsuHand_with_deficit_le
 
 lemma complete_mentsuHand_targetHand
     (before : Hand) (target : TileCounts)
-    (pair : Tile) (melds : List Meld)
+    (pair : Tile) (melds : List MentsuCandidate)
     (hvalid : ValidCounts (targetHand before target))
     (hmelds : melds.length + before.fixedMelds = 4)
     (htiles :
@@ -36,7 +36,7 @@ lemma complete_mentsuHand_targetHand
 
 lemma reachesCompletion_mentsuHand_of_equal_sum
     (before : Hand) (target : TileCounts)
-    (pair : Tile) (melds : List Meld)
+    (pair : Tile) (melds : List MentsuCandidate)
     (hsum : (∑ tile : Tile, before.counts tile) =
       ∑ tile : Tile, target tile)
     (hvalid : ValidCounts (targetHand before target))
@@ -62,7 +62,7 @@ lemma reachesCompletion_mentsuHand_of_equal_sum
 
 lemma reachesCompletion_mentsuHand_of_one_more_target_tile
     (before : Hand) (target : TileCounts)
-    (pair : Tile) (melds : List Meld)
+    (pair : Tile) (melds : List MentsuCandidate)
     (hsum :
       (∑ tile : Tile, target tile) =
         (∑ tile : Tile, before.counts tile) + 1)

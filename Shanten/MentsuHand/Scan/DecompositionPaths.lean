@@ -47,7 +47,7 @@ lemma mentsuHandChoicePairCount_of_perm
 lemma MentsuHandBlockDecomposition.blockChoices_pairCount
       {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
       mentsuHandChoicePairCount decomposition.blockChoices = 1 := by
-  have meldsCount (melds : List Meld) :
+  have meldsCount (melds : List MentsuCandidate) :
         mentsuHandChoicePairCount (melds.map MentsuHandChoice.meld) = 0 := by
       induction melds with
       | nil => rfl

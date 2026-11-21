@@ -18,24 +18,12 @@ structure Hand where
   counts : TileCounts
   fixedMelds : Nat
 
-/-- A concealed set: either a triplet or a suited sequence. -/
-inductive Meld
-  | triplet (tile : Tile)
-  | sequence (suit : Suit) (start : Fin 7)
-  deriving DecidableEq, Fintype
-
 /-- The tile multiset represented by one concealed meld. -/
-def meldTiles : Meld → Multiset Tile
-  | .triplet tile => Multiset.replicate 3 tile
-  | .sequence suit start =>
-      Multiset.ofList
-        [ Tile.suited suit ⟨start.val, by omega⟩
-        , Tile.suited suit ⟨start.val + 1, by omega⟩
-        , Tile.suited suit ⟨start.val + 2, by omega⟩
-        ]
+def meldTiles (meld : MentsuCandidate) : Multiset Tile :=
+  meld.tiles
 
 /-- The combined tiles represented by a list of concealed melds. -/
-def meldsTiles (melds : List Meld) : Multiset Tile :=
+def meldsTiles (melds : List MentsuCandidate) : Multiset Tile :=
   melds.foldr (fun meld rest => meldTiles meld + rest) 0
 
 /-- A standing hand has exactly the multiplicities of the given tile multiset. -/

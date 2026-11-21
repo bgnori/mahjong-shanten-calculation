@@ -11,12 +11,12 @@ def south : Tile := .honor ⟨1, by omega⟩
 def white : Tile := .honor ⟨4, by omega⟩
 
 def sequences : List FixedMeld :=
-  [ .meld (.sequence .man ⟨0, by omega⟩)
-  , .meld (.sequence .pin ⟨0, by omega⟩)
-  , .meld (.sequence .sou ⟨0, by omega⟩) ]
+  [ .meld (.shuntsu ⟨.man, ⟨0, by omega⟩⟩)
+  , .meld (.shuntsu ⟨.pin, ⟨0, by omega⟩⟩)
+  , .meld (.shuntsu ⟨.sou, ⟨0, by omega⟩⟩) ]
 
-def fixedA : List FixedMeld := .meld (.triplet east) :: sequences
-def fixedB : List FixedMeld := .meld (.triplet south) :: sequences
+def fixedA : List FixedMeld := .meld (.koutsu east) :: sequences
+def fixedB : List FixedMeld := .meld (.koutsu south) :: sequences
 
 def standing : Hand :=
   { counts := fun tile => if tile = east then 1 else 0
@@ -191,8 +191,8 @@ example :
   decide
 
 def blockedFixed : List FixedMeld :=
-  [ .meld (.triplet east), .meld (.triplet south)
-  , .meld (.sequence .man ⟨0, by omega⟩), .meld (.sequence .pin ⟨0, by omega⟩) ]
+  [ .meld (.koutsu east), .meld (.koutsu south)
+  , .meld (.shuntsu ⟨.man, ⟨0, by omega⟩⟩), .meld (.shuntsu ⟨.pin, ⟨0, by omega⟩⟩) ]
 
 set_option maxRecDepth 4096 in
 theorem fourteenBlocked_search :
@@ -338,8 +338,8 @@ theorem overallMentsuComplete_search :
   refine ⟨hvalid, by decide, by decide, ?_⟩
   apply (overallMinimumSearch_eq_neg_one_iff hvalid.1 (Or.inr hvalid.2)).mpr
   refine ⟨.mentsuHand, hvalid.1, hvalid.1.validCounts, white,
-    [ .triplet east, .triplet south, .triplet (.honor ⟨2, by omega⟩),
-      .triplet (.honor ⟨3, by omega⟩) ], by decide, ?_⟩
+    [ .koutsu east, .koutsu south, .koutsu (.honor ⟨2, by omega⟩),
+      .koutsu (.honor ⟨3, by omega⟩) ], by decide, ?_⟩
   unfold HasTiles
   decide
 

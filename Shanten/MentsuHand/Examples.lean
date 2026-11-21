@@ -155,7 +155,7 @@ example :
     let head := generalMentsuHandAddBlock isolatedMentsuHand initialGeneralMentsuHandState
       (pairTiles (.suited .man ⟨4, by omega⟩))
     let meld := generalMentsuHandAddBlock isolatedMentsuHand head
-      (meldTiles (.sequence .man ⟨3, by omega⟩))
+      (meldTiles (.shuntsu ⟨.man, ⟨3, by omega⟩⟩))
     head.used.card = 0 ∧ head.missing = 2 ∧
       meld.used.card = 0 ∧ meld.missing = 5 := by
   decide
@@ -176,15 +176,15 @@ private def gappedMentsuHand : Hand :=
 
 example :
     let state := generalMentsuHandAddBlock gappedMentsuHand initialGeneralMentsuHandState
-      (meldTiles (.sequence .man ⟨0, by omega⟩))
+      (meldTiles (.shuntsu ⟨.man, ⟨0, by omega⟩⟩))
     state.used.card = 2 ∧ state.missing = 1 := by
   decide
 
 example :
     let first := generalMentsuHandAddBlock gappedMentsuHand initialGeneralMentsuHandState
-      (meldTiles (.sequence .man ⟨0, by omega⟩))
+      (meldTiles (.shuntsu ⟨.man, ⟨0, by omega⟩⟩))
     let second := generalMentsuHandAddBlock gappedMentsuHand first
-      (meldTiles (.sequence .man ⟨0, by omega⟩))
+      (meldTiles (.shuntsu ⟨.man, ⟨0, by omega⟩⟩))
     second.used.card = 2 ∧ second.missing = 4 := by
   decide
 
@@ -192,7 +192,7 @@ example :
     let first := generalMentsuHandAddBlock missingHeadMentsuHand initialGeneralMentsuHandState
       (pairTiles (.honor ⟨0, by omega⟩))
     let second := generalMentsuHandAddBlock missingHeadMentsuHand first
-      (meldTiles (.triplet (.honor ⟨0, by omega⟩)))
+      (meldTiles (.koutsu (.honor ⟨0, by omega⟩)))
     validTileMultisetBool second.completed = false := by
   decide
 

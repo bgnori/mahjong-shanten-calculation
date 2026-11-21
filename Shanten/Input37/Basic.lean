@@ -109,8 +109,8 @@ lemma normalizeCounts_le_four
   · omega
 
 def kindMatches (kind : String) : Capacity.FixedMeld → Bool
-  | .meld (.sequence _ _) => kind == "chi"
-  | .meld (.triplet _) => kind == "pon"
+  | .meld (.shuntsu _) => kind == "chi"
+  | .meld (.koutsu _) => kind == "pon"
   | .kan _ => kind == "ankan" || kind == "daiminkan" || kind == "kakan"
 
 def MatchesMeld (raw : MeldInput) (target : Capacity.FixedMeld) : Prop :=

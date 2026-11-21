@@ -11,7 +11,7 @@ namespace Shanten
 open MahjongDomain
 
 lemma mentsuHandTargetDistance_eq_zero_iff
-    (hand : Hand) (pair : Tile) (melds : List Meld)
+    (hand : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hsum :
       (∑ tile : Tile, hand.counts tile) =
         ∑ tile : Tile, (mentsuHandTarget pair melds).count tile) :
@@ -54,7 +54,7 @@ lemma mentsuHandTargetDistance_eq_zero_iff
     simp [countDeficit, hcounts]
 
 lemma mentsuHandTargetDistance_pos_iff
-    (hand : Hand) (pair : Tile) (melds : List Meld)
+    (hand : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hsum :
       (∑ tile : Tile, hand.counts tile) =
         ∑ tile : Tile, (mentsuHandTarget pair melds).count tile) :
@@ -72,7 +72,7 @@ lemma mentsuHandTargetDistance_pos_iff
         ((mentsuHandTargetDistance_eq_zero_iff hand pair melds hsum).mp hzero))
 
 lemma mentsuHandTargetDistance_exchange
-    (hand : Hand) (pair : Tile) (melds : List Meld)
+    (hand : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (discarded drawn : Tile)
     (hdrawn :
       (mentsuHandTarget pair melds).count drawn > hand.counts drawn)
@@ -90,7 +90,7 @@ lemma mentsuHandTargetDistance_exchange
     hand discarded drawn hdrawn hdiscarded hne
 
 lemma exists_mentsuHandTarget_exchange
-    (hand : Hand) (pair : Tile) (melds : List Meld)
+    (hand : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hsum :
       (∑ tile : Tile, hand.counts tile) =
         ∑ tile : Tile, (mentsuHandTarget pair melds).count tile)
@@ -112,7 +112,7 @@ lemma exists_mentsuHandTarget_exchange
     hand pair melds discarded drawn hdrawn hdiscarded hneTiles
 
 lemma exists_mentsuHandTarget_exchange_of_pos
-    (hand : Hand) (pair : Tile) (melds : List Meld)
+    (hand : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hsum :
       (∑ tile : Tile, hand.counts tile) =
         ∑ tile : Tile, (mentsuHandTarget pair melds).count tile)
@@ -129,7 +129,7 @@ lemma exists_mentsuHandTarget_exchange_of_pos
   exact (mentsuHandTargetDistance_pos_iff hand pair melds hsum).mp hpos
 
 lemma reachesCompletion_mentsuHand_of_mentsuHandTarget
-    (before : Hand) (pair : Tile) (melds : List Meld)
+    (before : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hsum :
       (∑ tile : Tile, before.counts tile) =
         ∑ tile : Tile, (mentsuHandTarget pair melds).count tile)
@@ -257,7 +257,7 @@ lemma reachesCompletion_mentsuHand_of_blockDecomposition
   exact ⟨distance, by rw [hdistanceEq]; exact hdistance, hreach⟩
 
 lemma complete_mentsuHand_of_mentsuHandTarget_distance_zero
-    (before : Hand) (pair : Tile) (melds : List Meld)
+    (before : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hdistance : mentsuHandTargetDistance before pair melds = 0)
     (hsum :
       (∑ tile : Tile, before.counts tile) =
@@ -312,7 +312,7 @@ lemma complete_mentsuHand_of_mentsuHandTarget_distance_zero
 
 set_option maxHeartbeats 1000000 in
 lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
-    (before : Hand) (pair : Tile) (melds : List Meld)
+    (before : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hdistance : mentsuHandTargetDistance before pair melds = 1)
     (hsum :
       (∑ tile : Tile, before.counts tile) =
@@ -398,7 +398,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
 set_option maxHeartbeats 1000000 in
 lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance
     (distance : Nat)
-    (before : Hand) (pair : Tile) (melds : List Meld)
+    (before : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hdistance : mentsuHandTargetDistance before pair melds = distance)
     (hsum :
       (∑ tile : Tile, before.counts tile) =
@@ -463,7 +463,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance
 
 lemma isShapeShanten_mentsuHand_of_mentsuHandTarget_distance
     (distance : Nat)
-    (before : Hand) (pair : Tile) (melds : List Meld)
+    (before : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hdistance : mentsuHandTargetDistance before pair melds = distance)
     (hsum :
       (∑ tile : Tile, before.counts tile) =

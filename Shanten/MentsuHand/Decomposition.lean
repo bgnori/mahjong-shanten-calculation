@@ -12,13 +12,13 @@ namespace Shanten
 open MahjongDomain
 
 /-- A target has the required number of concealed melds for a hand. -/
-def HasMentsuHandMeldCount (hand : Hand) (melds : List Meld) : Prop :=
+def HasMentsuHandMeldCount (hand : Hand) (melds : List MentsuCandidate) : Prop :=
   melds.length + hand.fixedMelds = 4
 
 /-- A mentsu-hand-form decomposition before completing its taatsu blocks. -/
 structure MentsuHandBlockDecomposition (hand : Hand) where
   pair : Tile
-  melds : List Meld
+  melds : List MentsuCandidate
   taatsus : List Taatsu
   blocks : melds.length + taatsus.length + hand.fixedMelds = 4
   targetWithinHand :
@@ -305,7 +305,7 @@ lemma MentsuHandBlockDecomposition.blockChoices_meldCount
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     mentsuHandChoiceMeldCount decomposition.blockChoices =
       decomposition.melds.length := by
-  have aux : ∀ melds : List Meld,
+  have aux : ∀ melds : List MentsuCandidate,
       mentsuHandChoiceMeldCount (melds.map MentsuHandChoice.meld) =
         melds.length := by
     intro melds
@@ -339,7 +339,7 @@ lemma MentsuHandBlockDecomposition.blockChoices_taatsuCount
         simp [mentsuHandChoiceTaatsuCount]
     | cons taatsu taatsus ih =>
         simp [mentsuHandChoiceTaatsuCount, choiceUsesTaatsu, ih, Nat.add_comm]
-  have auxZero : ∀ melds : List Meld,
+  have auxZero : ∀ melds : List MentsuCandidate,
       mentsuHandChoiceTaatsuCount (melds.map MentsuHandChoice.meld) = 0 := by
     intro melds
     induction melds with
@@ -396,7 +396,7 @@ lemma MentsuHandBlockDecomposition.blockChoices_ne_skip
   · simp
 
 lemma mentsuHandChoiceTiles_map_meld
-    (melds : List Meld) :
+    (melds : List MentsuCandidate) :
     mentsuHandChoiceTiles (melds.map MentsuHandChoice.meld) =
       meldsTiles melds := by
   induction melds with
@@ -429,7 +429,7 @@ lemma MentsuHandBlockDecomposition.blockChoices_taatsus
     {hand : Hand} (decomposition : MentsuHandBlockDecomposition hand) :
     mentsuHandChoiceTaatsus decomposition.blockChoices =
      decomposition.taatsus := by
-  have hmelds : ∀ melds : List Meld,
+  have hmelds : ∀ melds : List MentsuCandidate,
      mentsuHandChoiceTaatsus (melds.map MentsuHandChoice.meld) = [] := by
     intro melds
     induction melds with

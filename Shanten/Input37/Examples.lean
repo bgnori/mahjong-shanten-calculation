@@ -52,9 +52,9 @@ private def normalizedTen : TileCounts :=
 
 theorem melds_normalize :
     produces ⟨standingTen, [⟨"chi", counts [(4, 1), (0, 1), (6, 1)]⟩]⟩
-        [.meld (.sequence .man ⟨3, by omega⟩)] normalizedTen ∧
+        [.meld (.shuntsu ⟨.man, ⟨3, by omega⟩⟩)] normalizedTen ∧
       produces ⟨standingTen, [⟨"pon", counts [(5, 2), (0, 1)]⟩]⟩
-        [.meld (.triplet (.suited .man ⟨4, by omega⟩))] normalizedTen ∧
+        [.meld (.koutsu (.suited .man ⟨4, by omega⟩))] normalizedTen ∧
       (∀ kind ∈ ["ankan", "daiminkan", "kakan"],
         produces ⟨standingTen, [⟨kind, counts [(5, 3), (0, 1)]⟩]⟩
           [.kan (.suited .man ⟨4, by omega⟩)] normalizedTen) := by

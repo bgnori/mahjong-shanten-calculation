@@ -156,7 +156,7 @@ def taatsuHistoryTiles : List Taatsu → Multiset Tile
   | [] => 0
   | taatsu :: taatsus => taatsuTiles taatsu + taatsuHistoryTiles taatsus
 
-def taatsuCompletionMelds : List Taatsu → List Meld
+def taatsuCompletionMelds : List Taatsu → List MentsuCandidate
   | [] => []
   | taatsu :: taatsus =>
       taatsuCompletionMeld taatsu :: taatsuCompletionMelds taatsus
@@ -241,10 +241,10 @@ lemma pairTiles_card (tile : Tile) :
     (pairTiles tile).card = 2 := by
   exact Pair.tiles_card ⟨tile⟩
 
-lemma meldTiles_card (meld : Meld) : (meldTiles meld).card = 3 := by
-  cases meld <;> simp [meldTiles]
+lemma meldTiles_card (meld : MentsuCandidate) : (meldTiles meld).card = 3 := by
+  exact MentsuCandidate.tiles_card meld
 
-lemma meldsTiles_card (melds : List Meld) :
+lemma meldsTiles_card (melds : List MentsuCandidate) :
     (meldsTiles melds).card = 3 * melds.length := by
   induction melds with
   | nil =>
@@ -255,7 +255,7 @@ lemma meldsTiles_card (melds : List Meld) :
       rw [Multiset.card_add, meldTiles_card, ih]
       omega
 
-def completedMeldsForState (state : MentsuHandSearchState) : List Meld :=
+def completedMeldsForState (state : MentsuHandSearchState) : List MentsuCandidate :=
   state.meldHistory.reverse ++
     taatsuCompletionMelds state.taatsuHistory.reverse
 
@@ -266,7 +266,7 @@ lemma completedMeldsForState_length
   simp [completedMeldsForState, taatsuCompletionMelds_length,
     Nat.add_comm]
 
-lemma meldsTiles_append (left right : List Meld) :
+lemma meldsTiles_append (left right : List MentsuCandidate) :
     meldsTiles (left ++ right) = meldsTiles left + meldsTiles right := by
   induction left with
   | nil =>
@@ -290,10 +290,10 @@ lemma taatsuHistoryTiles_append_single (history : List Taatsu) (taatsu : Taatsu)
   | cons head tail ih =>
       simp [taatsuHistoryTiles, ih, Multiset.add_assoc]
 
-lemma meldsTiles_append_single (history : List Meld) (meld : Meld) :
+lemma meldsTiles_append_single (history : List MentsuCandidate) (meld : MentsuCandidate) :
     meldsTiles (history ++ [meld]) =
       meldsTiles history + meldTiles meld := by
-  have aux : ∀ (items : List Meld) (acc : Multiset Tile),
+  have aux : ∀ (items : List MentsuCandidate) (acc : Multiset Tile),
       List.foldr (fun item rest => meldTiles item + rest) acc items =
         List.foldr (fun item rest => meldTiles item + rest) 0 items + acc := by
     intro items

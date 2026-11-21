@@ -14,11 +14,11 @@ open MahjongDomain
 /-- A mentsu-hand-form target before the fixed melds are added. -/
 
 
-def mentsuHandTarget (pair : Tile) (melds : List Meld) : Multiset Tile :=
+def mentsuHandTarget (pair : Tile) (melds : List MentsuCandidate) : Multiset Tile :=
   pairTiles pair + meldsTiles melds
 
 def mentsuHandTargetWithTaatsu
-    (pair : Tile) (melds : List Meld) (taatsus : List Taatsu) : Multiset Tile :=
+    (pair : Tile) (melds : List MentsuCandidate) (taatsus : List Taatsu) : Multiset Tile :=
   mentsuHandTarget pair melds + taatsuHistoryTiles taatsus
 
 lemma completedMeldsForState_tiles

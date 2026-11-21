@@ -12,7 +12,7 @@ open MahjongDomain
 
 lemma isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance
     (distance : Nat)
-    (before : Hand) (pair : Tile) (melds : List Meld)
+    (before : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hdistance : mentsuHandTargetDistance before pair melds = distance)
     (hsum :
       (∑ tile : Tile, before.counts tile) =
@@ -40,7 +40,7 @@ lemma isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance
 
 lemma isShapeShanten_mentsuHand_of_minimal_mentsuHandTargetDistance_one_more
     (distance : Nat)
-    (before : Hand) (pair : Tile) (melds : List Meld)
+    (before : Hand) (pair : Tile) (melds : List MentsuCandidate)
     (hdistance : mentsuHandTargetDistance before pair melds = distance)
     (hsum :
       (∑ tile : Tile,
@@ -243,7 +243,7 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget_one_more
 lemma sum_countsOfTiles_mentsuHandTarget_of_thirteen_tile_count
     (hand : Hand)
     (hstanding : tileCount hand + 3 * hand.fixedMelds = 13)
-    (pair : Tile) (melds : List Meld)
+    (pair : Tile) (melds : List MentsuCandidate)
     (hmelds : melds.length + hand.fixedMelds = 4) :
     (∑ tile : Tile, countsOfTiles (mentsuHandTarget pair melds) tile) =
       (∑ tile : Tile, hand.counts tile) + 1 := by

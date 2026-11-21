@@ -14,20 +14,20 @@ open MahjongDomain
 private def canonicalMentsuHandPair : Tile :=
   .honor ⟨0, by omega⟩
 
-private def canonicalMentsuHandMelds : Nat → List Meld
+private def canonicalMentsuHandMelds : Nat → List MentsuCandidate
   | 0 =>
-      [ .sequence .man ⟨0, by omega⟩
-      , .sequence .pin ⟨0, by omega⟩
-      , .sequence .sou ⟨0, by omega⟩
-      , .triplet (.honor ⟨1, by omega⟩) ]
+      [ .shuntsu ⟨.man, ⟨0, by omega⟩⟩
+      , .shuntsu ⟨.pin, ⟨0, by omega⟩⟩
+      , .shuntsu ⟨.sou, ⟨0, by omega⟩⟩
+      , .koutsu (.honor ⟨1, by omega⟩) ]
   | 1 =>
-      [ .sequence .man ⟨0, by omega⟩
-      , .sequence .pin ⟨0, by omega⟩
-      , .sequence .sou ⟨0, by omega⟩ ]
+      [ .shuntsu ⟨.man, ⟨0, by omega⟩⟩
+      , .shuntsu ⟨.pin, ⟨0, by omega⟩⟩
+      , .shuntsu ⟨.sou, ⟨0, by omega⟩⟩ ]
   | 2 =>
-      [ .sequence .man ⟨0, by omega⟩
-      , .sequence .pin ⟨0, by omega⟩ ]
-  | 3 => [ .sequence .man ⟨0, by omega⟩ ]
+      [ .shuntsu ⟨.man, ⟨0, by omega⟩⟩
+      , .shuntsu ⟨.pin, ⟨0, by omega⟩⟩ ]
+  | 3 => [ .shuntsu ⟨.man, ⟨0, by omega⟩⟩ ]
   | _ => []
 
 private lemma canonicalMentsuHandMelds_length
@@ -55,11 +55,13 @@ private lemma canonicalMentsuHandTarget_validCounts
     | suited suit rank =>
         cases suit <;> fin_cases rank <;>
           simp [canonicalMentsuHandPair, canonicalMentsuHandMelds,
-            mentsuHandTarget, pairTiles, Pair.tiles, meldsTiles, meldTiles]
+            mentsuHandTarget, pairTiles, Pair.tiles, meldsTiles, meldTiles,
+            MentsuCandidate.tiles, Shuntsu.tiles]
     | honor rank =>
         fin_cases rank <;>
           simp [canonicalMentsuHandPair, canonicalMentsuHandMelds,
-            mentsuHandTarget, pairTiles, Pair.tiles, meldsTiles, meldTiles]
+            mentsuHandTarget, pairTiles, Pair.tiles, meldsTiles, meldTiles,
+            MentsuCandidate.tiles, Shuntsu.tiles]
 
 set_option maxHeartbeats 1000000 in
 lemma exists_mentsuHandShanten_as_min_validTargetDistance

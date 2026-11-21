@@ -9,8 +9,8 @@
 | ファイル | 主な責務 |
 |---|---|
 | [Shanten.lean](../Shanten.lean) | 主要モジュールをまとめる公開入口（直接importは下記参照）。 |
-| [Core.lean](../Shanten/Core.lean) | Coreの牌種・カウントを使う手牌・面子モデル、Pair展開や基本述語。 |
-| [DomainAdapter.lean](../Shanten/DomainAdapter.lean) | ローカル面子とCoreの`MentsuCandidate`や通常完成を接続する移行用アダプタ。 |
+| [Core.lean](../Shanten/Core.lean) | Coreの牌種・カウント・面子候補を使う手牌モデル、Pair展開や基本述語。 |
+| [DomainAdapter.lean](../Shanten/DomainAdapter.lean) | 共有型へ移行した後の通常完成対応を保持する移行用アダプタ。恒等変換の整理は未完了。 |
 | [Specification.lean](../Shanten/Specification.lean) | 形、完成形、到達関係、形シャンテンと総合値の宣言的仕様。通常形完成を共有`StandardCompletion`へ接続する。 |
 | [Exchange.lean](../Shanten/Exchange.lean) | 形に依存しない不足枚数、交換操作、固定目標への到達、到達距離の下界。 |
 | [SevenPairs.lean](../Shanten/SevenPairs.lean) | 七対子の公開import入口。実装は下表のモジュールに分割。 |

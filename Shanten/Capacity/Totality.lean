@@ -5,7 +5,7 @@ namespace Shanten.Capacity
 open MahjongDomain
 
 private def honorKind : FixedMeld → Option (Fin 7)
-  | .meld (.triplet (.honor rank)) | .kan (.honor rank) => some rank
+  | .meld (.koutsu (.honor rank)) | .kan (.honor rank) => some rank
   | _ => none
 
 private def occupiedHonors (fixed : List FixedMeld) : Finset (Fin 7) :=
@@ -21,10 +21,10 @@ private lemma honor_count_zero (meld : FixedMeld) (rank : Fin 7)
   cases meld with
   | meld value =>
       cases value with
-      | triplet tile =>
-          cases tile <;> simp_all [honorKind, FixedMeld.tiles, meldTiles, eq_comm]
-      | sequence suit start =>
-          simp [FixedMeld.tiles, meldTiles]
+      | koutsu tile =>
+          cases tile <;> simp_all [honorKind, FixedMeld.tiles, meldTiles, MentsuCandidate.tiles, eq_comm]
+      | shuntsu sequence =>
+          simp [FixedMeld.tiles, meldTiles, MentsuCandidate.tiles, Shuntsu.tiles]
   | kan tile =>
       cases tile <;> simp_all [honorKind, FixedMeld.tiles, eq_comm]
 
@@ -44,11 +44,11 @@ private lemma fixedTiles_honor_count_zero (hfree : rank ∉ occupiedHonors fixed
       simpa [fixedTiles, Multiset.count_add, hhead] using htail
 
 private lemma triplet_list_counts (kinds : List Tile) (tile : Tile) :
-    (meldsTiles (kinds.map Meld.triplet)).count tile = 3 * kinds.count tile := by
+    (meldsTiles (kinds.map MentsuCandidate.koutsu)).count tile = 3 * kinds.count tile := by
   induction kinds with
   | nil => simp [meldsTiles]
   | cons head tail ih =>
-      change (Multiset.replicate 3 head + meldsTiles (tail.map Meld.triplet)).count tile =
+      change (Multiset.replicate 3 head + meldsTiles (tail.map MentsuCandidate.koutsu)).count tile =
         3 * (head :: tail).count tile
       rw [Multiset.count_add, ih, Multiset.count_replicate]
       by_cases heq : head = tile
@@ -57,7 +57,7 @@ private lemma triplet_list_counts (kinds : List Tile) (tile : Tile) :
       · simp [heq]
 
 private lemma triplet_finset_counts (kinds : Finset Tile) (tile : Tile) :
-    (meldsTiles (kinds.toList.map Meld.triplet)).count tile =
+    (meldsTiles (kinds.toList.map MentsuCandidate.koutsu)).count tile =
       if tile ∈ kinds then 3 else 0 := by
   rw [triplet_list_counts]
   by_cases hmem : tile ∈ kinds
@@ -87,7 +87,7 @@ lemma exists_complete_target (hvalid : ValidHand fixed hand) :
     omega)
   obtain ⟨pair, hpair⟩ := hnonempty
   let kinds := chosen.erase pair
-  let melds := kinds.toList.map Meld.triplet
+  let melds := kinds.toList.map MentsuCandidate.koutsu
   refine ⟨pair, melds, ?_, hvalid.1, hvalid.2.1, fun tile => ?_⟩
   · dsimp [melds, kinds]
     rw [List.length_map, Finset.length_toList, Finset.card_erase_of_mem hpair, hchosen]

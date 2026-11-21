@@ -31,10 +31,10 @@ lemma MentsuHandBlockDecomposition.blockChoices_representatives_in_tileOrder
               tile_mem_mentsuHandTileOrder _, rfl⟩
   | meld meld =>
         cases meld with
-        | triplet tile =>
+        | koutsu tile =>
             exact ⟨tile, tile_mem_mentsuHandTileOrder tile, rfl⟩
-        | sequence suit start =>
-            exact ⟨Tile.suited suit ⟨start.val, by omega⟩,
+        | shuntsu sequence =>
+            exact ⟨Tile.suited sequence.suit ⟨sequence.start.val, by omega⟩,
               tile_mem_mentsuHandTileOrder _, rfl⟩
 
 lemma AppliesMentsuHandGroupedTileBatches.of_forward_grouping

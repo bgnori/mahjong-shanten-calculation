@@ -12,7 +12,7 @@ namespace Shanten.Capacity
 open MahjongDomain
 
 inductive FixedMeld
-  | meld (value : Meld)
+  | meld (value : MentsuCandidate)
   | kan (tile : Tile)
   deriving DecidableEq
 

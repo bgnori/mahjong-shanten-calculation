@@ -20,7 +20,7 @@ structure MentsuHandSearchState where
   tileIndex : Nat
   used : Multiset Tile
   pair : Option Tile
-  meldHistory : List Meld
+  meldHistory : List MentsuCandidate
   taatsuHistory : List Taatsu
   melds : Nat
   taatsu : Nat
@@ -31,7 +31,7 @@ inductive MentsuHandChoice
   | skip
   | pair (tile : Tile)
   | taatsu (taatsu : Taatsu)
-  | meld (meld : Meld)
+  | meld (meld : MentsuCandidate)
   deriving DecidableEq
 
 def taatsuTiles : Taatsu → Multiset Tile
@@ -49,12 +49,12 @@ def taatsuCompletionTile : Taatsu → Tile
       else
         Tile.suited suit ⟨start.val - 1, by omega⟩
 
-def taatsuCompletionMeld : Taatsu → Meld
-  | .pair tile => .triplet tile
+def taatsuCompletionMeld : Taatsu → MentsuCandidate
+  | .pair tile => .koutsu tile
   | .sequence suit start =>
-      .sequence suit
+      .shuntsu ⟨suit,
         ⟨if hstart : start.val ≤ 6 then start.val else start.val - 1, by
-          by_cases h : start.val ≤ 6 <;> simp [h] <;> omega⟩
+          by_cases h : start.val ≤ 6 <;> simp [h] <;> omega⟩⟩
 
 lemma taatsuTiles_add_completionTile
     (taatsu : Taatsu) :
@@ -63,11 +63,11 @@ lemma taatsuTiles_add_completionTile
   cases taatsu with
   | pair tile =>
       simp [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,
-        pairTiles, Pair.tiles, meldTiles, Multiset.replicate_succ]
+        pairTiles, Pair.tiles, meldTiles, MentsuCandidate.tiles, Multiset.replicate_succ]
   | sequence suit start =>
       by_cases hstart : start.val ≤ 6
       · simp only [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,
-          meldTiles, dif_pos hstart]
+          meldTiles, MentsuCandidate.tiles, Shuntsu.tiles, dif_pos hstart]
         change Multiset.ofList
             [ Tile.suited suit ⟨start.val, by omega⟩
             , Tile.suited suit ⟨start.val + 1, by omega⟩ ] +
@@ -80,7 +80,7 @@ lemma taatsuTiles_add_completionTile
         rfl
       · have hstart' : start.val = 7 := by omega
         simp only [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,
-          meldTiles, dif_neg hstart, hstart', dif_neg (by omega)]
+          meldTiles, MentsuCandidate.tiles, Shuntsu.tiles, dif_neg hstart, hstart', dif_neg (by omega)]
         change Multiset.ofList
             [ Tile.suited suit ⟨7, by omega⟩
             , Tile.suited suit ⟨8, by omega⟩ ] +
