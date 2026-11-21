@@ -1,9 +1,13 @@
-# 用語集
+# Mahjong Shanten Glossary / シャンテン用語集
+
+This glossary records terminology used by this repository's Go contract,
+Mahjong model, and Lean proofs. Shared domain definitions are canonical in the
+[Mahjong Domain Core glossary](https://github.com/bgnori/mahjong-domain-core/blob/main/docs/GLOSSARY.md).
 
 この文書は、リポジトリの文書・Go契約・Lean4モデルで使う用語を、初めて
 読む人が同じ意味で解釈できるように整理したものです。
 
-## 読み方
+## How to read / 読み方
 
 - **正式語**: このリポジトリで優先して使う表記。
 - **別名**: 一般に使われる表記。ただし、意味が同じとは限らない場合は注意書きを
@@ -13,7 +17,7 @@
 - 英語の識別子は、説明中ではバッククォートで囲みます。識別子が似ていても、
   GoとLeanで意味が異なる場合は別の項目として扱います。
 
-## 共通ドメイン用語の正本
+## Canonical shared-domain terms / 共通ドメイン用語の正本
 
 牌種、136物理牌ID、Int37、34種への正規化、集約、牌種容量、対子・面子と
 通常形分解の共通定義は、
@@ -29,7 +33,9 @@ CIでは共通核の`main`に追従する。
 固定文脈付き待ちの接続は独立した[`w6/`](../w6/)パッケージで検査し、
 CIでは分類側も`main`でチェックアウトし、検証した各コミットSHAを実行概要に残す。
 
-## まず押さえる区別
+## Consumer-specific terms / 利用側固有用語
+
+### Key distinctions / まず押さえる区別
 
 | 混同しやすい語 | このリポジトリでの区別 |
 |---|---|
@@ -41,9 +47,9 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 | **適用不可** と **未実装・非対応** | 七対子・国士無双が固定面子のため対象外なのは適用不可。計算器が機能を持たないのは非対応（`ErrUnsupported`）。 |
 | **4枚制限** と **見えている牌** | 4枚制限は完成形・遷移が実在する牌種容量を超えないための不変条件。見えている牌や残り枚数を使った待ちの評価とは別。 |
 
-## 一般・データ表現
+### General and data representation / 一般・データ表現
 
-### 用語
+#### Terms / 用語
 
 - **牌種 (tile kind)** `[麻雀][Lean]`
   牌の種類。共通核の34種と正規化の定義は上記の用語集を参照してください。
@@ -93,7 +99,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
   要素を有限個列挙できる型。`Fintype` により `Tile` や `Suit` の全要素を
   列挙でき、総和や有限探索に使える。
 
-## 麻雀用語
+### Mahjong terminology / 麻雀用語
 
 - **手牌 (hand)** `[麻雀]`
   計算対象の牌の状態。本リポジトリでは、Goの `Input` は副露を除く
@@ -178,7 +184,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
   その形を手牌に対して評価してよいか。面子手は常に適用可能。七対子と
   国士無双は固定面子がない場合だけ適用可能。適用不可はエラーではない。
 
-## Go・情報技術の用語
+### Go and information technology / Go・情報技術の用語
 
 - **契約 (contract)** `[IT][Go]`
   型、入力制約、結果の意味、エラー、所有権・決定性など、実装が守る境界。
@@ -226,7 +232,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
   部分問題の状態を再利用して有限探索を行う方法。面子手では、牌を使った量、
   雀頭・面子・搭子の履歴などを `MentsuHandSearchState` に保存する。
 
-## Lean4・数学的証明の用語
+### Lean 4 and mathematical proofs / Lean4・数学的証明の用語
 
 - **型 (type)** `[Lean][数学]`
   値の種類を表すもの。`Tile` や `Hand` は型であり、型の違いにより不正な
@@ -322,7 +328,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
   宣言的に存在する有効な完成候補を、探索が取りこぼさない性質。健全性だけでは
   正しい最小シャンテン値を保証できない。
 
-## プロジェクト固有の識別子
+### Project-specific identifiers / プロジェクト固有の識別子
 
 | 識別子 | 意味 | 主な場所 |
 |---|---|---|
@@ -360,7 +366,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 | `ProtectedPairMakingExchange` | 保護対象の牌種を残したまま対を作る交換の分類。 | [`SevenPairs/Exchange/Basic.lean`](../Shanten/SevenPairs/Exchange/Basic.lean) |
 | `kokushiDistinctCount` / `kokushiPairCount` | 国士対象13種のうち、登場する種類数／2枚以上ある種類数。 | [`Shanten/Core.lean`](../Shanten/Core.lean) |
 
-## 表記上のルール
+## Notation conventions / 表記上のルール
 
 1. 最終完成形だけを指すときは「4面子＋雀頭」、未完成の面子手分解を指すときは
    「4ブロック＋雀頭」と書く。

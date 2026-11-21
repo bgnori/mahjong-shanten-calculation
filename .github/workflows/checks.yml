@@ -109,7 +109,7 @@ jobs:
             mahjong-shanten-calculation/docs/GLOSSARY.md
           grep -Fq \
             'https://github.com/bgnori/mahjong-domain-core/blob/main/docs/GLOSSARY.md' \
-            mahjong-wait-classification/docs/domain-vocabulary.md
+            mahjong-wait-classification/docs/GLOSSARY.md
       - name: Build shared domain core
         working-directory: mahjong-domain-core
         run: |
