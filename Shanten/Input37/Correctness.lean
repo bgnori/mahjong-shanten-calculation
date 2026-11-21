@@ -29,7 +29,7 @@ private lemma normalizeCounts_meldCounts (melds : List MeldInput) (tile : Tile) 
     normalizeCounts (meldCounts melds) tile =
       (melds.map fun raw => normalizeCounts raw.tiles tile).sum := by
   induction melds with
-  | nil => simp [meldCounts, normalizeCounts]
+  | nil => simp [meldCounts, normalizeCounts, MahjongDomain.aggregateInt37]
   | cons raw rest ih => simpa [meldCounts, normalizeCounts_add] using congrArg (normalizeCounts raw.tiles tile + ·) ih
 
 lemma parsedMelds_counts

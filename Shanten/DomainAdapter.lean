@@ -87,29 +87,30 @@ def ofDomainPair (pair : MahjongDomain.Pair) : Shanten.Tile :=
   cases pair with
   | mk tile => simp [toDomainPair, ofDomainPair, toDomainTile_ofDomainTile]
 
-def toDomainMeld : Shanten.Meld → MahjongDomain.Meld
-  | .triplet tile => .triplet (toDomainTile tile)
-  | .sequence suit start => .sequence (toDomainSuit suit) start
+def toDomainMeld : Shanten.Meld → MahjongDomain.MentsuCandidate
+  | .triplet tile => .koutsu (toDomainTile tile)
+  | .sequence suit start => .shuntsu ⟨toDomainSuit suit, start⟩
 
-def ofDomainMeld : MahjongDomain.Meld → Shanten.Meld
-  | .triplet tile => .triplet (ofDomainTile tile)
-  | .sequence suit start => .sequence (ofDomainSuit suit) start
+def ofDomainMeld : MahjongDomain.MentsuCandidate → Shanten.Meld
+  | .koutsu tile => .triplet (ofDomainTile tile)
+  | .shuntsu sequence => .sequence (ofDomainSuit sequence.suit) sequence.start
 
-def toDomainMelds (melds : List Shanten.Meld) : List MahjongDomain.Meld :=
+def toDomainMelds (melds : List Shanten.Meld) : List MahjongDomain.MentsuCandidate :=
   melds.map toDomainMeld
 
-def ofDomainMelds (melds : List MahjongDomain.Meld) : List Shanten.Meld :=
+def ofDomainMelds (melds : List MahjongDomain.MentsuCandidate) : List Shanten.Meld :=
   melds.map ofDomainMeld
 
 def toDomainTiles (tiles : Multiset Shanten.Tile) : Multiset MahjongDomain.Tile :=
   tiles.map toDomainTile
 
-theorem toDomainMeld_ofDomainMeld (meld : MahjongDomain.Meld) :
+theorem toDomainMeld_ofDomainMeld (meld : MahjongDomain.MentsuCandidate) :
     toDomainMeld (ofDomainMeld meld) = meld := by
   cases meld with
-  | triplet tile =>
+  | koutsu tile =>
       simp [toDomainMeld, ofDomainMeld, toDomainTile_ofDomainTile]
-  | sequence suit start =>
+  | shuntsu sequence =>
+      obtain ⟨suit, start⟩ := sequence
       cases suit <;> rfl
 
 theorem ofDomainMeld_toDomainMeld (meld : Shanten.Meld) :
@@ -120,7 +121,7 @@ theorem ofDomainMeld_toDomainMeld (meld : Shanten.Meld) :
   | sequence suit start =>
       cases suit <;> rfl
 
-@[simp] theorem toDomainMelds_ofDomainMelds (melds : List MahjongDomain.Meld) :
+@[simp] theorem toDomainMelds_ofDomainMelds (melds : List MahjongDomain.MentsuCandidate) :
     toDomainMelds (ofDomainMelds melds) = melds := by
   simp [toDomainMelds, ofDomainMelds, List.map_map, Function.comp_def,
     toDomainMeld_ofDomainMeld]
@@ -161,13 +162,13 @@ theorem toDomain_meldTiles_map (meld : Shanten.Meld) :
     toDomainTiles (meldTiles meld) = (toDomainMeld meld).tiles := by
   cases meld <;>
     simp [toDomainTiles, meldTiles, toDomainMeld, toDomainTile, toDomainSuit,
-      MahjongDomain.Meld.tiles]
+      MahjongDomain.MentsuCandidate.tiles, MahjongDomain.Shuntsu.tiles]
 
 theorem toDomain_meldsTiles_map (melds : List Shanten.Meld) :
-    toDomainTiles (meldsTiles melds) = MahjongDomain.MeldList.tiles (toDomainMelds melds) := by
+    toDomainTiles (meldsTiles melds) = MahjongDomain.MentsuCandidateList.tiles (toDomainMelds melds) := by
   induction melds with
   | nil =>
-      simp [toDomainTiles, meldsTiles, toDomainMelds, MahjongDomain.MeldList.tiles]
+      simp [toDomainTiles, meldsTiles, toDomainMelds, MahjongDomain.MentsuCandidateList.tiles]
   | cons meld melds ih =>
       calc
         toDomainTiles (meldTiles meld + meldsTiles melds) =
@@ -175,7 +176,7 @@ theorem toDomain_meldsTiles_map (melds : List Shanten.Meld) :
           change Multiset.map toDomainTile (meldTiles meld + meldsTiles melds) = _
           exact Multiset.map_add toDomainTile _ _
         _ = (toDomainMeld meld).tiles +
-              MahjongDomain.MeldList.tiles (toDomainMelds melds) := by
+              MahjongDomain.MentsuCandidateList.tiles (toDomainMelds melds) := by
           rw [toDomain_meldTiles_map, ih]
 
 theorem toDomain_pairTiles_count (pair : Shanten.Tile) (tile : MahjongDomain.Tile) :
@@ -199,12 +200,12 @@ theorem toDomain_meldTiles_count (meld : Shanten.Meld) (tile : MahjongDomain.Til
 theorem toDomain_meldsTiles_count
     (melds : List Shanten.Meld) (tile : MahjongDomain.Tile) :
     (meldsTiles melds).count (ofDomainTile tile) =
-      MahjongDomain.MeldList.counts (toDomainMelds melds) tile := by
+      MahjongDomain.MentsuCandidateList.counts (toDomainMelds melds) tile := by
   calc
     (meldsTiles melds).count (ofDomainTile tile) =
         (toDomainTiles (meldsTiles melds)).count tile :=
       (toDomainTiles_count (meldsTiles melds) tile).symm
-    _ = MahjongDomain.MeldList.counts (toDomainMelds melds) tile := by
+    _ = MahjongDomain.MentsuCandidateList.counts (toDomainMelds melds) tile := by
       rw [toDomain_meldsTiles_map]
       rfl
 
@@ -212,7 +213,7 @@ theorem toDomain_pairMeldCounts (pair : Shanten.Tile) (melds : List Shanten.Meld
     toDomainCounts (fun tile => (pairTiles pair + meldsTiles melds).count tile) =
       fun tile =>
         (toDomainPair pair).tiles.count tile +
-          MahjongDomain.MeldList.counts (toDomainMelds melds) tile := by
+          MahjongDomain.MentsuCandidateList.counts (toDomainMelds melds) tile := by
   funext tile
   change (pairTiles pair + meldsTiles melds).count (ofDomainTile tile) = _
   rw [Multiset.count_add, toDomain_pairTiles_count, toDomain_meldsTiles_count]
@@ -259,7 +260,7 @@ theorem standardCompletion_iff_shantenParts
       have hconvert := congrFun (toDomain_pairMeldCounts pair melds) tile
       have hcounts :
           (toDomainPair pair).tiles.count tile +
-              MahjongDomain.MeldList.counts (toDomainMelds melds) tile =
+              MahjongDomain.MentsuCandidateList.counts (toDomainMelds melds) tile =
             toDomainCounts counts tile := by
         simpa [toDomainCounts] using hconvert.symm.trans hlocal.symm
       exact hcounts

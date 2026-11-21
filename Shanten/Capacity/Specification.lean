@@ -247,7 +247,7 @@ lemma complete_mentsuHand_iff_of_four_fixed (hlength : fixed.length = 4) :
           hand.counts tile := by
       simpa [Shanten.DomainAdapter.toDomainCounts,
         Shanten.DomainAdapter.ofDomainTile_toDomainTile, meldsTiles,
-        MahjongDomain.MeldList.counts, MahjongDomain.MeldList.tiles] using
+        MahjongDomain.MentsuCandidateList.counts, MahjongDomain.MentsuCandidateList.tiles] using
           hconvert.trans hshared
     exact hcount.symm
   · rintro ⟨hvalid, pair, htiles⟩
