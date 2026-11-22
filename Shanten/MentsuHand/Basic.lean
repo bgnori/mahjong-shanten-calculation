@@ -62,8 +62,13 @@ lemma taatsuTiles_add_completionTile
       MentsuCandidate.tiles (taatsuCompletionMeld taatsu) := by
   cases taatsu with
   | pair tile =>
-      simp [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,
-        pairTiles, Pair.tiles, MentsuCandidate.tiles, Multiset.replicate_succ]
+      simp only [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,
+        pairTiles, Pair.tiles, Pair.orderedTiles, MentsuCandidate.tiles,
+        MentsuCandidate.orderedTiles]
+      change Multiset.ofList [tile, tile] + Multiset.ofList [tile] =
+        Multiset.ofList [tile, tile, tile]
+      rw [Multiset.coe_add]
+      rfl
   | sequence suit start =>
       by_cases hstart : start.val ≤ 6
       · simp only [taatsuTiles, taatsuCompletionTile, taatsuCompletionMeld,

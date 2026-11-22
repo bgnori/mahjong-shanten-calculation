@@ -22,9 +22,11 @@ private lemma honor_count_zero (meld : FixedMeld) (rank : Fin 7)
   | meld value =>
       cases value with
       | koutsu tile =>
-          cases tile <;> simp_all [honorKind, FixedMeld.tiles, MentsuCandidate.tiles, eq_comm]
+          cases tile <;> simp_all [honorKind, FixedMeld.tiles, MentsuCandidate.tiles,
+            MentsuCandidate.orderedTiles, eq_comm]
       | shuntsu sequence =>
-          simp [FixedMeld.tiles, MentsuCandidate.tiles, Shuntsu.tiles]
+          simp [FixedMeld.tiles, MentsuCandidate.tiles, MentsuCandidate.orderedTiles,
+            Shuntsu.orderedTiles]
   | kan tile =>
       cases tile <;> simp_all [honorKind, FixedMeld.tiles, Kan.occupiedTiles, eq_comm]
 
@@ -98,7 +100,7 @@ lemma exists_complete_target (hvalid : ValidHand fixed hand) :
     have hcount : (MentsuCandidateList.tiles melds).count tile =
         if tile ∈ kinds then 3 else 0 := triplet_finset_counts kinds tile
     simp only [mentsuHandTarget, Multiset.count_add, hcount,
-      pairTiles, Pair.tiles, Multiset.count_replicate]
+      pairTiles, Pair.tiles_eq_replicate, Multiset.count_replicate]
     by_cases hmem : tile ∈ chosen
     · obtain ⟨rank, hrank, rfl⟩ := Finset.mem_image.mp (hsubset hmem)
       have hfree := (Finset.mem_sdiff.mp hrank).2

@@ -193,7 +193,7 @@ lemma reachesCompletion_mentsuHand_of_blockDecomposition
                 rfl
             | cons taatsu taatsus ih =>
                 cases taatsu <;>
-                  simp [taatsuHistoryTiles, taatsuTiles, pairTiles, Pair.tiles, ih,
+                  simp [taatsuHistoryTiles, taatsuTiles, pairTiles, Pair.tiles, Pair.orderedTiles, ih,
                     Multiset.card_add] <;> omega
           unfold mentsuHandTargetWithTaatsu mentsuHandTarget
           rw [Multiset.card_add, Multiset.card_add, pairTiles_card,

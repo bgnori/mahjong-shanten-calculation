@@ -100,7 +100,7 @@ theorem CountsMatch.draw
 
 theorem flatMapMentsuComponentsTiles (melds : List MentsuCandidate) :
     ((melds.map fun candidate => (Sum.inr candidate : WinningComponent)).flatMap
-      WinningComponent.tiles) = melds.flatMap MentsuCandidate.orderedTiles := by
+      WinningComponent.tiles) = melds.flatMap Mahjong.DomainAdapter.mentsuTiles := by
   induction melds with
   | nil => rfl
   | cons first rest ih =>
@@ -119,13 +119,13 @@ theorem standardCompletion_toStandardAgari {tiles : List _root_.Tile}
       ((Sum.inl pair : WinningComponent) ::
           melds.map fun candidate => (Sum.inr candidate : WinningComponent)).flatMap
           WinningComponent.tiles =
-        ClassificationPair.tiles pair ++ melds.flatMap MentsuCandidate.orderedTiles := by
+        Mahjong.DomainAdapter.pairTiles pair ++ melds.flatMap Mahjong.DomainAdapter.mentsuTiles := by
     simp only [List.flatMap_cons, WinningComponent.tiles]
     rw [flatMapMentsuComponentsTiles]
   have hpartsCounts :=
     decomposition.counts_eq_parts.symm.trans hcounts
   have localCounts : ∀ tile : _root_.Tile,
-      (ClassificationPair.tiles pair ++ melds.flatMap MentsuCandidate.orderedTiles).count tile =
+      (Mahjong.DomainAdapter.pairTiles pair ++ melds.flatMap Mahjong.DomainAdapter.mentsuTiles).count tile =
         tiles.count tile := by
     intro tile
     have hcount := congrFun hpartsCounts
@@ -178,12 +178,12 @@ theorem standardAgari_toDomainCompletion_fixed
         melds.map fun candidate => (Sum.inr candidate : WinningComponent)).flatMap
           WinningComponent.tiles).length = 2 + 3 * melds.length := by
     calc
-      _ = (ClassificationPair.tiles pair).length + (melds.flatMap MentsuCandidate.orderedTiles).length := by
+      _ = (Mahjong.DomainAdapter.pairTiles pair).length + (melds.flatMap Mahjong.DomainAdapter.mentsuTiles).length := by
         simp only [List.flatMap_cons, List.length_append, WinningComponent.tiles]
         rw [flatMapMentsuComponentsTiles]
       _ = 2 + melds.length * mentsuTileCount := by
-        simp only [ClassificationPair.tiles, List.length_cons, List.length_nil]
-        rw [MentsuCandidate.flatMap_tiles_length]
+        simp only [Mahjong.DomainAdapter.pairTiles, MahjongDomain.Pair.orderedTiles, List.map_cons, List.map_nil, List.length_cons, List.length_nil]
+        rw [Mahjong.DomainAdapter.flatMap_mentsuTiles_length]
       _ = 2 + 3 * melds.length := by
         simp [mentsuTileCount, Nat.mul_comm]
   have hpermLength := tilesPerm.length_eq
@@ -202,20 +202,20 @@ theorem standardAgari_toDomainCompletion_fixed
           ((Sum.inl pair : WinningComponent) ::
               melds.map fun candidate => (Sum.inr candidate : WinningComponent)).flatMap
               WinningComponent.tiles =
-            ClassificationPair.tiles pair ++ melds.flatMap MentsuCandidate.orderedTiles := by
+            Mahjong.DomainAdapter.pairTiles pair ++ melds.flatMap Mahjong.DomainAdapter.mentsuTiles := by
         simp only [List.flatMap_cons, WinningComponent.tiles]
         rw [flatMapMentsuComponentsTiles]
       have domainPermutation :
-          ((ClassificationPair.tiles pair ++ melds.flatMap MentsuCandidate.orderedTiles).map
+          ((Mahjong.DomainAdapter.pairTiles pair ++ melds.flatMap Mahjong.DomainAdapter.mentsuTiles).map
             Mahjong.DomainAdapter.toDomainTile).Perm
             ((candidate :: tiles).map Mahjong.DomainAdapter.toDomainTile) := by
         simpa only [localParts] using tilesPerm.map Mahjong.DomainAdapter.toDomainTile
       have countsPermuted := domainPermutation.count tile
       rw [Mahjong.DomainAdapter.pair_count,
         Mahjong.DomainAdapter.mentsuCandidates_count,
-        ← Mahjong.DomainAdapter.toDomainTileList_count (ClassificationPair.tiles pair) tile,
+        ← Mahjong.DomainAdapter.toDomainTileList_count (Mahjong.DomainAdapter.pairTiles pair) tile,
         ← Mahjong.DomainAdapter.toDomainTileList_count
-          (melds.flatMap MentsuCandidate.orderedTiles) tile]
+          (melds.flatMap Mahjong.DomainAdapter.mentsuTiles) tile]
       rw [← List.count_append]
       simpa only [List.map_append, Mahjong.DomainAdapter.tileListCounts] using countsPermuted
   simpa [hmelds] using hcompletion

@@ -56,12 +56,14 @@ private lemma canonicalMentsuHandTarget_validCounts
         cases suit <;> fin_cases rank <;>
           simp [canonicalMentsuHandPair, canonicalMentsuHandMelds,
             mentsuHandTarget, pairTiles, Pair.tiles, MentsuCandidateList.tiles, MentsuCandidate.tiles,
-            MentsuCandidate.tiles, Shuntsu.tiles]
+            Pair.orderedTiles, MentsuCandidate.orderedTiles, Shuntsu.orderedTiles,
+            ShuntsuStart.firstRank, ShuntsuStart.middleRank, ShuntsuStart.lastRank]
     | honor rank =>
         fin_cases rank <;>
           simp [canonicalMentsuHandPair, canonicalMentsuHandMelds,
             mentsuHandTarget, pairTiles, Pair.tiles, MentsuCandidateList.tiles, MentsuCandidate.tiles,
-            MentsuCandidate.tiles, Shuntsu.tiles]
+            Pair.orderedTiles, MentsuCandidate.orderedTiles, Shuntsu.orderedTiles,
+            ShuntsuStart.firstRank, ShuntsuStart.middleRank, ShuntsuStart.lastRank]
 
 set_option maxHeartbeats 1000000 in
 lemma exists_mentsuHandShanten_as_min_validTargetDistance

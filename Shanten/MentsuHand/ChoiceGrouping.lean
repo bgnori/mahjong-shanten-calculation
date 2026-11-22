@@ -30,13 +30,13 @@ lemma mentsuHandChoiceRepresentative_mem
   | pair pairTile =>
       simp [mentsuHandChoiceRepresentative] at hrep
       subst tile
-      simp [choiceTiles, pairTiles, Pair.tiles]
+      simp [choiceTiles, pairTiles, Pair.tiles, Pair.orderedTiles]
   | taatsu taatsu =>
       cases taatsu with
       | pair pairTile =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile
-          simp [choiceTiles, taatsuTiles, pairTiles, Pair.tiles]
+          simp [choiceTiles, taatsuTiles, pairTiles, Pair.tiles, Pair.orderedTiles]
       | sequence suit start =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile
@@ -46,11 +46,12 @@ lemma mentsuHandChoiceRepresentative_mem
       | koutsu meldTile =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile
-          simp [choiceTiles, MentsuCandidate.tiles]
+          simp [choiceTiles, MentsuCandidate.tiles, MentsuCandidate.orderedTiles]
       | shuntsu sequence =>
           simp [mentsuHandChoiceRepresentative] at hrep
           subst tile
-          simp [choiceTiles, MentsuCandidate.tiles, Shuntsu.tiles]
+          simp [choiceTiles, MentsuCandidate.tiles, MentsuCandidate.orderedTiles,
+            Shuntsu.orderedTiles, ShuntsuStart.firstRank]
 
 def mentsuHandChoicesForTile
     (tile : Tile) : List MentsuHandChoice → List MentsuHandChoice

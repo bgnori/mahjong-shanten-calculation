@@ -98,14 +98,14 @@ private def reviewExampleDecomposition :
             reviewExampleMan2, reviewExampleTaatsu,
             mentsuHandTargetWithTaatsu, mentsuHandTarget, taatsuHistoryTiles,
               taatsuTiles, taatsuCompletionTiles, taatsuCompletionTile,
-              pairTiles, Pair.tiles, MentsuCandidateList.tiles] <;> omega
+              pairTiles, Pair.tiles, Pair.orderedTiles, MentsuCandidateList.tiles] <;> omega
       | honor rank =>
         fin_cases rank <;>
         simp [reviewExampleHand, reviewExampleEast, reviewExampleMan1,
           reviewExampleMan2, reviewExampleTaatsu,
           mentsuHandTargetWithTaatsu, mentsuHandTarget, taatsuHistoryTiles,
           taatsuTiles, taatsuCompletionTiles, taatsuCompletionTile,
-          pairTiles, Pair.tiles, MentsuCandidateList.tiles] <;> omega }
+          pairTiles, Pair.tiles, Pair.orderedTiles, MentsuCandidateList.tiles] <;> omega }
 
 example :
     ∃ final,
@@ -139,7 +139,7 @@ example : ¬ Nonempty (MentsuHandBlockDecomposition isolatedMentsuHand) := by
     change (if decomposition.pair ∈ kokushiKinds then 1 else 0) ≤ 1
     split <;> omega
   simp only [mentsuHandTargetWithTaatsu, mentsuHandTarget, Multiset.count_add,
-    pairTiles, Pair.tiles, Multiset.count_replicate_self] at hcount
+    pairTiles, Pair.tiles_eq_replicate, Multiset.count_replicate_self] at hcount
   omega
 
 example :
