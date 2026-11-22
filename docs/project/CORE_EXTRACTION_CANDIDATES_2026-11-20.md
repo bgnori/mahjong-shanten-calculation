@@ -4,6 +4,10 @@
 **対象:** `mahjong-domain-core`と二つのconsumerのLean定義
 **目的:** W7後もconsumer側に残る基礎ドメイン定義を確認し、追加抽出と既存coreへの接続を区別する。
 
+**履歴資料:** 以下は2026-11-20時点の調査・判断であり、現状や移行先を示しません。
+その後のCore・Shanten移行、互換性方針と待ち分類の型・操作の分離については
+[最新の共有語彙・Adapter状況](../../../docs/vocabulary-adapter-status.md)を参照してください。
+
 ## 要約
 
 ご指摘の[分類側 `Mahjong.Basic`](../../../mahjong-wait-classification/Mahjong/Basic.lean)には、
