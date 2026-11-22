@@ -5,6 +5,7 @@ import Mathlib.Util.AssertNoSorry
 namespace SharedDomainW6
 
 open Shanten Shanten.Capacity
+open MahjongDomain (MentsuCandidate)
 
 def IsFixedContextWait (fixed : List FixedMeld) (hand : Hand) (tile : MahjongDomain.Tile) : Prop :=
   hand.counts tile < remainingCapacity fixed tile ∧
@@ -99,7 +100,7 @@ theorem CountsMatch.draw
 
 theorem flatMapMentsuComponentsTiles (melds : List MentsuCandidate) :
     ((melds.map fun candidate => (Sum.inr candidate : WinningComponent)).flatMap
-      WinningComponent.tiles) = melds.flatMap MentsuCandidate.tiles := by
+      WinningComponent.tiles) = melds.flatMap MentsuCandidate.orderedTiles := by
   induction melds with
   | nil => rfl
   | cons first rest ih =>
@@ -112,33 +113,25 @@ theorem standardCompletion_toStandardAgari {tiles : List _root_.Tile}
       (Mahjong.DomainAdapter.tileListCounts tiles)) :
     WaitCompletionFinder.IsStandardAgari tiles := by
   obtain ⟨decomposition, _, hcounts⟩ := hcompletion
-  let localParts := Mahjong.DomainAdapter.ofDomainDecomposition decomposition
-  let pair := localParts.1
-  let melds := localParts.2
-  have hdecomposition :
-      Mahjong.DomainAdapter.toDomainDecomposition pair melds = decomposition := by
-    change Mahjong.DomainAdapter.toDomainDecomposition
-      (Mahjong.DomainAdapter.ofDomainDecomposition decomposition).1
-      (Mahjong.DomainAdapter.ofDomainDecomposition decomposition).2 = decomposition
-    exact Mahjong.DomainAdapter.toDomainDecomposition_ofDomainDecomposition decomposition
+  let pair := decomposition.pair
+  let melds := decomposition.mentsuCandidates
   have localPartsTiles :
       ((Sum.inl pair : WinningComponent) ::
           melds.map fun candidate => (Sum.inr candidate : WinningComponent)).flatMap
           WinningComponent.tiles =
-        pair.tiles ++ melds.flatMap MentsuCandidate.tiles := by
+        ClassificationPair.tiles pair ++ melds.flatMap MentsuCandidate.orderedTiles := by
     simp only [List.flatMap_cons, WinningComponent.tiles]
     rw [flatMapMentsuComponentsTiles]
   have hpartsCounts :=
     decomposition.counts_eq_parts.symm.trans hcounts
   have localCounts : ∀ tile : _root_.Tile,
-      (pair.tiles ++ melds.flatMap MentsuCandidate.tiles).count tile =
+      (ClassificationPair.tiles pair ++ melds.flatMap MentsuCandidate.orderedTiles).count tile =
         tiles.count tile := by
     intro tile
     have hcount := congrFun hpartsCounts
       (Mahjong.DomainAdapter.toDomainTile tile)
-    rw [← hdecomposition, Mahjong.DomainAdapter.toDomainDecomposition,
-      Mahjong.DomainAdapter.toDomainPair_count,
-      Mahjong.DomainAdapter.toDomainMentsuCandidates_count,
+    rw [Mahjong.DomainAdapter.pair_count,
+      Mahjong.DomainAdapter.mentsuCandidates_count,
       Mahjong.DomainAdapter.tileListCounts,
       Mahjong.DomainAdapter.toDomainTileList_count,
       Mahjong.DomainAdapter.ofDomainTile_toDomainTile] at hcount
@@ -185,11 +178,11 @@ theorem standardAgari_toDomainCompletion_fixed
         melds.map fun candidate => (Sum.inr candidate : WinningComponent)).flatMap
           WinningComponent.tiles).length = 2 + 3 * melds.length := by
     calc
-      _ = pair.tiles.length + (melds.flatMap MentsuCandidate.tiles).length := by
+      _ = (ClassificationPair.tiles pair).length + (melds.flatMap MentsuCandidate.orderedTiles).length := by
         simp only [List.flatMap_cons, List.length_append, WinningComponent.tiles]
         rw [flatMapMentsuComponentsTiles]
       _ = 2 + melds.length * mentsuTileCount := by
-        simp only [Toitsu.tiles, List.length_cons, List.length_nil]
+        simp only [ClassificationPair.tiles, List.length_cons, List.length_nil]
         rw [MentsuCandidate.flatMap_tiles_length]
       _ = 2 + 3 * melds.length := by
         simp [mentsuTileCount, Nat.mul_comm]
@@ -201,30 +194,28 @@ theorem standardAgari_toDomainCompletion_fixed
   have hcompletion :
       MahjongDomain.StandardCompletion melds.length
         (Mahjong.DomainAdapter.tileListCounts (candidate :: tiles)) := by
-    refine ⟨Mahjong.DomainAdapter.toDomainDecomposition pair melds, ?_, ?_⟩
-    · simp [Mahjong.DomainAdapter.toDomainDecomposition,
-        Mahjong.DomainAdapter.toDomainMentsuCandidates]
+    refine ⟨⟨pair, melds⟩, ?_, ?_⟩
+    · rfl
     · rw [MahjongDomain.StandardDecomposition.counts_eq_parts]
-      simp only [Mahjong.DomainAdapter.toDomainDecomposition]
       funext tile
       have localParts :
           ((Sum.inl pair : WinningComponent) ::
               melds.map fun candidate => (Sum.inr candidate : WinningComponent)).flatMap
               WinningComponent.tiles =
-            pair.tiles ++ melds.flatMap MentsuCandidate.tiles := by
+            ClassificationPair.tiles pair ++ melds.flatMap MentsuCandidate.orderedTiles := by
         simp only [List.flatMap_cons, WinningComponent.tiles]
         rw [flatMapMentsuComponentsTiles]
       have domainPermutation :
-          ((pair.tiles ++ melds.flatMap MentsuCandidate.tiles).map
+          ((ClassificationPair.tiles pair ++ melds.flatMap MentsuCandidate.orderedTiles).map
             Mahjong.DomainAdapter.toDomainTile).Perm
             ((candidate :: tiles).map Mahjong.DomainAdapter.toDomainTile) := by
         simpa only [localParts] using tilesPerm.map Mahjong.DomainAdapter.toDomainTile
       have countsPermuted := domainPermutation.count tile
-      rw [Mahjong.DomainAdapter.toDomainPair_count,
-        Mahjong.DomainAdapter.toDomainMentsuCandidates_count,
-        ← Mahjong.DomainAdapter.toDomainTileList_count pair.tiles tile,
+      rw [Mahjong.DomainAdapter.pair_count,
+        Mahjong.DomainAdapter.mentsuCandidates_count,
+        ← Mahjong.DomainAdapter.toDomainTileList_count (ClassificationPair.tiles pair) tile,
         ← Mahjong.DomainAdapter.toDomainTileList_count
-          (melds.flatMap MentsuCandidate.tiles) tile]
+          (melds.flatMap MentsuCandidate.orderedTiles) tile]
       rw [← List.count_append]
       simpa only [List.map_append, Mahjong.DomainAdapter.tileListCounts] using countsPermuted
   simpa [hmelds] using hcompletion
@@ -478,15 +469,15 @@ theorem capacityAB :
     unfold WaitCompletionFinder.IsWaitFor
     refine ⟨by decide, by decide, ?_⟩
     have hmember :
-        (.inl (.toitsu classificationEast) ::
-          [.inr (.koutsu (_root_.Tile.numbered .Manzu 0))]) ∈
+        (.inl ⟨shantenTileOfClassification classificationEast⟩ ::
+          [.inr (.koutsu (shantenTileOfClassification (_root_.Tile.numbered .Manzu 0)))]) ∈
           WaitCompletionFinder.winningPartitions
             (classificationEast :: classificationStanding) := by
       apply (WaitCompletionFinder.mem_winningPartitions_iff_spec _ _).mpr
-      refine ⟨.inl (.toitsu classificationEast),
-        [.koutsu (_root_.Tile.numbered .Manzu 0)], rfl, ?_, ?_⟩
+      refine ⟨.inl ⟨shantenTileOfClassification classificationEast⟩,
+        [.koutsu (shantenTileOfClassification (_root_.Tile.numbered .Manzu 0))], rfl, ?_, ?_⟩
       · exact WaitCompletionFinder.pair_mem_pairComponentCandidates
-          (.toitsu classificationEast)
+          ⟨shantenTileOfClassification classificationEast⟩
       · decide
     have hnonempty :
         WaitCompletionFinder.winningPartitions
