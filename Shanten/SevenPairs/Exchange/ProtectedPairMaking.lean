@@ -69,6 +69,7 @@ lemma ProtectedPairMakingExchange.isThirteenTileHand
         change exchangeCounts before discarded drawn discarded ≤ 4
         rcases hdiscarded with hsurplus | ⟨hsingleton, _⟩
         · have hbefore := hmax discarded
+          change before.counts discarded ≤ 4 at hbefore
           rw [exchangeCounts_discarded before discarded drawn hne hpositive]
           omega
         · rw [exchangeCounts_discarded before discarded drawn hne hpositive]

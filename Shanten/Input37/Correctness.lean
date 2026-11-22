@@ -65,6 +65,8 @@ theorem validateAndNormalize_valid
     simp [parsedMelds]
   refine ⟨⟨hlength.symm, by rw [hlength]; exact hvalid.2.2.2.1, ?_⟩, ?_⟩
   · intro tile
+    change (normalizedHand input hvalid.1).counts tile +
+      (Capacity.fixedTiles (parsedMelds input hparsed)).count tile ≤ MahjongDomain.copiesPerTile
     have hbound := MahjongDomain.aggregateInt37_le_four _ hvalid.2.2.1 tile
     have htotal : aggregateInt37 (totalCounts input) tile =
         ((normalizedHand input hvalid.1).counts tile : Int) +

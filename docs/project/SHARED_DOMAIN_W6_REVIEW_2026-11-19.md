@@ -1,7 +1,7 @@
 # W6対応レビュー報告（2026-11-19）
 
-このレビューは当時のリビジョンを対象とする履歴です。現在の固定文脈連携は共有牌種を
-直接使用し、牌種変換・往復定理を削除しています。現状は[用語集](../GLOSSARY.md)を参照してください。
+このレビューは当時のリビジョンを対象とする履歴です。W6パッケージは移行時の検証後に
+解消されました。現状は[用語集](../GLOSSARY.md)を参照してください。
 
 ## 結論
 
@@ -18,8 +18,8 @@ W6の接続証明は、固定文脈付き通常形待ちと分類側`IsWaitFor`�
 | 対象 | 確認したリビジョン／条件 |
 |---|---|
 | W6接続パッケージ | `a177a053d701291b60fc6b3b061177aa6a264570` |
-| 接続証明 | [SharedDomainW6.lean](../../w6/SharedDomainW6.lean) |
-| パッケージ設定 | [lakefile.lean](../../w6/lakefile.lean)、[lake-manifest.json](../../w6/lake-manifest.json) |
+| 接続証明 | [`SharedDomainW6.lean`（削除前）](https://github.com/bgnori/mahjong-shanten-calculation/blob/bbfed07f8de7d437898dd12abc01fe3b4031f516/w6/SharedDomainW6.lean) |
+| パッケージ設定 | [`lakefile.lean`（削除前）](https://github.com/bgnori/mahjong-shanten-calculation/blob/bbfed07f8de7d437898dd12abc01fe3b4031f516/w6/lakefile.lean)、[`lake-manifest.json`（削除前）](https://github.com/bgnori/mahjong-shanten-calculation/blob/bbfed07f8de7d437898dd12abc01fe3b4031f516/w6/lake-manifest.json) |
 | 受入条件 | [共通ドメイン抽出作業計画](SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md)の3.2、W6、5節 |
 
 ## 受入条件ごとの確認

@@ -59,7 +59,7 @@ def kokushiWorstCase : Hand :=
     fixedMelds := 0 }
 
 def ValidCounts (hand : Hand) : Prop :=
-  ∀ tile, hand.counts tile ≤ 4
+  TileCounts.Valid hand.counts
 /-- The number of standing tiles in a hand. -/
 def tileCount (hand : Hand) : Nat :=
   ∑ tile, hand.counts tile

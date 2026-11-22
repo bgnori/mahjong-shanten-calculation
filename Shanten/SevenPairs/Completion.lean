@@ -171,6 +171,7 @@ lemma complete_sevenPairs_of_counts
     Complete .sevenPairs hand := by
   refine ⟨?_, hfixed, pairs, hpairs, ?_⟩
   · intro tile
+    change hand.counts tile ≤ 4
     rw [hcounts, sevenPairsCompletionCounts]
     split <;> omega
   intro tile
@@ -204,6 +205,7 @@ lemma reachesCompletion_sevenPairs_one_draw
   refine ⟨rfl, ?_⟩
   refine Or.inl ⟨single, ?_, ?_⟩
   · intro tile
+    change completed.counts tile ≤ 4
     dsimp [completed, sevenPairsCompletionCounts]
     split <;> omega
   intro tile

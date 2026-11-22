@@ -1,6 +1,7 @@
 import Shanten.Capacity.Discard
 import Shanten.Capacity.Special
 import Shanten.Capacity.Overall
+import Shanten.Capacity.Wait
 
 namespace Shanten.Capacity.Examples
 
@@ -80,6 +81,7 @@ private lemma inputA_no_one_step :
   have hcount := htiles east
   simp only [pairTiles, Pair.tiles_eq_replicate, Multiset.count_replicate_self] at hcount
   have hcapacity := hvalid.2.2 east
+  change next.counts east + (fixedTiles fixedA).count east ≤ 4 at hcapacity
   have hfixed : (fixedTiles fixedA).count east = 3 := by decide
   omega
 
@@ -115,6 +117,50 @@ theorem inputB_shanten : IsShapeShanten fixedB standing .mentsuHand 0 := by
   have : smaller = 0 := by omega
   subst smaller
   exact not_complete fixedB (by decide) (reachesCompletion_zero_iff.mp hreach)
+
+example : ¬ ∃ tile, IsFixedContextWait fixedA standing tile := by
+  intro wait
+  have zero := (isShapeShanten_zero_iff_exists_fixedContextWait inputA_valid).mpr wait
+  have equal := isShapeShanten_unique inputA_shanten zero
+  omega
+
+example : ∃ tile, IsFixedContextWait fixedB standing tile :=
+  (isShapeShanten_zero_iff_exists_fixedContextWait inputB_valid).mp inputB_shanten
+
+private def man1 : Tile := .suited .man 0
+
+private def threeMeldStanding : Hand :=
+  { counts := fun tile => if tile = man1 then 3 else if tile = east then 1 else 0
+    fixedMelds := 3 }
+
+private def threeMeldFixedA : List FixedMeld :=
+  [.meld (.koutsu east), .meld (.shuntsu ⟨.pin, 0⟩), .meld (.shuntsu ⟨.sou, 0⟩)]
+
+private def threeMeldFixedB : List FixedMeld :=
+  [.meld (.koutsu south), .meld (.shuntsu ⟨.pin, 0⟩), .meld (.shuntsu ⟨.sou, 0⟩)]
+
+example : IsThirteenTileEquivalentHand threeMeldFixedA threeMeldStanding := by
+  unfold IsThirteenTileEquivalentHand ValidHand
+  decide
+
+example : ¬ IsFixedContextWait threeMeldFixedA threeMeldStanding east := by
+  intro wait
+  have : ¬ threeMeldStanding.counts east < remainingCapacity threeMeldFixedA east := by decide
+  exact this wait.1
+
+private theorem threeMeldFixedB_wait : IsFixedContextWait threeMeldFixedB threeMeldStanding east := by
+  have valid : ValidHand threeMeldFixedB (drawHand threeMeldStanding east) := by
+    unfold ValidHand
+    decide
+  refine ⟨by decide, valid, valid.validCounts, east, [.koutsu man1], by decide, ?_⟩
+  unfold HasTiles
+  decide
+
+example : IsShapeShanten threeMeldFixedB threeMeldStanding .mentsuHand 0 := by
+  have valid : IsThirteenTileEquivalentHand threeMeldFixedB threeMeldStanding := by
+    unfold IsThirteenTileEquivalentHand ValidHand
+    decide
+  exact (isShapeShanten_zero_iff_exists_fixedContextWait valid).mpr ⟨east, threeMeldFixedB_wait⟩
 
 set_option maxRecDepth 4096 in
 theorem inputA_search : generalMentsuHandMinimumSearch fixedA standing = some 1 := by

@@ -12,6 +12,7 @@ lemma handStep_of_targetExchange
   obtain ⟨discarded, drawn, hdrawn, hdiscarded, hne, rfl⟩ := hstep
   apply exchangeHand_step hvalid hne (by omega)
   have := htarget drawn
+  change target drawn + (fixedTiles fixed).count drawn ≤ copiesPerTile at this
   unfold remainingCapacity
   omega
 

@@ -20,6 +20,7 @@
 | [Capacity.lean](../Shanten/Capacity.lean) | 固定面子の実牌内容を持つ容量付きモデルの公開入口。既存抽象モデルとは別の段階導入。 |
 | [Capacity/Basic.lean](../Shanten/Capacity/Basic.lean) | 槓を含む固定面子、残余容量、合算容量の有効性と保存。 |
 | [Capacity/Specification.lean](../Shanten/Capacity/Specification.lean) | 容量付き完成・遷移・最短距離仕様、共有通常形完成との対応、総合値の達成最小値仕様。 |
+| [Capacity/Wait.lean](../Shanten/Capacity/Wait.lean) | 固定文脈の通常形待ちと、13枚相当入力の通常形シャンテン0との同値。 |
 | [Capacity/Reachability.lean](../Shanten/Capacity/Reachability.lean) | 共有の目標方向交換列を容量付き経路へ変換し、不足枚数で完成目標へ到達する。 |
 | [Capacity/Search.lean](../Shanten/Capacity/Search.lean) | 既存ブロック探索の容量フィルタ、完成形との対応、到達上界・下界、最小値証明。 |
 | [Capacity/Totality.lean](../Shanten/Capacity/Totality.lean) | 有効固定文脈の完成目標を構成し、13枚相当入力すべての全域性・仕様一致・最適状態を証明する。 |
@@ -98,6 +99,7 @@ Bounds        -> SevenPairs
 Special       -> SevenPairs.Completion, SevenPairs.Counting, ThirteenOrphans
 Capacity.Basic -> Exchange
 Capacity.Specification -> Capacity.Basic, Specification
+Capacity.Wait -> Capacity.Specification
 Capacity.Reachability -> Capacity.Specification
 Capacity.Search -> Capacity.Reachability, MentsuHand.Search.BlockSearch
 Capacity.Totality -> Capacity.Search
@@ -105,8 +107,8 @@ Capacity.Fourteen -> Capacity.Totality
 Capacity.Discard -> Capacity.Fourteen
 Capacity.Special -> Capacity.Specification, Special
 Capacity.Overall -> Capacity.Fourteen, Capacity.Special
-Capacity.Examples -> Capacity.Discard, Capacity.Special, Capacity.Overall
-Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Reachability,
+Capacity.Examples -> Capacity.Discard, Capacity.Special, Capacity.Overall, Capacity.Wait
+Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Wait, Capacity.Reachability,
                  Capacity.Search, Capacity.Totality, Capacity.Fourteen,
                  Capacity.Discard, Capacity.Special, Capacity.Overall, Capacity.Examples
 Input37.Basic -> Capacity.Basic
@@ -127,10 +129,9 @@ Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, Special, Ment
 アダプタと対応定理を介して共有定義を利用する。循環importを作らない。
 構造変更が必要になった場合も、宣言・命題の意味の変更とは分離して検証する。
 
-固定面子文脈付き待ちと分類側`IsWaitFor`の同値は、両プロジェクト間の循環依存を避けるため
-独立した[`w6/`](../w6/) Lakeパッケージに置く。CIは分類側の検査対象を
-`803ba634ab53b90c0b51add76f7ce36b1bf73b2c`に固定し、W6の接続定理とA/B例を
-推移的`sorryAx`不在検査付きでビルドする。既存の`Shanten`公開rootと探索器は変更しない。
+固定面子文脈付き待ちと分類側`IsWaitFor`の接続は、共有型への移行中に独立した
+W6パッケージで検証した。移行後は各側の仕様とA/B回帰へ引き継ぎ、パッケージは削除した。
+CIはCoreと分類側の`main`を検査し、各リビジョンを記録する。
 
 国士無双の追加時に、面子手の `Exchange` にあった汎用の目標カウント・不足数・
 交換列の補題を共有の [Exchange.lean](../Shanten/Exchange.lean) へ移動した。

@@ -12,8 +12,9 @@ lemma ValidHand.discard (hvalid : ValidHand fixed hand) :
     ValidHand fixed (discardHand hand discarded) := by
   refine ⟨hvalid.1, hvalid.2.1, fun tile => ?_⟩
   have := hvalid.2.2 tile
+  change hand.counts tile + (fixedTiles fixed).count tile ≤ copiesPerTile at this
   change hand.counts tile - (if tile = discarded then 1 else 0) +
-    (fixedTiles fixed).count tile ≤ 4
+    (fixedTiles fixed).count tile ≤ copiesPerTile
   omega
 
 lemma discardHand_tileCount (hpositive : 0 < hand.counts discarded) :

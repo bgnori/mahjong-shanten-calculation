@@ -28,15 +28,17 @@ Mahjong model, and Lean proofs. Shared domain definitions are canonical in the
 国士の対象となる么九牌の集合と各種1枚の多重集合はCoreの
 `orphanKinds`と`orphanTiles`を直接使う。国士の完成条件やシャンテン計算は
 引き続きShanten側の仕様である。
+牌種ごとの4枚則はCoreの`copiesPerTile`と`TileCounts.Valid`を正本とし、
+固定文脈では手元牌と固定牌の占有を合算して適用する。
 
 共通核の `MahjongDomain.StandardCompletion` は雀頭と順序付き面子列の証人を保持する。
 shantenの通常形 `Complete` は `mentsuComplete_iff_standardCompletion` でこの仕様に対応し、
 4枚制限や固定面子文脈は利用側の前提として別に保つ。
-待ち分類との固定文脈連携では、両側が共有牌種を直接使い、`CountsMatch`で
-分類の牌列とshantenのカウントを比較する。牌種変換や往復は不要である。
+固定文脈付き通常形待ちとシャンテン0の対応は`IsFixedContextWait`と
+`isShapeShanten_zero_iff_exists_fixedContextWait`で表す。
 このリポジトリは[`lakefile.lean`](../lakefile.lean)のpath依存で隣の共通核を使用し、
 CIでは共通核の`main`に追従する。
-固定文脈付き待ちの接続は独立した[`w6/`](../w6/)パッケージで検査し、
+待ち分類との接続は共有型への移行時にW6で検証し、各側の仕様と回帰に引き継いだ。
 CIでは分類側も`main`でチェックアウトし、検証した各コミットSHAを実行概要に残す。
 
 ## Consumer-specific terms / 利用側固有用語

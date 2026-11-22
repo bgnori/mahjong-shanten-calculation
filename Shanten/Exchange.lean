@@ -92,6 +92,7 @@ lemma validCounts_exchangeHand
       change exchangeCounts hand discarded drawn discarded ≤ 4
       rw [exchangeCounts_discarded]
       · have hbefore := hvalid discarded
+        change hand.counts discarded ≤ 4 at hbefore
         omega
       · exact hne
       · exact hdiscarded
@@ -540,7 +541,7 @@ lemma reachesCompletion_of_one_more_target_tile
     by_cases htile : tile = drawn
     · subst tile
       have := hvalid drawn
-      simp [next]
+      simp [next, MahjongDomain.copiesPerTile]
       omega
     · simpa [next, htile] using hbeforeValid tile
   have hstep : HandStep before next :=

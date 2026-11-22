@@ -55,6 +55,7 @@ lemma DistinctnessExchange.isThirteenTileHand
         unfold IsPairPreservingDiscard at hdiscarded
         change exchangeCounts before discarded drawn discarded ≤ 4
         have hbefore := hmax discarded
+        change before.counts discarded ≤ 4 at hbefore
         rw [exchangeCounts_discarded]
         · omega
         · exact hne

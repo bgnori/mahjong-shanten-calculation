@@ -63,7 +63,7 @@ jobs:
         working-directory: mahjong-shanten-calculation
       - name: Check migrated declarations are absent
         run: |
-          if grep -REn --include='*.lean' '^[[:space:]]*(noncomputable[[:space:]]+)?(def|lemma|theorem)[[:space:]]+(orphanKinds|kokushiKinds|orphanTiles|orphanKinds_eq_kokushiKinds|orphanKinds_card|orphanTiles_count|orphanTiles_card|countsOfTiles_sum_eq_card|meldsTiles_card|pairTiles_card)([[:space:]:(]|$)' Shanten w6/SharedDomainW6.lean; then
+          if grep -REn --include='*.lean' '^[[:space:]]*(noncomputable[[:space:]]+)?(abbrev|def|lemma|theorem)[[:space:]]+(copiesPerTile|orphanKinds|kokushiKinds|orphanTiles|orphanKinds_eq_kokushiKinds|orphanKinds_card|orphanTiles_count|orphanTiles_card|countsOfTiles_sum_eq_card|meldsTiles_card|pairTiles_card)([[:space:]:(]|$)' Shanten; then
             echo "Obsolete shared-domain declaration found" >&2
             exit 1
           fi
@@ -142,10 +142,3 @@ jobs:
       - name: Test classification Go contract
         working-directory: mahjong-wait-classification
         run: go test ./mahjong
-      - name: Build fixed-context connection and reject proof holes
-        working-directory: mahjong-shanten-calculation/w6
-        run: |
-          lake exe cache get $(find ../Shanten ../../mahjong-wait-classification/Mahjong \
-            ../../mahjong-domain-core/MahjongDomain SharedDomainW6.lean \
-            -name '*.lean' -exec sed -n 's/^\(public \)\?import \(Mathlib\..*\)$/\2/p' {} + | sort -u)
-          lake build
