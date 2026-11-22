@@ -314,6 +314,6 @@ lemma countDeficit_add_le_card_of_le
       have htile := hbelow tile
       omega
     _ = extra.card := by
-      exact countsOfTiles_sum_eq_card extra
+      exact TileCounts.ofMultiset_sum_eq_card extra
 
 end Shanten

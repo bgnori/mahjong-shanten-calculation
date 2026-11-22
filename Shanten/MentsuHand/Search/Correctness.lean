@@ -141,14 +141,14 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget
             ∑ tile : Tile, (mentsuHandTarget pair melds).count tile := hsum
         _ = (mentsuHandTarget pair melds).card := by
           simpa [TileCounts.ofMultiset] using
-            (countsOfTiles_sum_eq_card (mentsuHandTarget pair melds))
+            (TileCounts.ofMultiset_sum_eq_card (mentsuHandTarget pair melds))
         _ = (mentsuHandTarget otherPair otherMelds).card := by
-          simp [mentsuHandTarget, Multiset.card_add, pairTiles_card,
-            meldsTiles_card, hlength]
+          simp [mentsuHandTarget, pairTiles, Multiset.card_add, Pair.tiles_card,
+            MentsuCandidateList.tiles_card, hlength]
         _ = ∑ tile : Tile, (mentsuHandTarget otherPair otherMelds).count tile := by
           symm
           simpa [TileCounts.ofMultiset] using
-            (countsOfTiles_sum_eq_card (mentsuHandTarget otherPair otherMelds))
+            (TileCounts.ofMultiset_sum_eq_card (mentsuHandTarget otherPair otherMelds))
     have hotherCandidate :
         candidateDistance (mentsuHandTargetDistance before otherPair otherMelds) :=
       ⟨otherPair, otherMelds, hotherMelds, hsumOther, hotherValid, rfl⟩
@@ -214,15 +214,15 @@ lemma exists_isShapeShanten_mentsuHand_of_valid_mentsuHandTarget_one_more
             TileCounts.ofMultiset (mentsuHandTarget otherPair otherMelds) tile) =
             (mentsuHandTarget otherPair otherMelds).card := by
           simpa [TileCounts.ofMultiset] using
-            (countsOfTiles_sum_eq_card (mentsuHandTarget otherPair otherMelds))
+            (TileCounts.ofMultiset_sum_eq_card (mentsuHandTarget otherPair otherMelds))
         _ = (mentsuHandTarget pair melds).card := by
-          simp [mentsuHandTarget, Multiset.card_add, pairTiles_card,
-            meldsTiles_card, hlength]
+          simp [mentsuHandTarget, pairTiles, Multiset.card_add, Pair.tiles_card,
+            MentsuCandidateList.tiles_card, hlength]
         _ = ∑ tile : Tile,
             TileCounts.ofMultiset (mentsuHandTarget pair melds) tile := by
           symm
           simpa [TileCounts.ofMultiset] using
-            (countsOfTiles_sum_eq_card (mentsuHandTarget pair melds))
+            (TileCounts.ofMultiset_sum_eq_card (mentsuHandTarget pair melds))
         _ = (∑ tile : Tile, before.counts tile) + 1 := hsum
     have hotherCandidate :
         candidateDistance (mentsuHandTargetDistance before otherPair otherMelds) :=
@@ -249,10 +249,10 @@ lemma sum_countsOfTiles_mentsuHandTarget_of_thirteen_tile_count
       (∑ tile : Tile, hand.counts tile) + 1 := by
   calc
     _ = (mentsuHandTarget pair melds).card := by
-      exact countsOfTiles_sum_eq_card (mentsuHandTarget pair melds)
+      exact TileCounts.ofMultiset_sum_eq_card (mentsuHandTarget pair melds)
     _ = 2 + 3 * melds.length := by
-      simp [mentsuHandTarget, Multiset.card_add, pairTiles_card,
-        meldsTiles_card]
+      simp [mentsuHandTarget, pairTiles, Multiset.card_add, Pair.tiles_card,
+        MentsuCandidateList.tiles_card]
     _ = tileCount hand + 1 := by omega
     _ = (∑ tile : Tile, hand.counts tile) + 1 := by rfl
 

@@ -120,23 +120,23 @@ example :
 /-! Regression cases for hands not covered by the old decomposition premise. -/
 
 private def isolatedMentsuHand : Hand :=
-  { counts := fun tile => if tile ∈ kokushiKinds then 1 else 0
+  { counts := fun tile => if tile ∈ orphanKinds then 1 else 0
     fixedMelds := 0 }
 
 private lemma isolatedMentsuHand_thirteen : IsThirteenTileHand isolatedMentsuHand := by
   refine ⟨rfl, ?_, ?_⟩
-  · change (∑ tile : Tile, if tile ∈ kokushiKinds then 1 else 0) = 13
+  · change (∑ tile : Tile, if tile ∈ orphanKinds then 1 else 0) = 13
     simp only [Finset.sum_boole, Finset.filter_mem_eq_inter, Finset.univ_inter]
     decide
   · intro tile
-    change (if tile ∈ kokushiKinds then 1 else 0) ≤ 4
+    change (if tile ∈ orphanKinds then 1 else 0) ≤ 4
     split <;> omega
 
 example : ¬ Nonempty (MentsuHandBlockDecomposition isolatedMentsuHand) := by
   rintro ⟨decomposition⟩
   have hcount := decomposition.targetWithinHand decomposition.pair
   have hone : isolatedMentsuHand.counts decomposition.pair ≤ 1 := by
-    change (if decomposition.pair ∈ kokushiKinds then 1 else 0) ≤ 1
+    change (if decomposition.pair ∈ orphanKinds then 1 else 0) ≤ 1
     split <;> omega
   simp only [mentsuHandTargetWithTaatsu, mentsuHandTarget, Multiset.count_add,
     pairTiles, Pair.tiles_eq_replicate, Multiset.count_replicate_self] at hcount

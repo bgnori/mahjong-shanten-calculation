@@ -5,6 +5,7 @@ public import Mathlib.Data.Fintype.Sigma
 public import Mathlib.Data.Fintype.Sum
 public import Mathlib.Data.Multiset.Replicate
 public import MahjongDomain.Parts
+public import MahjongDomain.Orphans
 import Mathlib.Tactic.DeriveFintype
 
 @[expose] public section
@@ -26,42 +27,13 @@ def HasTiles (hand : Hand) (tiles : Multiset Tile) : Prop :=
 def pairTiles (tile : Tile) : Multiset Tile :=
   (Pair.mk tile).tiles
 
-/-- All 13 terminal and honor tile kinds. -/
-noncomputable def orphanKinds : Finset Tile :=
-  by
-    classical
-    exact Finset.univ.filter fun tile =>
-      match tile with
-      | .suited _ rank => rank.val = 0 ∨ rank.val = 8
-      | .honor _ => True
-
-/-- The multiset containing one of each terminal and honor tile kind. -/
-noncomputable def orphanTiles : Multiset Tile :=
-  Multiset.ofList orphanKinds.toList
-
-/-- The thirteen orphan kinds, written explicitly for computable calculations. -/
-def kokushiKinds : Finset Tile :=
-  { Tile.suited .man ⟨0, by omega⟩
-  , Tile.suited .man ⟨8, by omega⟩
-  , Tile.suited .pin ⟨0, by omega⟩
-  , Tile.suited .pin ⟨8, by omega⟩
-  , Tile.suited .sou ⟨0, by omega⟩
-  , Tile.suited .sou ⟨8, by omega⟩
-  , Tile.honor ⟨0, by omega⟩
-  , Tile.honor ⟨1, by omega⟩
-  , Tile.honor ⟨2, by omega⟩
-  , Tile.honor ⟨3, by omega⟩
-  , Tile.honor ⟨4, by omega⟩
-  , Tile.honor ⟨5, by omega⟩
-  , Tile.honor ⟨6, by omega⟩ }
-
 /-- The number of orphan kinds occurring in a hand. -/
 def kokushiDistinctCount (hand : Hand) : Nat :=
-  (kokushiKinds.filter fun tile => 0 < hand.counts tile).card
+  (orphanKinds.filter fun tile => 0 < hand.counts tile).card
 
 /-- The number of orphan kinds occurring at least twice. -/
 def kokushiPairCount (hand : Hand) : Nat :=
-  (kokushiKinds.filter fun tile => 2 ≤ hand.counts tile).card
+  (orphanKinds.filter fun tile => 2 ≤ hand.counts tile).card
 
 /-- The closed-form shanten value for the thirteen-orphans shape. -/
 def kokushiShanten (hand : Hand) : Int :=

@@ -64,7 +64,7 @@ lemma generalMentsuHandAddBlock_stateFor
   · change countDeficit hand.counts (TileCounts.ofMultiset tiles) +
         (block - (mentsuHandSupply hand - tiles ∩ mentsuHandSupply hand)).card =
       countDeficit hand.counts (TileCounts.ofMultiset (tiles + block))
-    rw [← countsOfTiles_sum_eq_card]
+    rw [← TileCounts.ofMultiset_sum_eq_card]
     unfold countDeficit
     rw [← Finset.sum_add_distrib]
     apply Finset.sum_congr rfl
@@ -84,7 +84,7 @@ lemma generalMentsuHandStateFor_accounting
       (generalMentsuHandStateFor hand tiles).missing = tiles.card := by
   change (tiles ∩ mentsuHandSupply hand).card +
     countDeficit hand.counts (TileCounts.ofMultiset tiles) = tiles.card
-  rw [← countsOfTiles_sum_eq_card, ← countsOfTiles_sum_eq_card tiles]
+  rw [← TileCounts.ofMultiset_sum_eq_card, ← TileCounts.ofMultiset_sum_eq_card tiles]
   unfold countDeficit
   rw [← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl

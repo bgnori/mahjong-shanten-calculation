@@ -222,7 +222,7 @@ lemma MentsuHandBlockDecomposition.exists_isShapeShanten
       (mentsuHandTarget decomposition.pair melds).card =
         tileCount hand + 1 := by
     rw [htarget, MentsuHandBlockDecomposition.completedTarget_eq]
-    simp [Multiset.card_add, pairTiles_card, meldsTiles_card,
+    simp [Multiset.card_add, pairTiles, Pair.tiles_card, MentsuCandidateList.tiles_card,
       List.length_append, taatsuCompletionMelds_length]
     have hblocks := decomposition.blocks
     omega
@@ -232,7 +232,7 @@ lemma MentsuHandBlockDecomposition.exists_isShapeShanten
         (∑ tile : Tile, hand.counts tile) + 1 := by
     calc
       _ = (mentsuHandTarget decomposition.pair melds).card := by
-        exact countsOfTiles_sum_eq_card
+        exact TileCounts.ofMultiset_sum_eq_card
           (mentsuHandTarget decomposition.pair melds)
       _ = tileCount hand + 1 := htargetCard
       _ = (∑ tile : Tile, hand.counts tile) + 1 := by

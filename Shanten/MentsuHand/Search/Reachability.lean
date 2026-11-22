@@ -178,7 +178,7 @@ lemma reachesCompletion_mentsuHand_of_blockDecomposition
           (∑ tile : Tile,
             TileCounts.ofMultiset (mentsuHandTarget decomposition.pair melds) tile) =
             decomposition.completedTarget.card
-        rw [htarget, countsOfTiles_sum_eq_card]
+        rw [htarget, TileCounts.ofMultiset_sum_eq_card]
       _ = 14 := by
         have hbase :
             (mentsuHandTargetWithTaatsu decomposition.pair
@@ -196,8 +196,8 @@ lemma reachesCompletion_mentsuHand_of_blockDecomposition
                   simp [taatsuHistoryTiles, taatsuTiles, pairTiles, Pair.tiles, Pair.orderedTiles, ih,
                     Multiset.card_add] <;> omega
           unfold mentsuHandTargetWithTaatsu mentsuHandTarget
-          rw [Multiset.card_add, Multiset.card_add, pairTiles_card,
-            meldsTiles_card, htaatsu]
+          simp only [Multiset.card_add, pairTiles, Pair.tiles_card,
+            MentsuCandidateList.tiles_card, htaatsu]
         have hextra :
             (taatsuCompletionTiles decomposition.taatsus).card =
               decomposition.taatsus.length :=

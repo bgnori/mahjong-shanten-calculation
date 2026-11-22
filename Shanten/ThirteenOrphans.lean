@@ -13,26 +13,6 @@ namespace Shanten
 
 open MahjongDomain
 
-lemma orphanKinds_eq_kokushiKinds : orphanKinds = kokushiKinds := by
-  ext tile
-  cases tile with
-  | suited suit rank =>
-      cases suit <;> fin_cases rank <;> simp [orphanKinds, kokushiKinds]
-  | honor rank =>
-      fin_cases rank <;> simp [orphanKinds, kokushiKinds]
-
-lemma orphanKinds_card : orphanKinds.card = 13 := by
-  rw [orphanKinds_eq_kokushiKinds]
-  decide
-
-lemma orphanTiles_count (tile : Tile) :
-    orphanTiles.count tile = if tile ∈ orphanKinds then 1 else 0 := by
-  simpa [orphanTiles] using
-    (Multiset.count_eq_of_nodup (a := tile) orphanKinds.nodup)
-
-lemma orphanTiles_card : orphanTiles.card = 13 := by
-  simpa [orphanTiles] using orphanKinds_card
-
 lemma thirteenOrphans_completion_tileCount
     (hcomplete : Complete .thirteenOrphans hand) :
     tileCount hand = 14 := by
@@ -42,7 +22,7 @@ lemma thirteenOrphans_completion_tileCount
   simp_rw [hcounts]
   change (∑ tile : Tile,
     TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair) tile) = 14
-  rw [countsOfTiles_sum_eq_card, Multiset.card_add, orphanTiles_card]
+  rw [TileCounts.ofMultiset_sum_eq_card, Multiset.card_add, orphanTiles_card]
   simp
 
 lemma complete_thirteenOrphans_targetHand
@@ -67,7 +47,7 @@ lemma reaches_thirteenOrphans_completion
   let pair : Tile := .honor ⟨0, by omega⟩
   let target := TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair)
   have hpair : pair ∈ orphanKinds := by
-    simp only [orphanKinds, Finset.mem_filter, Finset.mem_univ, true_and]
+    rw [mem_orphanKinds]
     trivial
   have hcomplete := complete_thirteenOrphans_targetHand hand pair h13.1 hpair
   have htargetCount : (∑ tile : Tile, target tile) = 14 := by
@@ -109,7 +89,6 @@ lemma kokushiWorstCase_isThirteenTileHand : IsThirteenTileHand kokushiWorstCase 
 
 lemma kokushiWorstCase_no_orphans :
     ∀ tile ∈ orphanKinds, kokushiWorstCase.counts tile = 0 := by
-  rw [orphanKinds_eq_kokushiKinds]
   decide
 
 lemma kokushiWorstCase_completion_distance_ge_fourteen

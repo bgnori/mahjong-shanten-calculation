@@ -25,6 +25,10 @@ Mahjong model, and Lean proofs. Shared domain definitions are canonical in the
 を参照してください。この文書では、以下にshantenの入力・出力・探索に固有の意味と、
 共有定義との違いを記します。
 
+国士の対象となる么九牌の集合と各種1枚の多重集合はCoreの
+`orphanKinds`と`orphanTiles`を直接使う。国士の完成条件やシャンテン計算は
+引き続きShanten側の仕様である。
+
 共通核の `MahjongDomain.StandardCompletion` は雀頭と順序付き面子列の証人を保持する。
 shantenの通常形 `Complete` は `mentsuComplete_iff_standardCompletion` でこの仕様に対応し、
 4枚制限や固定面子文脈は利用側の前提として別に保つ。

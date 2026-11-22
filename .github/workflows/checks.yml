@@ -61,6 +61,13 @@ jobs:
           lake exe cache get $(find Shanten ../mahjong-domain-core/MahjongDomain -name '*.lean' \
             -exec sed -n 's/^\(public \)\?import \(Mathlib\..*\)$/\2/p' {} + | sort -u)
         working-directory: mahjong-shanten-calculation
+      - name: Check migrated declarations are absent
+        run: |
+          if grep -REn --include='*.lean' '^[[:space:]]*(noncomputable[[:space:]]+)?(def|lemma|theorem)[[:space:]]+(orphanKinds|kokushiKinds|orphanTiles|orphanKinds_eq_kokushiKinds|orphanKinds_card|orphanTiles_count|orphanTiles_card|countsOfTiles_sum_eq_card|meldsTiles_card|pairTiles_card)([[:space:]:(]|$)' Shanten w6/SharedDomainW6.lean; then
+            echo "Obsolete shared-domain declaration found" >&2
+            exit 1
+          fi
+        working-directory: mahjong-shanten-calculation
       - name: Build and reject proof holes
         run: lake build
         working-directory: mahjong-shanten-calculation

@@ -233,8 +233,8 @@ theorem completeTileCount
       (pairTiles pair + MahjongDomain.MentsuCandidateList.tiles melds) := by
     funext tile
     exact htiles tile
-  rw [tileCount, hcounts, countsOfTiles_sum_eq_card, Multiset.card_add,
-    pairTiles_card, meldsTiles_card]
+  rw [tileCount, hcounts, MahjongDomain.TileCounts.ofMultiset_sum_eq_card, Multiset.card_add, pairTiles,
+    MahjongDomain.Pair.tiles_card, MahjongDomain.MentsuCandidateList.tiles_card]
   have hfixed : hand.fixedMelds = fixed.length := hvalid.1
   have hmelds : melds.length + fixed.length = 4 := by
     rw [← hfixed]

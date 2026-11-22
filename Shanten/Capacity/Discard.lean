@@ -106,9 +106,9 @@ theorem exists_discard_search_eq (h14 : IsFourteenTileEquivalentHand fixed hand)
     (mem_generalMentsuHandStates_iff h14.1 state).mp hstate
   let target := TileCounts.ofMultiset (mentsuHandTarget pair melds)
   have hsum : (∑ tile : Tile, hand.counts tile) = ∑ tile : Tile, target tile := by
-    rw [countsOfTiles_sum_eq_card]
+    rw [TileCounts.ofMultiset_sum_eq_card]
     change tileCount hand = (pairTiles pair + MentsuCandidateList.tiles melds).card
-    rw [Multiset.card_add, pairTiles_card, meldsTiles_card]
+    rw [Multiset.card_add, pairTiles, Pair.tiles_card, MentsuCandidateList.tiles_card]
     have := h14.1.1
     have := h14.2
     omega

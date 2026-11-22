@@ -237,21 +237,6 @@ lemma taatsuCompletionTiles_of_perm
   | trans hperm hperm' ih ih' =>
       exact ih.trans ih'
 
-lemma pairTiles_card (tile : Tile) :
-    (pairTiles tile).card = 2 := by
-  exact Pair.tiles_card ⟨tile⟩
-
-lemma meldsTiles_card (melds : List MentsuCandidate) :
-    (MentsuCandidateList.tiles melds).card = 3 * melds.length := by
-  induction melds with
-  | nil =>
-      rfl
-  | cons meld melds ih =>
-      change (MentsuCandidate.tiles meld + MentsuCandidateList.tiles melds).card =
-        3 * (melds.length + 1)
-      rw [Multiset.card_add, MentsuCandidate.tiles_card, ih]
-      omega
-
 def completedMeldsForState (state : MentsuHandSearchState) : List MentsuCandidate :=
   state.meldHistory.reverse ++
     taatsuCompletionMelds state.taatsuHistory.reverse

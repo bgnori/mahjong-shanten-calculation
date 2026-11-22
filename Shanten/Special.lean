@@ -161,35 +161,34 @@ lemma kokushi_deficit_accounting (hand : Hand) (pair : Tile)
     countDeficit hand.counts
         (TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair)) +
       kokushiDistinctCount hand + (if 2 ≤ hand.counts pair then 1 else 0) = 14 := by
-  have hpair' : pair ∈ kokushiKinds := by rwa [← orphanKinds_eq_kokushiKinds]
   have hpoint : ∀ tile,
       (orphanTiles + Multiset.replicate 1 pair).count tile - hand.counts tile =
-        (if tile ∈ kokushiKinds then 1 - hand.counts tile else 0) +
+        (if tile ∈ orphanKinds then 1 - hand.counts tile else 0) +
         (if tile = pair then (if 2 ≤ hand.counts pair then 0 else 1) else 0) := by
     intro tile
-    rw [Multiset.count_add, orphanTiles_count, orphanKinds_eq_kokushiKinds]
+    rw [Multiset.count_add, orphanTiles_count]
     by_cases heq : tile = pair
     · subst tile
-      simp only [hpair', ite_true, Multiset.count_replicate_self]
+      simp only [hpair, ite_true, Multiset.count_replicate_self]
       split <;> omega
     · simp [heq, ite_sub]
   have hdeficit : countDeficit hand.counts
         (TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair)) =
-      (∑ tile ∈ kokushiKinds, (1 - hand.counts tile)) +
+      (∑ tile ∈ orphanKinds, (1 - hand.counts tile)) +
         (if 2 ≤ hand.counts pair then 0 else 1) := by
     simp only [countDeficit, TileCounts.ofMultiset, hpoint, Finset.sum_add_distrib]
     simp
-  have hmissing : (∑ tile ∈ kokushiKinds, (1 - hand.counts tile)) +
+  have hmissing : (∑ tile ∈ orphanKinds, (1 - hand.counts tile)) +
       kokushiDistinctCount hand = 13 := by
     calc
-      _ = ∑ tile ∈ kokushiKinds,
+      _ = ∑ tile ∈ orphanKinds,
           ((1 - hand.counts tile) + (if 0 < hand.counts tile then 1 else 0)) := by
         simp [kokushiDistinctCount, Finset.sum_add_distrib]
-      _ = ∑ _tile ∈ kokushiKinds, 1 := by
+      _ = ∑ _tile ∈ orphanKinds, 1 := by
         apply Finset.sum_congr rfl
         intro tile _
         split <;> omega
-      _ = 13 := by rw [← orphanKinds_eq_kokushiKinds]; simp [orphanKinds_card]
+      _ = 13 := by simp [orphanKinds_card]
   rw [hdeficit]
   split <;> omega
 
@@ -203,21 +202,21 @@ theorem kokushiShanten_isShapeShanten
     by_cases hpair : 0 < kokushiPairCount hand
     · obtain ⟨pair, hp⟩ := Finset.card_pos.mp hpair
       obtain ⟨horphan, hcount⟩ := Finset.mem_filter.mp hp
-      exact ⟨pair, by rwa [orphanKinds_eq_kokushiKinds], by simp [hcount, hpair]⟩
+      exact ⟨pair, horphan, by simp [hcount, hpair]⟩
     · let pair : Tile := .honor ⟨0, by omega⟩
       have horphan : pair ∈ orphanKinds := by simp [pair, orphanKinds]
       have hcount : ¬ 2 ≤ hand.counts pair := by
         intro hc
         have : 0 < kokushiPairCount hand := Finset.card_pos.mpr
           ⟨pair, Finset.mem_filter.mpr
-            ⟨by rwa [← orphanKinds_eq_kokushiKinds], hc⟩⟩
+            ⟨horphan, hc⟩⟩
         exact hpair this
       exact ⟨pair, horphan, by simp [hcount, hpair]⟩
   obtain ⟨pair, hpair, hbest⟩ := hchoose
   have hcomplete := complete_thirteenOrphans_targetHand hand pair hfixed hpair
   have htotal : (∑ tile : Tile,
       TileCounts.ofMultiset (orphanTiles + Multiset.replicate 1 pair) tile) = 14 := by
-    rw [countsOfTiles_sum_eq_card, Multiset.card_add, orphanTiles_card]
+    rw [TileCounts.ofMultiset_sum_eq_card, Multiset.card_add, orphanTiles_card]
     simp
   have haccount := kokushi_deficit_accounting hand pair hpair
   apply isShapeShanten_of_minimum_deficit hvalid hsize
@@ -238,7 +237,7 @@ theorem kokushiShanten_isShapeShanten
       next hc =>
         have hp : 0 < kokushiPairCount hand := Finset.card_pos.mpr
           ⟨other, Finset.mem_filter.mpr
-            ⟨by rwa [← orphanKinds_eq_kokushiKinds], hc⟩⟩
+            ⟨hother, hc⟩⟩
         simp [hp]
       next => omega
     rw [hbest] at haccount

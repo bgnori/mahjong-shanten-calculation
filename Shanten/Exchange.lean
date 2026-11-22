@@ -407,14 +407,6 @@ lemma targetHand_hasTiles_countsOfTiles
   intro tile
   rfl
 
-lemma countsOfTiles_sum_eq_card (tiles : Multiset Tile) :
-    (∑ tile : Tile, TileCounts.ofMultiset tiles tile) = tiles.card := by
-  induction tiles using Multiset.induction_on with
-  | empty =>
-      simp [TileCounts.ofMultiset]
-  | @cons tile tiles ih =>
-      simp [TileCounts.ofMultiset, ih, Finset.sum_add_distrib]
-
 lemma reachesTargetExchange_targetHand_of_equal_sum
     (before : Hand) (target : TileCounts)
     (hsum : (∑ tile : Tile, before.counts tile) =

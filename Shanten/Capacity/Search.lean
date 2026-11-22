@@ -76,9 +76,9 @@ lemma generalMentsuHandState_reaches_of_size (hvalid : ValidHand fixed hand)
         hand hstanding pair melds hlength) hvalid hcomplete
   · have hsum : (∑ tile : Tile, hand.counts tile) =
         ∑ tile : Tile, TileCounts.ofMultiset (mentsuHandTarget pair melds) tile := by
-      rw [countsOfTiles_sum_eq_card]
+      rw [TileCounts.ofMultiset_sum_eq_card]
       change tileCount hand = (pairTiles pair + MentsuCandidateList.tiles melds).card
-      rw [Multiset.card_add, pairTiles_card, meldsTiles_card]
+      rw [Multiset.card_add, pairTiles, Pair.tiles_card, MentsuCandidateList.tiles_card]
       have := hvalid.1
       omega
     exact ⟨_, reachesHand_targetHand_of_equal_sum hsum hvalid hcapacity.2.2, hcomplete⟩

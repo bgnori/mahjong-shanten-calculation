@@ -38,20 +38,20 @@ lemma validCounts_completedTarget_of_copyLimit
 lemma completedMeldsForState_card (state : MentsuHandSearchState) :
     (MentsuCandidateList.tiles (completedMeldsForState state)).card =
       3 * (state.meldHistory.length + state.taatsuHistory.length) := by
-  rw [meldsTiles_card, completedMeldsForState_length]
+  rw [MentsuCandidateList.tiles_card, completedMeldsForState_length]
 
 lemma completedTargetForState_card
     (state : MentsuHandSearchState) (pair : Tile) :
     (completedTargetForState state pair).card =
       2 + 3 * (state.meldHistory.length + state.taatsuHistory.length) := by
   unfold completedTargetForState
-  rw [Multiset.card_add, pairTiles_card, completedMeldsForState_card]
+  rw [Multiset.card_add, pairTiles, Pair.tiles_card, completedMeldsForState_card]
 
 lemma completedTargetForState_sum
     (state : MentsuHandSearchState) (pair : Tile) :
     (∑ tile : Tile, TileCounts.ofMultiset (completedTargetForState state pair) tile) =
       2 + 3 * (state.meldHistory.length + state.taatsuHistory.length) := by
-  rw [countsOfTiles_sum_eq_card, completedTargetForState_card]
+  rw [TileCounts.ofMultiset_sum_eq_card, completedTargetForState_card]
 
 lemma completedTargetForState_sum_of_blockCount
     (before : Hand) (fuel : Nat) (state : MentsuHandSearchState)

@@ -260,19 +260,19 @@ example : IsShapeShanten [] (drawHand sevenPairsQuads (.honor ⟨3, by omega⟩)
     (Or.inr sevenPairsQuads_search.2.2.1.2)).mp sevenPairsQuads_search.2.2.2
 
 def kokushiReady : Hand :=
-  { counts := fun tile => if tile ∈ kokushiKinds then 1 else 0
+  { counts := fun tile => if tile ∈ orphanKinds then 1 else 0
     fixedMelds := 0 }
 
 def kokushiTriple : Hand :=
   { counts := fun tile =>
       if tile = east then 3
-      else if tile ∈ kokushiKinds ∧ tile ≠ south then 1 else 0
+      else if tile ∈ orphanKinds ∧ tile ≠ south then 1 else 0
     fixedMelds := 0 }
 
 def kokushiNonOrphanPair : Hand :=
   { counts := fun tile =>
       if tile = .suited .man ⟨1, by omega⟩ then 2
-      else if tile ∈ kokushiKinds ∧ tile ≠ east ∧ tile ≠ south then 1 else 0
+      else if tile ∈ orphanKinds ∧ tile ≠ east ∧ tile ≠ south then 1 else 0
     fixedMelds := 0 }
 
 theorem kokushiFormula_search :
