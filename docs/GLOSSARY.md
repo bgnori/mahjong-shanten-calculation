@@ -28,6 +28,8 @@ Mahjong model, and Lean proofs. Shared domain definitions are canonical in the
 共通核の `MahjongDomain.StandardCompletion` は雀頭と順序付き面子列の証人を保持する。
 shantenの通常形 `Complete` は `mentsuComplete_iff_standardCompletion` でこの仕様に対応し、
 4枚制限や固定面子文脈は利用側の前提として別に保つ。
+待ち分類との固定文脈連携では、両側が共有牌種を直接使い、`CountsMatch`で
+分類の牌列とshantenのカウントを比較する。牌種変換や往復は不要である。
 このリポジトリは[`lakefile.lean`](../lakefile.lean)のpath依存で隣の共通核を使用し、
 CIでは共通核の`main`に追従する。
 固定文脈付き待ちの接続は独立した[`w6/`](../w6/)パッケージで検査し、

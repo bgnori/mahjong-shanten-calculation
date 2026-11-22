@@ -13,7 +13,7 @@
 ご指摘の[分類側 `Mahjong.Basic`](../../../mahjong-wait-classification/Mahjong/Basic.lean)には、
 数牌のランク・スート・牌種の定義が残っている。ただし、これらの意味はすでに
 [coreの `MahjongDomain.Tile`](../../../mahjong-domain-core/MahjongDomain/Tile.lean)にあり、
-[分類側adapter](../../../mahjong-wait-classification/Mahjong/DomainAdapter.lean)には
+当時の分類側adapterには
 牌種の対応と安定した数値順の一致を示す定理もある。したがって主な残作業は、
 定義をそのまま再移植することではなく、consumerの既存APIと列挙順を保ちながら、
 coreを表現の正本にする接続・互換化である。
