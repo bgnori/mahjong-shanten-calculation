@@ -443,8 +443,8 @@ def standingAB : Hand :=
     fixedMelds := 3 }
 
 def classificationStanding : List _root_.Tile :=
-  [ _root_.Tile.numbered .Manzu 0, _root_.Tile.numbered .Manzu 0,
-    _root_.Tile.numbered .Manzu 0, _root_.Tile.honor .East ]
+  [ _root_.Tile.numbered .man 0, _root_.Tile.numbered .man 0,
+    _root_.Tile.numbered .man 0, _root_.Tile.honor .East ]
 
 def classificationEast : _root_.Tile := _root_.Tile.honor .East
 
@@ -470,12 +470,12 @@ theorem capacityAB :
     refine ⟨by decide, by decide, ?_⟩
     have hmember :
         (.inl ⟨shantenTileOfClassification classificationEast⟩ ::
-          [.inr (.koutsu (shantenTileOfClassification (_root_.Tile.numbered .Manzu 0)))]) ∈
+          [.inr (.koutsu (shantenTileOfClassification (_root_.Tile.numbered .man 0)))]) ∈
           WaitCompletionFinder.winningPartitions
             (classificationEast :: classificationStanding) := by
       apply (WaitCompletionFinder.mem_winningPartitions_iff_spec _ _).mpr
       refine ⟨.inl ⟨shantenTileOfClassification classificationEast⟩,
-        [.koutsu (shantenTileOfClassification (_root_.Tile.numbered .Manzu 0))], rfl, ?_, ?_⟩
+        [.koutsu (shantenTileOfClassification (_root_.Tile.numbered .man 0))], rfl, ?_, ?_⟩
       · exact WaitCompletionFinder.pair_mem_pairComponentCandidates
           ⟨shantenTileOfClassification classificationEast⟩
       · decide
