@@ -383,7 +383,7 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
       | mk base fixed =>
           cases base with
           | mk counts =>
-              simp only [targetHand, hnext]
+              simp only [targetHand]
               simpa [hnext] using
                 congrArg
                   (fun counts : TileCounts =>
