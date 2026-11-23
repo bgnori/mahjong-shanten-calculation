@@ -129,7 +129,7 @@ example : ∃ tile, IsFixedContextWait fixedB standing tile :=
 
 private def man1 : Tile := .suited .man 0
 
-private def threeMeldStanding : Hand :=
+private def handWithThreeFixedMelds : Hand :=
   { counts := fun tile => if tile = man1 then 3 else if tile = east then 1 else 0
     fixedMelds := 3 }
 
@@ -139,25 +139,25 @@ private def threeMeldFixedA : List FixedMeld :=
 private def threeMeldFixedB : List FixedMeld :=
   [.meld (.koutsu south), .meld (.shuntsu ⟨.pin, 0⟩), .meld (.shuntsu ⟨.sou, 0⟩)]
 
-example : IsThirteenTileEquivalentHand threeMeldFixedA threeMeldStanding := by
+example : IsThirteenTileEquivalentHand threeMeldFixedA handWithThreeFixedMelds := by
   unfold IsThirteenTileEquivalentHand ValidHand
   decide
 
-example : ¬ IsFixedContextWait threeMeldFixedA threeMeldStanding east := by
+example : ¬ IsFixedContextWait threeMeldFixedA handWithThreeFixedMelds east := by
   intro wait
-  have : ¬ threeMeldStanding.counts east < remainingCapacity threeMeldFixedA east := by decide
+  have : ¬ handWithThreeFixedMelds.counts east < remainingCapacity threeMeldFixedA east := by decide
   exact this wait.1
 
-private theorem threeMeldFixedB_wait : IsFixedContextWait threeMeldFixedB threeMeldStanding east := by
-  have valid : ValidHand threeMeldFixedB (drawHand threeMeldStanding east) := by
+private theorem threeMeldFixedB_wait : IsFixedContextWait threeMeldFixedB handWithThreeFixedMelds east := by
+  have valid : ValidHand threeMeldFixedB (drawHand handWithThreeFixedMelds east) := by
     unfold ValidHand
     decide
   refine ⟨by decide, valid, valid.validCounts, east, [.koutsu man1], by decide, ?_⟩
   unfold HasTiles
   decide
 
-example : IsShapeShanten threeMeldFixedB threeMeldStanding .mentsuHand 0 := by
-  have valid : IsThirteenTileEquivalentHand threeMeldFixedB threeMeldStanding := by
+example : IsShapeShanten threeMeldFixedB handWithThreeFixedMelds .mentsuHand 0 := by
+  have valid : IsThirteenTileEquivalentHand threeMeldFixedB handWithThreeFixedMelds := by
     unfold IsThirteenTileEquivalentHand ValidHand
     decide
   exact (isShapeShanten_zero_iff_exists_fixedContextWait valid).mpr ⟨east, threeMeldFixedB_wait⟩
