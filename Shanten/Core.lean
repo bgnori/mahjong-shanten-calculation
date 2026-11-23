@@ -4,6 +4,7 @@ public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Data.Fintype.Sigma
 public import Mathlib.Data.Fintype.Sum
 public import Mathlib.Data.Multiset.Replicate
+public import MahjongDomain.Hand
 public import MahjongDomain.Parts
 public import MahjongDomain.Orphans
 import Mathlib.Tactic.DeriveFintype
@@ -15,8 +16,7 @@ namespace Shanten
 open MahjongDomain
 
 /-- The standing tiles and the number of fixed melds. -/
-structure Hand where
-  counts : TileCounts
+structure Hand extends MahjongDomain.Hand where
   fixedMelds : Nat
 
 /-- A standing hand has exactly the multiplicities of the given tile multiset. -/

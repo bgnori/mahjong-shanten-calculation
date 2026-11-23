@@ -79,14 +79,22 @@ theorem isShapeShanten_zero_iff_exists_fixedContextWait
     · obtain ⟨tile, _, hcounts⟩ := draw
       have hnext : next = drawHand hand tile := by
         cases next with
-        | mk counts fixedMelds =>
-            cases hand with
-            | mk handCounts handFixed =>
-                simp only [Shanten.Hand.mk.injEq, drawHand]
-                constructor
-                · funext kind
-                  exact hcounts kind
-                · exact hstep.toAbstract.1.symm
+      | mk nextBase fixedMelds =>
+          cases nextBase with
+          | mk nextCounts =>
+              cases hand with
+              | mk handBase handFixed =>
+                  cases handBase with
+                  | mk handCounts =>
+                      simp only [
+                        Shanten.Hand.mk.injEq,
+                        MahjongDomain.Hand.mk.injEq,
+                        drawHand
+                      ]
+                      constructor
+                      · funext kind
+                        exact hcounts kind
+                      · exact hstep.toAbstract.1.symm
       subst next
       have hcapacity := hcomplete.1.counts_le_capacity tile
       simp [drawHand] at hcapacity

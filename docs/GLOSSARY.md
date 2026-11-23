@@ -114,8 +114,9 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
   計算対象の牌の状態。本リポジトリでは、Goの `Input` は副露を除く
   `Standing` と固定面子 `Melds` を分けて持つ。これは「門前」や「立直」を
   宣言したことを意味しない。Leanの `Hand` は
-  `counts` と `fixedMelds` を持つ抽象モデルで、現状は固定面子の牌内容を
-  保持しない。
+  `MahjongDomain.Hand`を基底とし、`fixedMelds`を加えた抽象モデルである。
+  基底の`counts`は手元牌を表し、固定面子の牌内容やカウント妥当性の証拠は
+  保持しない。カウント上限は`ValidCounts`など利用箇所の前提で扱う。
 
 - **手元牌 (standing tiles)** `[麻雀][Go]`
   固定面子に含まれない手牌。Goの `Input.Standing` は暗槓を含むすべての
@@ -343,7 +344,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 |---|---|---|
 | `Counts37` | 赤5を別要素として保持する37要素のGoカウント配列。計算前に通常5へ合算する。 | [`shanten.go`](../shanten.go) |
 | `Result.MentsuHand` | Go契約における面子手のシャンテン値。常に適用可能で、完成は`-1`。 | [`shanten.go`](../shanten.go) |
-| `Hand` | Leanの手牌抽象モデル。`counts` と固定面子数を持つ。固定面子の牌内容はまだ持たない。 | [`Shanten/Core.lean`](../Shanten/Core.lean) |
+| `Hand` | Leanの手牌抽象モデル。`MahjongDomain.Hand`を基底とし、固定面子数を加える。固定面子の牌内容やカウント妥当性の証拠は持たない。 | [`Shanten/Core.lean`](../Shanten/Core.lean) |
 | `MahjongDomain.Tile` | Leanの正規化済み牌種。34種類で、赤5を分離しない。 | [Core用語集](https://github.com/bgnori/mahjong-domain-core/blob/main/docs/GLOSSARY.md) |
 | `MahjongDomain.MentsuCandidate` | 副露状態を含まない順子または刻子の形。Goの入力固定面子と同義ではない。 | [Core用語集](https://github.com/bgnori/mahjong-domain-core/blob/main/docs/GLOSSARY.md) |
 | `Taatsu` | Leanで表す未完成の2枚組。対子形または順子形。 | [`Shanten/MentsuHand.lean`](../Shanten/MentsuHand.lean) |

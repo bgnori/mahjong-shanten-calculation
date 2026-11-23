@@ -164,7 +164,8 @@ theorem normalized_equivalent
   refine ⟨hfixed, ?_⟩
   unfold normalizedHand
   apply congrArg₂ Hand.mk
-  · funext tile
+  · apply congrArg MahjongDomain.Hand.mk
+    funext tile
     exact congrArg Int.toNat (congrFun heq.1 tile)
   · exact hlength
 

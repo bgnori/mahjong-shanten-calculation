@@ -380,13 +380,15 @@ lemma reachesCompletion_mentsuHand_of_mentsuHandTarget_distance_one
           targetHand (exchangeHand before discarded drawn)
             (TileCounts.ofMultiset (mentsuHandTarget pair melds)) := by
       cases hnext : exchangeHand before discarded drawn with
-      | mk counts fixed =>
-          simp only [targetHand, hnext]
-          simpa [hnext] using
-            congrArg
-              (fun counts : TileCounts =>
-                ({ counts := counts, fixedMelds := fixed } : Hand))
-              hcountsNext
+      | mk base fixed =>
+          cases base with
+          | mk counts =>
+              simp only [targetHand, hnext]
+              simpa [hnext] using
+                congrArg
+                  (fun counts : TileCounts =>
+                    ({ counts := counts, fixedMelds := fixed } : Hand))
+                  hcountsNext
     rw [hhand]
     exact htargetComplete
   apply ReachesCompletion.step
