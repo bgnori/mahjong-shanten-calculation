@@ -350,7 +350,7 @@ example : IsShapeShanten [] (drawHand kokushiReady east) .thirteenOrphans (-1) :
   (thirteenOrphansSearch_eq_some_iff kokushiFormula_search.2.2.1.1
     (Or.inr kokushiFormula_search.2.2.1.2)).mp kokushiFormula_search.2.2.2.1
 
-def specialKanStanding : Hand :=
+def standingHandWithOneFixedKan : Hand :=
   { counts := fun tile =>
       if tile = south ∨ tile = .honor ⟨2, by omega⟩ then 4
       else if tile = .honor ⟨3, by omega⟩ then 2 else 0
@@ -358,9 +358,9 @@ def specialKanStanding : Hand :=
 
 example :
     sevenPairsSearch standing = none ∧ thirteenOrphansSearch standing = none ∧
-      IsThirteenTileEquivalentHand [.kan east] specialKanStanding ∧
-      sevenPairsSearch specialKanStanding = none ∧
-      thirteenOrphansSearch specialKanStanding = none := by
+      IsThirteenTileEquivalentHand [.kan east] standingHandWithOneFixedKan ∧
+      sevenPairsSearch standingHandWithOneFixedKan = none ∧
+      thirteenOrphansSearch standingHandWithOneFixedKan = none := by
   unfold IsThirteenTileEquivalentHand ValidHand
   decide
 
