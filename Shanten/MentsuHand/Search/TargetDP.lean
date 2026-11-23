@@ -1,4 +1,8 @@
-import Shanten.MentsuHand.Search.Enumeration
+module
+
+public import Shanten.MentsuHand.Search.Enumeration
+
+@[expose] public section
 
 /-!
 # Search / TargetDP

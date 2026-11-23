@@ -1,5 +1,9 @@
-import Shanten.Exchange
-import Mathlib.Tactic.FinCases
+module
+
+public import Shanten.Exchange
+public import Mathlib.Tactic.FinCases
+
+@[expose] public section
 
 /-!
 # Thirteen orphans

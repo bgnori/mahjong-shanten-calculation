@@ -1,5 +1,9 @@
-import Shanten.MentsuHand.Search.Correctness
-import Mathlib.Tactic.FinCases
+module
+
+public import Shanten.MentsuHand.Search.Correctness
+public import Mathlib.Tactic.FinCases
+
+@[expose] public section
 
 /-!
 # Search / Totality

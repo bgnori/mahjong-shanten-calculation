@@ -1,4 +1,8 @@
-import Shanten.MentsuHand.Search.Reachability
+module
+
+public import Shanten.MentsuHand.Search.Reachability
+
+@[expose] public section
 
 /-!
 # Search / Correctness

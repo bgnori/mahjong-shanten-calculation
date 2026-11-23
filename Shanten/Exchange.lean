@@ -1,5 +1,9 @@
-import Shanten.Specification
-import Mathlib.Algebra.BigOperators.Ring.Finset
+module
+
+public import Shanten.Specification
+public import Mathlib.Algebra.BigOperators.Ring.Finset
+
+@[expose] public section
 
 /-!
 # Shared exchanges

@@ -1,10 +1,12 @@
-import Shanten.Core
-import Shanten.Specification
-import Shanten.SevenPairs
-import Shanten.ThirteenOrphans
-import Shanten.SevenPairsAndThirteenOrphans
-import Shanten.MentsuHand
-import Shanten.Bounds
-import Shanten.Capacity
-import Shanten.Input37
-import Shanten.ProofChecks
+module
+
+public import Shanten.Core
+public import Shanten.Specification
+public import Shanten.SevenPairs
+public import Shanten.ThirteenOrphans
+public import Shanten.SevenPairsAndThirteenOrphans
+public import Shanten.MentsuHand
+public import Shanten.Bounds
+public import Shanten.Capacity
+public import Shanten.Input37
+public import Shanten.ProofChecks

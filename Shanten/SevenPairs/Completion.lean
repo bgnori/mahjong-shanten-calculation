@@ -1,4 +1,8 @@
-import Shanten.SevenPairs.Basic
+module
+
+public import Shanten.SevenPairs.Basic
+
+@[expose] public section
 
 /-!
 # Seven pairs / Completion

@@ -1,4 +1,8 @@
-import Shanten.Exchange
+module
+
+public import Shanten.Exchange
+
+@[expose] public section
 
 /-!
 # Seven pairs / Basic

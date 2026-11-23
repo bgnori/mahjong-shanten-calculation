@@ -1,4 +1,8 @@
-import Shanten.Input37.Correctness
+module
+
+public import Shanten.Input37.Correctness
+
+@[expose] public section
 
 namespace Shanten.Input37.Examples
 
@@ -6,10 +10,12 @@ open MahjongDomain
 
 set_option maxRecDepth 4096
 
-private def counts (entries : List (Fin 37 × Int)) : Int37Counts :=
+def Internal.counts (entries : List (Fin 37 × Int)) : Int37Counts :=
   fun index => (entries.map fun entry => if entry.1 = index then entry.2 else 0).sum
 
-private def produces (input : Input) (fixed : List Capacity.FixedMeld)
+open _root_.Shanten.Input37.Examples.Internal
+
+def Internal.produces (input : Input) (fixed : List Capacity.FixedMeld)
     (expected : TileCounts) : Prop :=
   match validateAndNormalize input with
   | .error _ => False
@@ -21,7 +27,7 @@ private instance : Decidable (produces input fixed expected) := by
   unfold produces
   split <;> infer_instance
 
-private def error (input : Input) : Option ValidationError :=
+def Internal.error (input : Input) : Option ValidationError :=
   match validateAndNormalize input with
   | .error reason => some reason
   | .ok _ => none
@@ -43,9 +49,9 @@ theorem fourteen_normalizes :
         | .honor rank => if rank.val = 0 ∨ rank.val = 6 then 1 else 0) := by
   decide
 
-private def standingTen : Int37Counts := counts [(30, 4), (31, 4), (32, 2)]
+def Internal.standingTen : Int37Counts := counts [(30, 4), (31, 4), (32, 2)]
 
-private def normalizedTen : TileCounts :=
+def Internal.normalizedTen : TileCounts :=
   fun tile => match tile with
     | .honor rank => if rank.val < 2 then 4 else if rank.val = 2 then 2 else 0
     | .suited _ _ => 0

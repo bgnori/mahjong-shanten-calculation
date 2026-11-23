@@ -1,5 +1,9 @@
-import Shanten.MentsuHand.Search.Totality
-import Mathlib.Data.Multiset.UnionInter
+module
+
+public import Shanten.MentsuHand.Search.Totality
+public import Mathlib.Data.Multiset.UnionInter
+
+@[expose] public section
 
 /-!
 # Search / BlockSearch

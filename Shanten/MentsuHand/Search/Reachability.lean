@@ -1,4 +1,8 @@
-import Shanten.MentsuHand.Search.Minimum
+module
+
+public import Shanten.MentsuHand.Search.Minimum
+
+@[expose] public section
 
 /-!
 # Search / Reachability

@@ -1,4 +1,8 @@
-import Shanten.Capacity.Specification
+module
+
+public import Shanten.Capacity.Specification
+
+@[expose] public section
 
 namespace Shanten.Capacity
 

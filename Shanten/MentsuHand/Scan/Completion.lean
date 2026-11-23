@@ -1,5 +1,9 @@
-import Shanten.MentsuHand.Scan.Paths
-import Shanten.MentsuHand.Search.Totality
+module
+
+public import Shanten.MentsuHand.Scan.Paths
+public import Shanten.MentsuHand.Search.Totality
+
+@[expose] public section
 
 /-!
 # Scan / Completion

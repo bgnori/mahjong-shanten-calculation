@@ -1,4 +1,8 @@
-import Shanten.MentsuHand.Scan.Basic
+module
+
+public import Shanten.MentsuHand.Scan.Basic
+
+@[expose] public section
 
 /-!
 # Scan / Paths

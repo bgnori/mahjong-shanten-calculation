@@ -1,5 +1,9 @@
-import Shanten.Capacity.Fourteen
-import Shanten.Capacity.SevenPairsAndThirteenOrphans
+module
+
+public import Shanten.Capacity.Fourteen
+public import Shanten.Capacity.SevenPairsAndThirteenOrphans
+
+@[expose] public section
 
 /-!
 # Overall capacity-aware calculation

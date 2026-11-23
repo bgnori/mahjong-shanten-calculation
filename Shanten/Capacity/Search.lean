@@ -1,5 +1,9 @@
-import Shanten.Capacity.Reachability
-import Shanten.MentsuHand.Search.BlockSearch
+module
+
+public import Shanten.Capacity.Reachability
+public import Shanten.MentsuHand.Search.BlockSearch
+
+@[expose] public section
 
 namespace Shanten.Capacity
 

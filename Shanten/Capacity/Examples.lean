@@ -1,7 +1,11 @@
-import Shanten.Capacity.Discard
-import Shanten.Capacity.SevenPairsAndThirteenOrphans
-import Shanten.Capacity.Overall
-import Shanten.Capacity.Wait
+module
+
+public import Shanten.Capacity.Discard
+public import Shanten.Capacity.SevenPairsAndThirteenOrphans
+public import Shanten.Capacity.Overall
+public import Shanten.Capacity.Wait
+
+@[expose] public section
 
 namespace Shanten.Capacity.Examples
 

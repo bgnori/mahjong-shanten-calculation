@@ -1,4 +1,8 @@
-import Shanten.Capacity.Search
+module
+
+public import Shanten.Capacity.Search
+
+@[expose] public section
 
 namespace Shanten.Capacity
 

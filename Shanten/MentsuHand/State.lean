@@ -1,5 +1,10 @@
-import Shanten.MentsuHand.Basic
-import Mathlib.Data.Finset.Union
+module
+
+public import Shanten.MentsuHand.Basic
+public import Mathlib.Data.Finset.Union
+public meta import MahjongDomain.Tile
+
+@[expose] public section
 
 /-!
 # State

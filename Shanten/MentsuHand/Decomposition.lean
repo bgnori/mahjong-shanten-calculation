@@ -1,5 +1,9 @@
-import Shanten.MentsuHand.ChoiceGrouping
-import Shanten.MentsuHand.Exchange
+module
+
+public import Shanten.MentsuHand.ChoiceGrouping
+public import Shanten.MentsuHand.Exchange
+
+@[expose] public section
 
 /-!
 # Decomposition

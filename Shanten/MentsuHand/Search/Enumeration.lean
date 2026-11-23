@@ -1,4 +1,8 @@
-import Shanten.MentsuHand.Decomposition
+module
+
+public import Shanten.MentsuHand.Decomposition
+
+@[expose] public section
 
 /-!
 # Search / Enumeration

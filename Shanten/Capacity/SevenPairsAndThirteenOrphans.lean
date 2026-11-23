@@ -1,5 +1,9 @@
-import Shanten.Capacity.Specification
-import Shanten.SevenPairsAndThirteenOrphans
+module
+
+public import Shanten.Capacity.Specification
+public import Shanten.SevenPairsAndThirteenOrphans
+
+@[expose] public section
 
 /-!
 # Capacity-aware special-shape calculations

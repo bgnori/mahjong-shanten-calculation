@@ -1,4 +1,8 @@
-import Shanten.MentsuHand.Basic
+module
+
+public import Shanten.MentsuHand.Basic
+
+@[expose] public section
 
 /-!
 # ChoiceGrouping

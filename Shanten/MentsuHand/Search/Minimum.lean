@@ -1,4 +1,8 @@
-import Shanten.MentsuHand.Search.TargetDP
+module
+
+public import Shanten.MentsuHand.Search.TargetDP
+
+@[expose] public section
 
 /-!
 # Search / Minimum

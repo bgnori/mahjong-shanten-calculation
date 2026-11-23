@@ -1,9 +1,13 @@
-import Shanten.MentsuHand
-import Shanten.ThirteenOrphans
-import Shanten.Bounds
-import Shanten.Capacity
-import Shanten.Input37
-import Mathlib.Util.AssertNoSorry
+module
+
+public import Shanten.MentsuHand
+public import Shanten.ThirteenOrphans
+public import Shanten.Bounds
+public import Shanten.Capacity
+public import Shanten.Input37
+public import Mathlib.Util.AssertNoSorry
+
+@[expose] public section
 
 /-!
 # Proof checks

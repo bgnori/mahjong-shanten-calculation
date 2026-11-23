@@ -1,5 +1,9 @@
-import Shanten.MentsuHand.Scan.Grouping
-import Shanten.MentsuHand.Search.BlockSearch
+module
+
+public import Shanten.MentsuHand.Scan.Grouping
+public import Shanten.MentsuHand.Search.BlockSearch
+
+@[expose] public section
 
 /-!
 # Examples

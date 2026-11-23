@@ -1,6 +1,10 @@
-import Shanten.SevenPairs.Exchange.Distinctness
-import Shanten.SevenPairs.Exchange.PairMaking
-import Shanten.SevenPairs.Exchange.ProtectedPairMaking
+module
+
+public import Shanten.SevenPairs.Exchange.Distinctness
+public import Shanten.SevenPairs.Exchange.PairMaking
+public import Shanten.SevenPairs.Exchange.ProtectedPairMaking
+
+@[expose] public section
 
 /-!
 # Seven pairs / Reachability

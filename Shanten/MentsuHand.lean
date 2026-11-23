@@ -1,7 +1,11 @@
-import Shanten.MentsuHand.Search.BlockSearch
-import Shanten.MentsuHand.Scan.Grouping
-import Shanten.MentsuHand.Scan.Completion
-import Shanten.MentsuHand.Examples
+module
+
+public import Shanten.MentsuHand.Search.BlockSearch
+public import Shanten.MentsuHand.Scan.Grouping
+public import Shanten.MentsuHand.Scan.Completion
+public import Shanten.MentsuHand.Examples
+
+@[expose] public section
 
 /-!
 # Mentsu-hand shanten proofs

@@ -1,5 +1,9 @@
-import Shanten.Input37.Validation
-import Shanten.Capacity.Overall
+module
+
+public import Shanten.Input37.Validation
+public import Shanten.Capacity.Overall
+
+@[expose] public section
 
 namespace Shanten.Input37
 

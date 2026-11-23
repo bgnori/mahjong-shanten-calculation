@@ -1,5 +1,9 @@
-import Shanten.MentsuHand.State
-import Shanten.Exchange
+module
+
+public import Shanten.MentsuHand.State
+public import Shanten.Exchange
+
+@[expose] public section
 
 /-!
 # Targets

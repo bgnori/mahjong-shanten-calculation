@@ -1,4 +1,9 @@
-import Shanten.Specification
+module
+
+public import Shanten.Specification
+import Mathlib.Tactic.DeriveFintype
+
+@[expose] public section
 
 /-!
 # Basic

@@ -1,4 +1,8 @@
-import Shanten.MentsuHand.Targets
+module
+
+public import Shanten.MentsuHand.Targets
+
+@[expose] public section
 
 /-!
 # Exchange

@@ -1,5 +1,9 @@
-import Shanten.Core
-import Mathlib.Data.Nat.Find
+module
+
+public import Shanten.Core
+public import Mathlib.Data.Nat.Find
+
+@[expose] public section
 
 namespace Shanten
 

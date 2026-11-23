@@ -1,6 +1,10 @@
-import Shanten.SevenPairs.Completion
-import Shanten.SevenPairs.Counting
-import Shanten.ThirteenOrphans
+module
+
+public import Shanten.SevenPairs.Completion
+public import Shanten.SevenPairs.Counting
+public import Shanten.ThirteenOrphans
+
+@[expose] public section
 
 /-!
 # Computable special-shape formulas

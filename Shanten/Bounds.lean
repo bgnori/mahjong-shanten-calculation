@@ -1,5 +1,10 @@
-import Shanten.SevenPairs
-import Mathlib.Tactic.Convert
+module
+
+public import Shanten.SevenPairs
+public import Mathlib.Tactic.Convert
+public meta import Shanten.Core
+
+@[expose] public section
 
 namespace Shanten
 

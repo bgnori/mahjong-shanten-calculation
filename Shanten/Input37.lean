@@ -1,4 +1,6 @@
-import Shanten.Input37.Basic
-import Shanten.Input37.Validation
-import Shanten.Input37.Correctness
-import Shanten.Input37.Examples
+module
+
+public import Shanten.Input37.Basic
+public import Shanten.Input37.Validation
+public import Shanten.Input37.Correctness
+public import Shanten.Input37.Examples

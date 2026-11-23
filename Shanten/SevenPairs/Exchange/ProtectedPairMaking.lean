@@ -1,5 +1,9 @@
-import Shanten.SevenPairs.Exchange.Basic
-import Shanten.SevenPairs.Counting
+module
+
+public import Shanten.SevenPairs.Exchange.Basic
+public import Shanten.SevenPairs.Counting
+
+@[expose] public section
 
 /-!
 # Seven pairs / Exchange / Protected pair making

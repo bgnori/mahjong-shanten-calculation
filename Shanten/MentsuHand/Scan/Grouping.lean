@@ -1,4 +1,8 @@
-import Shanten.MentsuHand.Scan.DecompositionPaths
+module
+
+public import Shanten.MentsuHand.Scan.DecompositionPaths
+
+@[expose] public section
 
 /-!
 # Scan / Grouping

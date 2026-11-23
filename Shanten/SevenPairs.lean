@@ -1,5 +1,9 @@
-import Shanten.SevenPairs.Completion
-import Shanten.SevenPairs.Reachability
+module
+
+public import Shanten.SevenPairs.Completion
+public import Shanten.SevenPairs.Reachability
+
+@[expose] public section
 
 /-!
 # Seven-pairs proofs

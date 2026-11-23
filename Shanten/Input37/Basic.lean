@@ -1,5 +1,9 @@
-import MahjongDomain.Representation
-import Shanten.Capacity.Basic
+module
+
+public import MahjongDomain.Representation
+public import Shanten.Capacity.Basic
+
+@[expose] public section
 
 /-!
 # Signed aka37 inputs and normalization

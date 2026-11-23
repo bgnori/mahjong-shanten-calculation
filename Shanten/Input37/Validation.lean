@@ -1,4 +1,8 @@
-import Shanten.Input37.Basic
+module
+
+public import Shanten.Input37.Basic
+
+@[expose] public section
 
 namespace Shanten.Input37
 
@@ -67,15 +71,15 @@ def parsedMelds (input : Input)
     List Capacity.FixedMeld :=
   List.ofFn fun index => (parseMeld input.melds[index]).get (hparsed index)
 
-private def firstViolation {n : Nat} (p : Fin n → Prop) [DecidablePred p]
+def Internal.firstViolation {n : Nat} (p : Fin n → Prop) [DecidablePred p]
     (h : ¬ ∀ index, p index) : Fin n :=
   (Finset.univ.filter fun index => ¬ p index).min' (by
     obtain ⟨index, hindex⟩ := not_forall.mp h
     exact ⟨index, by simp [hindex]⟩)
 
-private lemma firstViolation_not {n : Nat} (p : Fin n → Prop) [DecidablePred p]
-    (h : ¬ ∀ index, p index) : ¬ p (firstViolation p h) := by
-  unfold firstViolation
+lemma Internal.firstViolation_not {n : Nat} (p : Fin n → Prop) [DecidablePred p]
+    (h : ¬ ∀ index, p index) : ¬ p (Internal.firstViolation p h) := by
+  unfold Internal.firstViolation
   exact (Finset.mem_filter.mp
     (Finset.min'_mem (Finset.univ.filter fun index => ¬ p index) _)).2
 
@@ -91,15 +95,15 @@ def validateAndNormalize (input : Input) : Except ValidationError NormalizedInpu
                 (parseMeld input.melds[index]).isSome = true then
               .ok ⟨parsedMelds input hparsed, normalizedHand input hstanding⟩
             else
-              .error (.invalidMeld (firstViolation _ hparsed).val)
+              .error (.invalidMeld (Internal.firstViolation _ hparsed).val)
           else .error (.invalidSize (standingCount input) input.melds.length)
         else .error (.tooManyMelds input.melds.length)
-      else .error (.capacityExceeded (firstViolation _ hcapacity))
+      else .error (.capacityExceeded (Internal.firstViolation _ hcapacity))
     else
-      let index := firstViolation _ hmeldCounts
+      let index := Internal.firstViolation _ hmeldCounts
       .error (.negativeMeld index.val
-        (firstViolation _ (firstViolation_not _ hmeldCounts)))
-  else .error (.negativeStanding (firstViolation _ hstanding))
+        (Internal.firstViolation _ (Internal.firstViolation_not _ hmeldCounts)))
+  else .error (.negativeStanding (Internal.firstViolation _ hstanding))
 
 theorem validateAndNormalize_ok_iff :
     validateAndNormalize input = .ok normalized ↔
