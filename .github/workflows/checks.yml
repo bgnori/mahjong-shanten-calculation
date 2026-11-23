@@ -69,8 +69,19 @@ jobs:
           fi
         working-directory: mahjong-shanten-calculation
       - name: Build and reject proof holes
-        run: lake build
+        run: |
+          python3 ../mahjong-domain-core/scripts/measure_lean_build.py \
+            --output "$RUNNER_TEMP/lean-build-metrics.json" \
+            --module Shanten/Specification.lean -- lake build
         working-directory: mahjong-shanten-calculation
+      - name: Save Lean build metrics
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lean-build-metrics-v1
+          path: ${{ runner.temp }}/lean-build-metrics.json
+          if-no-files-found: error
+          overwrite: true
 
   shared-domain:
     name: Shared domain regression
