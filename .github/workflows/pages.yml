@@ -1,0 +1,65 @@
+name: Deploy CI metrics to Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Checks"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: "23 4 * * *"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          repository: bgnori/mahjong-domain-core
+          ref: main
+          path: _ci-tools
+          persist-credentials: false
+      - uses: actions/configure-pages@v5
+      - name: Test CI page scripts
+        run: |
+          python3 -m unittest discover -s _ci-tools/scripts -p 'test_build_ci_page.py'
+          python3 -m unittest discover -s _ci-tools/scripts -p 'test_collect_build_metrics.py'
+      - name: Assemble Pages site
+        run: |
+          mkdir _site
+          cp _ci-tools/scripts/ci-site/root.html _site/index.html
+          touch _site/.nojekyll
+          python3 _ci-tools/scripts/build_ci_page.py _site
+      - name: Collect this repository's metrics
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 _ci-tools/scripts/collect_build_metrics.py _site/ci/data.json
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
