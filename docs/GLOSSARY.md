@@ -31,8 +31,8 @@ Mahjong model, and Lean proofs. Shared domain definitions are canonical in the
 牌種ごとの4枚則はCoreの`copiesPerTile`と`TileCounts.Valid`を正本とし、
 固定文脈では手元牌と固定牌の占有を合算して適用する。
 
-共通核の `MahjongDomain.StandardCompletion` は雀頭と順序付き面子列の証人を保持する。
-shantenの通常形 `Complete` は `mentsuComplete_iff_standardCompletion` でこの仕様に対応し、
+共通核の `MahjongDomain.MentsuHandCompletion` は雀頭と順序付き面子列の証人を保持する。
+shantenの面子手 `Complete` は `mentsuComplete_iff_mentsuHandCompletion` でこの仕様に対応し、
 4枚制限や固定面子文脈は利用側の前提として別に保つ。
 固定文脈付き通常形待ちとシャンテン0の対応は`IsFixedContextWait`と
 `isShapeShanten_zero_iff_exists_fixedContextWait`で表す。
@@ -352,7 +352,7 @@ CIでは分類側も`main`でチェックアウトし、検証した各コミッ
 | `Shape` | `mentsuHand`、`sevenPairs`、`thirteenOrphans` の形の列挙型。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `Applicable` | 形を評価できるかを表す述語。特殊形は固定面子なしの場合だけ真。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `Complete` | 指定した形の完成条件。役や待ちの良し悪しは含めない。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
-| `mentsuComplete_iff_standardCompletion` | 通常形 `Complete` と共有核の証人付き分解仕様との対応。固定面子数4以下を前提とする。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
+| `mentsuComplete_iff_mentsuHandCompletion` | 面子手 `Complete` と共有核の証人付き分解仕様との対応。固定面子数4以下を前提とする。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `Complete.validCounts` | 3形に共通する完成形の4枚制限を取り出す補題。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `HandStep` | 1枚ドローまたは1枚交換による改善遷移。固定面子数は保存する。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |
 | `ReachesCompletion` | 指定回数の `HandStep` で完成条件へ到達する関係。 | [`Shanten/Specification.lean`](../Shanten/Specification.lean) |

@@ -1,5 +1,5 @@
 import Shanten.Capacity.Specification
-import Shanten.Special
+import Shanten.SevenPairsAndThirteenOrphans
 
 /-!
 # Capacity-aware special-shape calculations
@@ -16,7 +16,7 @@ def sevenPairsSearch (hand : Hand) : Option Int :=
 def thirteenOrphansSearch (hand : Hand) : Option Int :=
   if hand.fixedMelds = 0 then some (kokushiShanten hand) else none
 
-private theorem specialSearch_eq_some_iff
+private theorem sevenPairsOrThirteenOrphansSearch_eq_some_iff
     (hvalid : ValidHand fixed hand)
     (hsize : tileCount hand + 3 * fixed.length = 13 ∨
       tileCount hand + 3 * fixed.length = 14)
@@ -46,7 +46,7 @@ theorem sevenPairsSearch_eq_some_iff
       tileCount hand + 3 * fixed.length = 14) :
     sevenPairsSearch hand = some value ↔
       IsShapeShanten fixed hand .sevenPairs value :=
-  specialSearch_eq_some_iff hvalid hsize Iff.rfl
+  sevenPairsOrThirteenOrphansSearch_eq_some_iff hvalid hsize Iff.rfl
     sevenPairsShanten_isShapeShanten
 
 theorem thirteenOrphansSearch_eq_some_iff
@@ -55,7 +55,7 @@ theorem thirteenOrphansSearch_eq_some_iff
       tileCount hand + 3 * fixed.length = 14) :
     thirteenOrphansSearch hand = some value ↔
       IsShapeShanten fixed hand .thirteenOrphans value :=
-  specialSearch_eq_some_iff hvalid hsize Iff.rfl
+  sevenPairsOrThirteenOrphansSearch_eq_some_iff hvalid hsize Iff.rfl
     kokushiShanten_isShapeShanten
 
 theorem sevenPairsSearch_eq_none_iff :

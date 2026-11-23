@@ -10,11 +10,11 @@
 |---|---|
 | [Shanten.lean](../Shanten.lean) | 主要モジュールをまとめる公開入口（直接importは下記参照）。 |
 | [Core.lean](../Shanten/Core.lean) | Coreの牌種・カウント・面子候補を使う手牌モデル、Pair展開や基本述語。 |
-| [Specification.lean](../Shanten/Specification.lean) | 形、完成形、到達関係、形シャンテンと総合値の宣言的仕様。通常形完成を共有`StandardCompletion`へ接続する。 |
+| [Specification.lean](../Shanten/Specification.lean) | 形、完成形、到達関係、形シャンテンと総合値の宣言的仕様。面子手完成を共有`MentsuHandCompletion`へ接続する。 |
 | [Exchange.lean](../Shanten/Exchange.lean) | 形に依存しない不足枚数、交換操作、固定目標への到達、到達距離の下界。 |
 | [SevenPairs.lean](../Shanten/SevenPairs.lean) | 七対子の公開import入口。実装は下表のモジュールに分割。 |
 | [ThirteenOrphans.lean](../Shanten/ThirteenOrphans.lean) | 有効13枚手の国士無双の仕様値の存在・上界13と、最大値を達成する具体例。 |
-| [Special.lean](../Shanten/Special.lean) | 七対子・国士無双の閉形式と最短完成距離仕様の一致。有効な固定面子なし13・14枚手を対象とする。 |
+| [SevenPairsAndThirteenOrphans.lean](../Shanten/SevenPairsAndThirteenOrphans.lean) | 七対子・国士無双の閉形式と最短完成距離仕様の一致。有効な固定面子なし13・14枚手を対象とする。 |
 | [MentsuHand.lean](../Shanten/MentsuHand.lean) | 面子手のターゲットDP、選択列・バッチ走査、仕様への接続。 |
 | [Bounds.lean](../Shanten/Bounds.lean) | 到達性からの条件付き上界、国士無双の閉形式の直接計算などの上位補題。 |
 | [Capacity.lean](../Shanten/Capacity.lean) | 固定面子の実牌内容を持つ容量付きモデルの公開入口。既存抽象モデルとは別の段階導入。 |
@@ -26,9 +26,9 @@
 | [Capacity/Totality.lean](../Shanten/Capacity/Totality.lean) | 有効固定文脈の完成目標を構成し、13枚相当入力すべての全域性・仕様一致・最適状態を証明する。 |
 | [Capacity/Fourteen.lean](../Shanten/Capacity/Fourteen.lean) | 14枚相当の全域性・仕様一致・最適状態、完成と値−1の同値。 |
 | [Capacity/Discard.lean](../Shanten/Capacity/Discard.lean) | 合法打牌後の13枚相当入力、打牌結果・最適打牌列挙、未完成14枚相当の値と打牌後最小値の一致。 |
-| [Capacity/Special.lean](../Shanten/Capacity/Special.lean) | 特殊形の計算API、13・14枚相当の容量付き仕様一致、固定面子による適用除外。 |
+| [Capacity/SevenPairsAndThirteenOrphans.lean](../Shanten/Capacity/SevenPairsAndThirteenOrphans.lean) | 七対子・国士無双の計算API、13・14枚相当の容量付き仕様一致、固定面子による適用除外。 |
 | [Capacity/Overall.lean](../Shanten/Capacity/Overall.lean) | 3形の計算窓口と総合最小値、仕様一致・存在一意性、完成値・固定面子時の帰着・旧総合仕様との一致。 |
-| [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/B、14枚相当の最適打牌、特殊形・総合値、容量超過・槓の回帰例。 |
+| [Capacity/Examples.lean](../Shanten/Capacity/Examples.lean) | R2のA/B、14枚相当の最適打牌、七対子・国士無双と総合値、容量超過・槓の回帰例。 |
 | [Input37.lean](../Shanten/Input37.lean) | 符号付き37種入力のLean側の公開入口。Go実装ではない。 |
 | [Input37/Basic.lean](../Shanten/Input37/Basic.lean) | aka37添字・物理容量、整数上の赤5統合、総枚数保存、統合後容量、入力妥当性の宣言的仕様。 |
 | [Input37/Validation.lean](../Shanten/Input37/Validation.lean) | 共有集約による正規化、正規化前の検証と位置付きエラー、受理と入力仕様の同値。 |
@@ -96,7 +96,7 @@ SevenPairs.Reachability -> SevenPairs.Exchange.{Distinctness,PairMaking,Protecte
 SevenPairs    -> SevenPairs.Completion, SevenPairs.Reachability
 MentsuHand.Targets -> MentsuHand.State, Exchange
 Bounds        -> SevenPairs
-Special       -> SevenPairs.Completion, SevenPairs.Counting, ThirteenOrphans
+SevenPairsAndThirteenOrphans -> SevenPairs.Completion, SevenPairs.Counting, ThirteenOrphans
 Capacity.Basic -> Exchange
 Capacity.Specification -> Capacity.Basic, Specification
 Capacity.Wait -> Capacity.Specification
@@ -105,19 +105,19 @@ Capacity.Search -> Capacity.Reachability, MentsuHand.Search.BlockSearch
 Capacity.Totality -> Capacity.Search
 Capacity.Fourteen -> Capacity.Totality
 Capacity.Discard -> Capacity.Fourteen
-Capacity.Special -> Capacity.Specification, Special
-Capacity.Overall -> Capacity.Fourteen, Capacity.Special
-Capacity.Examples -> Capacity.Discard, Capacity.Special, Capacity.Overall, Capacity.Wait
+Capacity.SevenPairsAndThirteenOrphans -> Capacity.Specification, SevenPairsAndThirteenOrphans
+Capacity.Overall -> Capacity.Fourteen, Capacity.SevenPairsAndThirteenOrphans
+Capacity.Examples -> Capacity.Discard, Capacity.SevenPairsAndThirteenOrphans, Capacity.Overall, Capacity.Wait
 Capacity      -> Capacity.Basic, Capacity.Specification, Capacity.Wait, Capacity.Reachability,
                  Capacity.Search, Capacity.Totality, Capacity.Fourteen,
-                 Capacity.Discard, Capacity.Special, Capacity.Overall, Capacity.Examples
+                 Capacity.Discard, Capacity.SevenPairsAndThirteenOrphans, Capacity.Overall, Capacity.Examples
 Input37.Basic -> Capacity.Basic
 Input37.Validation -> Input37.Basic
 Input37.Correctness -> Input37.Validation, Capacity.Overall
 Input37.Examples -> Input37.Correctness
 Input37       -> Input37.Basic, Input37.Validation, Input37.Correctness, Input37.Examples
 ProofChecks   -> MentsuHand, ThirteenOrphans, Bounds, Capacity, Input37
-Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, Special, MentsuHand, Bounds,
+Shanten       -> Core, Specification, SevenPairs, ThirteenOrphans, SevenPairsAndThirteenOrphans, MentsuHand, Bounds,
                  Capacity, Input37, ProofChecks
 ```
 

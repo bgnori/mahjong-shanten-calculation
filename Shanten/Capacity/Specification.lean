@@ -8,15 +8,15 @@ open MahjongDomain
 def Complete (fixed : List FixedMeld) (shape : Shape) (hand : Hand) : Prop :=
   ValidHand fixed hand ∧ Shanten.Complete shape hand
 
-theorem Complete.mentsuHand_iff_standardCompletion :
+theorem Complete.mentsuHand_iff_mentsuHandCompletion :
     Complete fixed .mentsuHand hand ↔
       ValidHand fixed hand ∧
-        MahjongDomain.StandardCompletion (4 - fixed.length)
+        MahjongDomain.MentsuHandCompletion (4 - fixed.length)
           hand.counts := by
   constructor
   · rintro ⟨hvalid, hcomplete⟩
     obtain ⟨_, _, hcompletion⟩ :=
-      Shanten.mentsuComplete_iff_standardCompletion hand |>.mp hcomplete
+      Shanten.mentsuComplete_iff_mentsuHandCompletion hand |>.mp hcomplete
     have hlength : hand.fixedMelds = fixed.length := hvalid.1
     rw [hlength] at hcompletion
     exact ⟨hvalid, hcompletion⟩
@@ -25,13 +25,13 @@ theorem Complete.mentsuHand_iff_standardCompletion :
     have hbound : hand.fixedMelds ≤ 4 := by
       rw [hfixed]
       exact hvalid.2.1
-    have hstandard :
-        MahjongDomain.StandardCompletion (4 - hand.fixedMelds)
+    have hmentsuHandCompletion :
+        MahjongDomain.MentsuHandCompletion (4 - hand.fixedMelds)
           hand.counts := by
       rw [hfixed]
       exact hcompletion
-    exact ⟨hvalid, (Shanten.mentsuComplete_iff_standardCompletion hand).mpr
-      ⟨hvalid.validCounts, hbound, hstandard⟩⟩
+    exact ⟨hvalid, (Shanten.mentsuComplete_iff_mentsuHandCompletion hand).mpr
+      ⟨hvalid.validCounts, hbound, hmentsuHandCompletion⟩⟩
 
 def HandStep (fixed : List FixedMeld) (before after : Hand) : Prop :=
   ValidHand fixed before ∧ Shanten.HandStep before after ∧ ValidHand fixed after

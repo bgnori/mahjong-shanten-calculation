@@ -1,5 +1,5 @@
 import Shanten.Capacity.Fourteen
-import Shanten.Capacity.Special
+import Shanten.Capacity.SevenPairsAndThirteenOrphans
 
 /-!
 # Overall capacity-aware calculation
@@ -59,22 +59,24 @@ private lemma minimum_shapes_iff (search : Shape → Option Int) :
         ∀ shape other, search shape = some other → value ≤ other := by
   constructor
   · rw [minOption_eq_some_iff]
-    rintro ⟨hwitness, hmentsu, hspecial⟩
+    rintro ⟨hwitness, hmentsu, hsevenPairsAndOrphans⟩
     have hlower : ∀ shape other, search shape = some other → value ≤ other := by
       intro shape other hother
       cases shape with
       | mentsuHand => exact hmentsu _ hother
       | sevenPairs =>
           cases horphans : search .thirteenOrphans with
-          | none => exact hspecial _ (by simp [minOption, hother, horphans])
+          | none => exact hsevenPairsAndOrphans _ (by simp [minOption, hother, horphans])
           | some orphans =>
-              have := hspecial (min other orphans) (by simp [minOption, hother, horphans])
+              have := hsevenPairsAndOrphans (min other orphans)
+                (by simp [minOption, hother, horphans])
               exact this.trans (min_le_left _ _)
       | thirteenOrphans =>
           cases hseven : search .sevenPairs with
-          | none => exact hspecial _ (by simp [minOption, hother, hseven])
+          | none => exact hsevenPairsAndOrphans _ (by simp [minOption, hother, hseven])
           | some seven =>
-              have := hspecial (min seven other) (by simp [minOption, hother, hseven])
+              have := hsevenPairsAndOrphans (min seven other)
+                (by simp [minOption, hother, hseven])
               exact this.trans (min_le_right _ _)
     refine ⟨?_, hlower⟩
     rcases hwitness with hm | hs
@@ -84,14 +86,14 @@ private lemma minimum_shapes_iff (search : Shape → Option Int) :
       · exact ⟨.thirteenOrphans, horphans⟩
   · rintro ⟨⟨shape, hwitness⟩, hlower⟩
     apply (minOption_eq_some_iff _ _).mpr
-    have hspecial : ∀ other,
+    have hsevenPairsAndOrphans : ∀ other,
         minOption (search .sevenPairs) (search .thirteenOrphans) = some other →
           value ≤ other := by
       intro other hother
       obtain ⟨hseven | horphans, _⟩ := (minOption_eq_some_iff _ _).mp hother
       · exact hlower .sevenPairs _ hseven
       · exact hlower .thirteenOrphans _ horphans
-    refine ⟨?_, hlower .mentsuHand, hspecial⟩
+    refine ⟨?_, hlower .mentsuHand, hsevenPairsAndOrphans⟩
     cases shape with
     | mentsuHand => exact Or.inl hwitness
     | sevenPairs =>

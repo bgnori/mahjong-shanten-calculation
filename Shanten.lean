@@ -2,7 +2,7 @@ import Shanten.Core
 import Shanten.Specification
 import Shanten.SevenPairs
 import Shanten.ThirteenOrphans
-import Shanten.Special
+import Shanten.SevenPairsAndThirteenOrphans
 import Shanten.MentsuHand
 import Shanten.Bounds
 import Shanten.Capacity

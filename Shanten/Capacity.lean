@@ -6,6 +6,6 @@ import Shanten.Capacity.Search
 import Shanten.Capacity.Totality
 import Shanten.Capacity.Fourteen
 import Shanten.Capacity.Discard
-import Shanten.Capacity.Special
+import Shanten.Capacity.SevenPairsAndThirteenOrphans
 import Shanten.Capacity.Overall
 import Shanten.Capacity.Examples

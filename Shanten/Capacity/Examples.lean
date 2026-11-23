@@ -1,5 +1,5 @@
 import Shanten.Capacity.Discard
-import Shanten.Capacity.Special
+import Shanten.Capacity.SevenPairsAndThirteenOrphans
 import Shanten.Capacity.Overall
 import Shanten.Capacity.Wait
 
@@ -399,7 +399,7 @@ theorem overallMentsuComplete_search :
   unfold HasTiles
   decide
 
-theorem overallSpecialComplete_search :
+theorem overallSevenPairsAndThirteenOrphansComplete_search :
     overallMinimumSearch [] (drawHand sevenPairsReady (.honor ⟨6, by omega⟩)) = some (-1) ∧
       thirteenOrphansSearch (drawHand sevenPairsReady (.honor ⟨6, by omega⟩)) = some 5 ∧
       overallMinimumSearch [] (drawHand kokushiReady east) = some (-1) ∧

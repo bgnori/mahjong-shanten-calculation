@@ -37,13 +37,13 @@ def Complete : Shape → Hand → Prop
           ∃ pair, pair ∈ orphanKinds ∧
             HasTiles hand (orphanTiles + Multiset.replicate 1 pair)
 
-theorem standardCompletion_iff_shantenParts
+theorem mentsuHandCompletion_iff_shantenParts
     (counts : TileCounts) (fixedMelds : Nat) (hfixed : fixedMelds ≤ 4) :
-    StandardCompletion (4 - fixedMelds) counts ↔
+    MentsuHandCompletion (4 - fixedMelds) counts ↔
       ∃ pair : Tile, ∃ melds : List MentsuCandidate,
         melds.length + fixedMelds = 4 ∧
           ∀ tile, counts tile = (pairTiles pair + MentsuCandidateList.tiles melds).count tile := by
-  rw [standardCompletion_iff_parts]
+  rw [mentsuHandCompletion_iff_parts]
   constructor
   · rintro ⟨⟨pair⟩, melds, hlength, hcounts⟩
     refine ⟨pair, melds, by omega, ?_⟩
@@ -58,21 +58,21 @@ theorem standardCompletion_iff_shantenParts
     simpa [pairTiles, MentsuCandidateList.counts,
       Multiset.count_add] using h.symm
 
-theorem mentsuComplete_iff_standardCompletion (hand : Hand) :
+theorem mentsuComplete_iff_mentsuHandCompletion (hand : Hand) :
     Complete .mentsuHand hand ↔
       ValidCounts hand ∧
         hand.fixedMelds ≤ 4 ∧
-        MahjongDomain.StandardCompletion (4 - hand.fixedMelds)
+        MahjongDomain.MentsuHandCompletion (4 - hand.fixedMelds)
           hand.counts := by
   constructor
   · rintro ⟨hvalid, pair, melds, hlength, htiles⟩
     have hfixed : hand.fixedMelds ≤ 4 := by omega
     refine ⟨hvalid, hfixed, ?_⟩
-    exact (standardCompletion_iff_shantenParts
+    exact (mentsuHandCompletion_iff_shantenParts
       hand.counts hand.fixedMelds hfixed).mpr ⟨pair, melds, by omega, htiles⟩
   · rintro ⟨hvalid, hfixed, hcompletion⟩
     obtain ⟨pair, melds, hlength, htiles⟩ :=
-      (standardCompletion_iff_shantenParts
+      (mentsuHandCompletion_iff_shantenParts
         hand.counts hand.fixedMelds hfixed).mp hcompletion
     exact ⟨hvalid, pair, melds, by omega, htiles⟩
 

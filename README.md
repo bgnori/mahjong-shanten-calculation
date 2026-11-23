@@ -212,12 +212,12 @@ valid noncomplete fourteen-tile-equivalent hands. Check completion before using
 discard recommendations: discarding from a completed hand loses the `-1` value.
 Discards preserve fixed meld contents and capacity validity.
 
-[Shanten/Special.lean](./Shanten/Special.lean) proves that the computable formulas
+[Shanten/SevenPairsAndThirteenOrphans.lean](./Shanten/SevenPairsAndThirteenOrphans.lean) proves that the computable formulas
 `sevenPairsShanten` and `kokushiShanten` equal the minimum completion distance
 minus one for every valid concealed thirteen- or fourteen-tile hand.
 Seven pairs counts a quad as one pair kind and accounts for missing distinct
 kinds; thirteen orphans counts pairs only among terminal and honor kinds.
-[Shanten/Capacity/Special.lean](./Shanten/Capacity/Special.lean) exposes
+[Shanten/Capacity/SevenPairsAndThirteenOrphans.lean](./Shanten/Capacity/SevenPairsAndThirteenOrphans.lean) exposes
 `sevenPairsSearch hand` and `thirteenOrphansSearch hand`. They return `some value`
 exactly for the corresponding capacity-aware specification on valid
 thirteen- or fourteen-tile-equivalent inputs, and `none` exactly when fixed
