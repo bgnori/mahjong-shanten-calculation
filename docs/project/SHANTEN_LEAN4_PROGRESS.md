@@ -7,129 +7,9 @@
 この台帳には現在の成果と未解決条件だけを記録する。作業範囲は
 [現行計画](SHANTEN_LEAN4_PLAN.md)、判断の根拠は
 [追補レビュー](MENTSU_HAND_PROGRESS_REVIEW_FOLLOWUP.md) を参照する。
+検証履歴は[検証記録](SHANTEN_LEAN4_VERIFICATION.md)、
 過去の補題別履歴・撤回した計画は [アーカイブ](archive/README.md) に分離した。
 旧コードの除去によって、現在の未解決条件を完了扱いにはしていない。
-
-## 性能測定の準備（2026-11-25）
-
-[測定手順](../../benchmarks/README.md) と、既存の容量付き計算を呼び出す代表入力を用意した。
-固定面子0〜4組、13・14枚相当、槓、完成・テンパイ・未完成を含む。
-入力の有効性と既存の証明済み回帰例の一部は測定用プログラムの `check` で確認する。
-計算部分の時間と、Lean起動を含むコマンド全体の時間・最大RSSは区別する。
-測定器は時間・仮想アドレス空間の制限と、失敗・時間切れの記録を扱う。
-
-基準コミット `5045fa6` の後に準備を追加し、
-`LEAN_NUM_THREADS=2 lake env lean --run benchmarks/ShantenBench.lean check` と
-`python3 -m unittest discover -s benchmarks -p 'test_*.py'` で動作を確認した。
-これは準備の動作確認であり、性能の数値目標は未決定。
-
-## 起動と計算の時間制限の分離（2026-11-25）
-
-旧測定では外側の12秒上限にLeanの起動時間が含まれ、
-時間切れから計算時間を評価できなかった。
-`ShantenBench.lean` の `controlled` モードと
-`measure_calculation.py` は、起動・入力検査後の準備完了通知と開始指示を交換し、
-起動用と計算用の時間制限を分ける。
-計算が完了した場合の `calculation_ns` はLean内の時計で測り、起動と通知処理を含まない。
-計算の時間切れ監視には開始・結果通知の通信やスケジューリングの遅延が含まれるため、
-計算時間そのものの厳密な下限としては扱わない。詳しい手順と制約は
-[測定手順](../../benchmarks/README.md) を参照する。
-
-動作確認として、計算の上限を1秒に設定した実行で `ready-four-13` は
-起動約2.52秒の後、計算約11.7ミリ秒で成功した。
-`kan-three-13` は起動約2.54秒の後、計算側の監視が約1.00秒で時間切れとなった。
-これは方式の動作確認であり、旧測定の全ケースを新方式で再測定したものではない。
-
-## 性能測定の初回結果（2026-11-25）
-
-**旧方式の参考記録:** 時間切れの判定にLeanの起動時間を含めていたため、
-計算時間のベースラインとしては不十分。時間切れのケースについて計算時間の下限は分からず、
-起動完了後に制限時間を開始する新方式で再測定する。
-
-測定対象はshanten `cdab34e0ab2ec1acdf12631ca4911c806001943e`、
-Core `86e594624ee5f6a5c7ba35603db9a3f7462525be`、
-Mathlib `56a005855ea17e0b0958f73ec801ae140b0a1679`。各作業ツリーは変更なし。
-Lean 4.35.0、Python 3.11.2、Linux x86_64、Intel Core i5-4690、
-`LEAN_NUM_THREADS=2`。CPUは `nproc` で4、cgroupのCPU割当は2 CPU相当、
-メモリ上限は6 GiB。共有環境で他のプロセスも稼働していた。
-既存のビルド成果物・OSキャッシュを使い、クリーンな測定環境ではない。
-
-[測定手順](../../benchmarks/README.md) に従い `lean --run` を順次実行した。
-各コマンドは起動を含め12秒で打ち切り、各プロセスの仮想アドレス空間を
-12 GiBに制限した。cgroupの匿名メモリが3,750 MiBに達した場合は中断する監視を加えたが、
-中断はなかった。計算時間はLean内の時計、全体時間と最大RSSは測定器による。
-全50実行の順序、反復番号、結果、出力、制限、メモリ情報は
-[生データ](../../benchmarks/baseline-2026-11-25.jsonl) に保存した。
-
-### 面子手
-
-全18ケースを1回ずつ測定し、`closed-seven-ready-13`、`kan-one-13`、
-`kan-two-13`、`kan-three-13`、`ready-four-13` は計3回測定した。
-時間は計算部分のみ。複数回は最小〜最大、値は各回で一致した。
-「時間切れ」はコマンド全体が12秒で終了しなかったことを表し、
-Leanの起動時間を含むため、計算部分だけが12秒以上とは限らない。
-
-| ケース | 回数 | 結果 | 計算時間 |
-|---|---:|---:|---:|
-| `closed-seven-ready-13` | 3 | 時間切れ | — |
-| `closed-seven-quads-13` | 1 | 時間切れ | — |
-| `closed-seven-complete-14` | 1 | 時間切れ | — |
-| `closed-orphans-ready-13` | 1 | 時間切れ | — |
-| `closed-orphans-far-13` | 1 | 時間切れ | — |
-| `closed-orphans-complete-14` | 1 | 時間切れ | — |
-| `closed-mentsu-complete-14` | 1 | 時間切れ | — |
-| `kan-one-13` | 3 | 時間切れ | — |
-| `kan-one-14` | 1 | 時間切れ | — |
-| `kan-two-13` | 3 | 時間切れ | — |
-| `kan-two-14` | 1 | 時間切れ | — |
-| `kan-three-13` | 3 | 0 | 5.400〜5.524秒 |
-| `kan-three-14` | 1 | -1 | 5.389秒 |
-| `blocked-four-13` | 1 | 1 | 10.397ミリ秒 |
-| `ready-four-13` | 3 | 0 | 10.743〜11.455ミリ秒 |
-| `complete-four-14` | 1 | -1 | 11.575ミリ秒 |
-| `blocked-four-14` | 1 | 1 | 10.165ミリ秒 |
-| `kan-four-13` | 1 | 0 | 13.858ミリ秒 |
-
-### 特殊形・総合値
-
-固定面子なしの7ケースについて七対子・国士無双を各1回測定し、
-七対子の `closed-seven-ready-13` と国士の `closed-orphans-far-13` は各3回測定した。
-時間は計算部分のみ。
-
-| ケース | 七対子：値／時間（ミリ秒） | 国士：値／時間（ミリ秒） |
-|---|---|---|
-| `closed-seven-ready-13` | 0／0.105〜0.143（3回） | 5／0.256 |
-| `closed-seven-quads-13` | 6／0.133 | 8／0.236 |
-| `closed-seven-complete-14` | -1／0.150 | 5／0.255 |
-| `closed-orphans-ready-13` | 6／0.421 | 0／0.150 |
-| `closed-orphans-far-13` | 6／0.391 | 13／0.294〜0.300（3回） |
-| `closed-orphans-complete-14` | 5／0.333 | -1／0.155 |
-| `closed-mentsu-complete-14` | 3／0.106 | 7／0.204 |
-
-総合値は `closed-seven-ready-13` が1回の測定で時間切れ、
-`ready-four-13` が3回とも0で、計算時間は10.490〜11.639ミリ秒。
-正常終了した計算コマンドの最大RSSは約1.67 GiBで、Leanの読み込みを含む。
-時間切れ時の `wait4` のRSSは強制終了で親が子を回収できない場合があり、
-子を含む計算全体のピークとはみなさない。
-
-### ビルドと所見
-
-`lake build Shanten` の別測定は、12 GiBの仮想アドレス空間制限・120秒上限で
-多数のモジュールを再ビルド中、1モジュールでスレッド作成失敗が発生し、
-全体も時間切れとなった。続く16 GiB・180秒上限の再実行は、
-先の途中成果を利用して49.573秒で成功した。さらに成果物が最新の状態での
-増分ビルドは1.171秒で成功した。いずれもクリーンビルドの所要時間ではない。
-ビルドの `wait4` 最大RSSは並列子プロセスの合計ピークを示さない。
-事前の制限値確認では、8 GiBの仮想アドレス空間制限、および768 MiB・2 GiBの
-データ領域制限の各試行で、Leanのスレッド作成が失敗した。これらを計算時間に含めない。
-
-固定面子3組の例は約5.4〜5.5秒、4組の例は約10〜14ミリ秒であり、
-固定面子0〜2組の今回の例はすべてコマンド全体の12秒上限に達した。
-面子手候補の列挙が性能改善の優先候補だが、この測定だけでは内訳や支配要因を
-確定できない。特殊形の閉形式は今回の例ではそれより短い。
-1回だけのケースや時間切れを含むため、分位点・最悪時性能は算出しない。
-固定面子0〜2組の完了時間と探索内訳は未測定であり、必要なら資源を確保して再測定する。
-ネイティブ実行速度ではなく `lean --run` の結果であり、性能目標は未決定。
 
 ## 現在地
 
@@ -151,10 +31,14 @@ Leanの起動時間を含むため、計算部分だけが12秒以上とは限�
 | 検証運用 | CI設定・成功確認済み | Go／Lean独立ジョブの成功を利用者が確認。主要87宣言の推移的な `sorryAx` 依存を通常ビルドで拒否する。今回追加分のGitHub上の実行はpush後。 |
 | Go適合性 | 保留 | 利用者の別計画を先行し、現段階では実装しない。Go計算器とLean仕様の値一致、共有fixtureは未実装。 |
 
+性能測定の結果は[性能測定記録](SHANTEN_LEAN4_PERFORMANCE.md)、
+実行方法は[測定手順](../../benchmarks/README.md)に分離した。
+旧方式の時間切れには起動時間が含まれるため、新方式での再測定が必要。
+
 公開入口は [MentsuHand.lean](../../Shanten/MentsuHand.lean)、
 [SevenPairs.lean](../../Shanten/SevenPairs.lean) と
 [ThirteenOrphans.lean](../../Shanten/ThirteenOrphans.lean)、
-特殊形の一般式は [Special.lean](../../Shanten/Special.lean)、
+特殊形の一般式は [SevenPairsAndThirteenOrphans.lean](../../Shanten/SevenPairsAndThirteenOrphans.lean)、
 実装の配置と読む順序は[構成表](SHANTEN_LEAN4_PLAN.md#ファイル構成と読む順序)を参照する。
 既存のターゲットDPの仕様一致は、新しいバッチ走査の成果とは別に数える。
 手牌消費付きブロック探索は
@@ -266,7 +150,7 @@ Aは最適打牌が東のみ、Bは東・白の双方となることを実計算
 
 ## 順序4：七対子・国士無双の一般計算
 
-[Special.lean](../../Shanten/Special.lean) で、固定面子なし・4枚制限を満たす
+[SevenPairsAndThirteenOrphans.lean](../../Shanten/SevenPairsAndThirteenOrphans.lean) で、固定面子なし・4枚制限を満たす
 任意の13枚手または14枚手について、計算可能な閉形式の最短完成距離仕様との一致を証明した。
 
 - `sevenPairsShanten_isShapeShanten`：
@@ -279,7 +163,7 @@ Aは最適打牌が東のみ、Bは東・白の双方となることを実計算
 - 上限用の既存証明を仮定せず、共有の不足数下界と、
   ドロー／同枚数交換の到達証明を使って閉形式の最小性まで証明した。
 
-[Capacity/Special.lean](../../Shanten/Capacity/Special.lean) は
+[Capacity/SevenPairsAndThirteenOrphans.lean](../../Shanten/Capacity/SevenPairsAndThirteenOrphans.lean) は
 `sevenPairsSearch hand` / `thirteenOrphansSearch hand` を公開する。
 有効13・14枚相当入力に対し `*_eq_some_iff` が容量付き仕様との双方向の一致を保証する。
 固定面子なしでは旧仕様との同値を再利用し、固定面子があれば `none` とする。
@@ -479,137 +363,7 @@ R3設定後のCI成功は利用者から確認済みとの報告を受けた。
 
 ## 検証記録
 
-- 2026-11-16、国士無双の最大値13：
-  `lake build Shanten` 成功（909 jobs）。既存・移動済みコードの警告と
-  Mathlib import形式の警告は残る。
-  `lake env lean --stdin` で公開入口からの仕様値の存在・上界の利用、
-  具体例の `some 13`、13手では和了できないことを検査した。
-  最大値・値の存在・具体例の仕様値・共有の到達定理・不足数の下界の5定理に
-  `#print axioms` を実行し、依存は `propext`・`Classical.choice`・`Quot.sound` のみで、
-  `sorryAx` や `native_decide` の公理への依存がないことを確認した。
-
-- 2026-11-15、`f79ed59`：追補レビューで
-  `lake env lean Shanten/MentsuHand.lean` 成功（約21.3秒、警告83件）。
-- 同レビューで、任意の分解にグループ化順列定理を適用できることと、
-  具体例の重複度保持・残余列の空性をLeanで確認済み。
-- 2026-11-16のアーカイブ整理は文書変更のみ。Leanビルドは再実行していない。
-- 2026-11-16、旧計画コード除去後：
-  `lake env lean Shanten/MentsuHand.lean` 成功（警告64件）、
-  `lake build Shanten` 成功（880 jobs）。
-- 残した294宣言の命題・証明本文が、コメントと空白を除いて除去前と一致することを確認。
-  公開入口をimportする一時Lean検査で、雀頭が後になるグループ化の重複度保持、
-  グループ走査からバッチ走査への変換、完了したバッチ走査から仕様値の存在への接続を確認。
-  ターゲットDPの仕様一致とバッチ到達性の定理に `sorryAx` がないことも確認した。
-- 2026-11-16、分解から牌種順バッチ走査を構成する統合後：
-  `lake env lean Shanten/MentsuHand.lean` 成功。新しい具体例では、
-  13枚手「11112222萬 東東 9筒 9索 北」と分解「東雀頭、12萬ターツ4組」について、
-  `exists_tileBatchScan_complete` が返す選択列・雀頭・完了条件まで検査した。
-  続けて `lake build Shanten` も成功（880 jobs）。既存の警告は残る。
-- 2026-11-16、一般ブロック探索の追加：
-  `lake env lean Shanten/GeneralMentsuHand.lean` 成功（新モジュールの警告なし）。
-  13種の么九牌を各1枚持つ手牌について、旧分解が存在しないことと新探索の全域性を検査。
-  雀頭・面子とも該当牌がない場合も、使用牌0枚のまま不足数を2・5と累積することを検査。
-  固定面子4組・東1枚の手牌の結果が `some 0`、13萬を123萬へ補う不足数が1、
-  同じ面子を再選択しても手牌を二重使用せず累積不足数が4になること、
-  完成後5枚を要求する候補が4枚制限で排除されることもLeanで検査した。
-  `lake build Shanten` 成功（881 jobs）。ビルドには既存と同種のMathlib import形式の
-  警告が残る。公開入口からのimportと全域性定理の適用も検査した。
-  遷移不変条件・被覆性・距離集合一致・仕様一致・存在一意性・最適状態の6定理について
-  `#print axioms` を実行し、依存は `propext`・`Classical.choice`・`Quot.sound` のみで、
-  `sorryAx` がないことを確認した。
-- 2026-11-16、モジュール分割後：`lake build Shanten` 成功（899 jobs）。
-  `Shanten.MentsuHand` だけをimportする検査で、一般手牌の全域性定理の適用と、
-  牌種順走査・ターゲットDP・手牌消費付き探索の主要8定理に `sorryAx` がないことを確認。
-  旧走査には従来から `tile_mem_mentsuHandTileOrder` の `native_decide` 依存があり、
-  今回も変更していない。Mathlib import形式・既存の証明スタイルに関する警告は残る。
-- 2026-11-16、七対子の分割・改名後：`lake build Shanten` 成功（908 jobs）。
-  `lake env lean --stdin` で `Shanten.SevenPairs` だけをimportし、
-  テンパイからの和了定理の適用と改名後のテンパイ目標のカウント補題を検査した。
-  分解・最後のドロー・7牌種への到達・6対への到達・保護付き6対への到達の5補題に
-  `sorryAx` がないことを `#print axioms` で確認した。
-  7牌種への到達には従来の `exists_missing_tile_kind` の `native_decide` 依存が残る。
-  他の4補題の依存は `propext`・`Classical.choice`・`Quot.sound` のみ。
-  面子手の全モジュールが七対子を直接importしないことも検査した。
-  Mathlib import形式・既存の証明スタイルに関する警告は残る。
-
-- 2026-11-16、レビューR1修正後：
-  `lake build Shanten.Exchange Shanten.SevenPairs.Reachability` 成功（881 jobs）、
-  回帰例を含む `lake build Shanten` 成功（909 jobs）。
-  保存定理・共有到達・一般探索の仕様一致／全域性／最適状態・バッチ走査・七対子上限・
-  国士最大値の主要14宣言を `lake env lean -j2 --stdin` の `#print axioms` で検査し、
-  `sorryAx` 依存なし。新しい保存・完成経路接続の4補題は公理依存もない。
-  既存のバッチ走査・七対子の `native_decide` 依存と、既存の警告は残る。
-  修正前の基準はレビュー対象コミット `f3f49369dffb45c3ca04f89571471b2c122ee6cc`。
-
-- 2026-11-16、レビューR3設定後：
-  Go 1.26.4で `go test ./...` / `go vet ./...` 成功。
-  `lake build Shanten.ProofChecks` 成功（909 jobs）、
-  公開入口を含む `lake build` 成功（911 jobs）。
-  `actionlint` v1.7.12でワークフロー検証成功。
-  一時的なLean入力で、`sorry` を持つ定理を経由した別定理への
-  `assert_no_sorry` が `contains sorry` エラーで非ゼロ終了することも検査した。
-  GitHubホスト上のワークフロー実行はpush後に確認する。既存の警告は残る。
-  修正前の基準コミットはR1対応済みの `7f06247`。
-
-- 2026-11-16、レビューR2の段階導入後：
-  `lake build Shanten.Capacity` 成功（879 jobs）、
-  公開入口・既存証明・主要23宣言の証明穴検査を含む `lake build` 成功（915 jobs）。
-  新たな主要9宣言を `#print axioms` で検査し、依存は
-  `propext`・`Classical.choice`・`Quot.sound` の範囲のみ。
-  `sorryAx`・新規の `native_decide` 依存なし。
-  公開入口からA/Bの値1・0の一意性の適用も検査した。
-  既存の警告は残る。修正前の基準コミットはR3対応済みの `29235ad`。
-
-- 2026-11-16、順序4冒頭の容量付き一般探索接続後：
-  `lake build Shanten.Capacity` 成功（896 jobs）、
-  既存証明と主要31宣言の証明穴検査を含む `lake build` 成功（918 jobs）。
-  新たな主要8宣言を `#print axioms` で検査し、依存は
-  `propext`・`Classical.choice`・`Quot.sound` のみ。新たな `native_decide` 依存なし。
-  公開入口から、追加の目標存在仮定なしの全域性定理の適用と、
-  A/Bの探索結果から容量付き仕様値1・0への接続も検査した。
-  既存の警告は残る。修正前の基準コミットは `21c3043`。
-
-- 2026-11-16、14枚相当の面子手・打牌選択接続後：
-  `lake build Shanten.Capacity.Fourteen` 成功（895 jobs）、
-  `lake build Shanten.Capacity.Discard` 成功（896 jobs）、
-  回帰例を含む `lake build Shanten.Capacity` 成功（898 jobs）。
-  既存証明と主要42宣言の証明穴検査を含む `lake build` 成功（920 jobs）。
-  新たな主要11宣言を `#print axioms` で検査し、依存は
-  `propext`・`Classical.choice`・`Quot.sound` のみ。新たな `native_decide` 依存なし。
-  公開入口から、未完成の任意の有効14枚相当入力に対して、
-  元の値を達成する合法打牌が得られることも検査した。
-  既存の警告は残る。修正前の基準コミットは `898fc75`。
-
-- 2026-11-16、七対子・国士無双の一般計算接続後：
-  `lake build Shanten.Special` 成功（881 jobs）、
-  `lake build Shanten.Capacity.Special` 成功（884 jobs）、
-  回帰例と主要52宣言の証明穴検査を含む `lake build Shanten.ProofChecks` 成功（920 jobs）。
-  最終的な `lake build` 成功（922 jobs）。
-  新たな主要10宣言を `lake env lean -j2 --stdin` の `#print axioms` で検査し、
-  依存は `propext`・`Classical.choice`・`Quot.sound` の範囲のみ。
-  新たな `native_decide` 依存なし。既存の警告は残る。
-  13枚・14枚の回帰計算から容量付き仕様への適用も検査した。
-  修正前の基準コミットは `4d9c543`。
-
-- 2026-11-16、3形の総合値接続後：
-  `lake build Shanten.Capacity.Overall` 成功（902 jobs）。
-  最終的な `lake build` 成功（923 jobs）。主要65宣言の証明穴検査を通過。
-  新たな主要13宣言を `lake env lean -j2 --stdin` の `#print axioms` で検査し、
-  依存は `propext`・`Classical.choice`・`Quot.sound` のみ。
-  新たな `native_decide` 依存なし。既存の警告は残る。
-  固定文脈の既存探索結果と、各形の構造的完成・特殊形の閉形式から、
-  公開された総合計算の期待値への接続も検査した。
-  修正前の基準コミットは `f22a660`。
-
-- 2026-11-16、Lean側の37種入力検証・正規化接続後：
-  `lake build Shanten.Input37.Validation` 成功（878 jobs）、
-  `lake build Shanten.Input37.Correctness` 成功（905 jobs）、
-  `lake build Shanten.Input37.Examples` 成功（906 jobs）。
-  最終的な `lake build` 成功（928 jobs）。主要87宣言の証明穴検査を通過。
-  新たな主要22宣言を `lake env lean -j2 --stdin` の `#print axioms` で検査し、
-  依存は `propext`・`Classical.choice`・`Quot.sound` のみ。
-  新たな `native_decide` 依存なし。既存の警告は残る。
-  Goソース・開発コンテナは未変更。修正前の基準コミットは `7a71446`。
+詳細な履歴は[Lean証明の検証記録](SHANTEN_LEAN4_VERIFICATION.md)を参照。
 
 ## 旧計画コードの除去（2026-11-16）
 
@@ -626,7 +380,7 @@ R3設定後のCI成功は利用者から確認済みとの報告を受けた。
 
 ## 更新ルール
 
-1. 実装変更ごとに、基準コミット・解消した未解決前提・検証コマンドと結果を更新する。
+1. 実装変更ごとに、基準コミット・解消した未解決前提を台帳に、検証コマンドと結果を[検証記録](SHANTEN_LEAN4_VERIFICATION.md)に記録する。性能測定は[性能測定記録](SHANTEN_LEAN4_PERFORMANCE.md)に記録する。
 2. 完了したチェック項目は根拠となる定理とともに成果欄へ移す。
 3. 経路を仮定する変換と、分解から経路を生成する定理を区別して報告する。
 4. 撤回した方針や詳細な過去履歴はアーカイブへ移し、現行チェックリストに残さない。

@@ -5,8 +5,11 @@
 
 ## 計画・進捗
 
-- [Lean証明計画](./SHANTEN_LEAN4_PLAN.md)
-- [Lean証明進捗台帳](./SHANTEN_LEAN4_PROGRESS.md)
+- [Lean証明計画](./SHANTEN_LEAN4_PLAN.md)：作業範囲・目標・完了条件。
+- [Lean証明進捗台帳](./SHANTEN_LEAN4_PROGRESS.md)：現在の成果と未解決条件。
+- [Lean証明の検証記録](./SHANTEN_LEAN4_VERIFICATION.md)：検証コマンドと結果の履歴。
+- [Leanシャンテン計算の性能測定記録](./SHANTEN_LEAN4_PERFORMANCE.md)：測定方式・結果と制約。
+  実行手順は[測定手順](../../benchmarks/README.md)を参照。
 - [共通ドメイン抽出計画](./SHARED_DOMAIN_EXTRACTION_PLAN_2026-11-17.md)
 - [core抽出候補の棚卸し](./CORE_EXTRACTION_CANDIDATES_2026-11-20.md)
 - [共通ドメインW0基準記録](./SHARED_DOMAIN_W0_BASELINE_2026-11-17.md)
