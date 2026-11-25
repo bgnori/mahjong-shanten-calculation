@@ -96,6 +96,43 @@ def check : IO UInt32 := do
   IO.println "benchmark smoke checks passed"
   return 0
 
+def measure (controlled : Bool) (operation name : String) : IO UInt32 := do
+  match cases.find? (fun c => c.name == name) with
+  | none =>
+      IO.eprintln s!"unknown case: {name}"
+      return 1
+  | some c =>
+      if !validCase c then
+        IO.eprintln s!"invalid benchmark case: {name}"
+        return 1
+      if !["mentsu", "overall", "seven", "orphans"].contains operation then
+        IO.eprintln s!"unknown operation: {operation}"
+        return 1
+      if controlled then
+        let stdout ← IO.getStdout
+        stdout.putStr "SHANTEN_READY\n"
+        stdout.flush
+        let stdin ← IO.getStdin
+        if (← stdin.getLine) != "RUN\n" then
+          IO.eprintln "expected RUN after SHANTEN_READY"
+          return 1
+      let start ← IO.monoNanosNow
+      match runSearch operation c with
+      | .error message =>
+          IO.eprintln message
+          return 1
+      | .ok result =>
+          let finish ← IO.monoNanosNow
+          let applicable := operation == "mentsu" || operation == "overall" || c.fixed.isEmpty
+          if result.isSome != applicable then
+            IO.eprintln s!"unexpected applicability: {operation} {name} returned {repr result}"
+            return 1
+          let marker := if controlled then "SHANTEN_RESULT " else ""
+          IO.println s!"{marker}operation={operation} case={name} result={repr result} calculation_ns={finish - start}"
+          if controlled then
+            (← IO.getStdout).flush
+          return 0
+
 def run (args : List String) : IO UInt32 := do
   match args with
   | ["list"] =>
@@ -103,33 +140,10 @@ def run (args : List String) : IO UInt32 := do
         IO.println s!"{c.name}\tfixed={c.fixed.length}\tstanding={tileCount c.hand}\tvalid={validCase c}"
       if cases.all validCase then return 0 else return 1
   | ["check"] => check
-  | [operation, name] =>
-      match cases.find? (fun c => c.name == name) with
-      | none =>
-          IO.eprintln s!"unknown case: {name}"
-          return 1
-      | some c =>
-          if !validCase c then
-            IO.eprintln s!"invalid benchmark case: {name}"
-            return 1
-          if !["mentsu", "overall", "seven", "orphans"].contains operation then
-            IO.eprintln s!"unknown operation: {operation}"
-            return 1
-          let start ← IO.monoNanosNow
-          match runSearch operation c with
-          | .error message =>
-              IO.eprintln message
-              return 1
-          | .ok result =>
-              let finish ← IO.monoNanosNow
-              let applicable := operation == "mentsu" || operation == "overall" || c.fixed.isEmpty
-              if result.isSome != applicable then
-                IO.eprintln s!"unexpected applicability: {operation} {name} returned {repr result}"
-                return 1
-              IO.println s!"operation={operation} case={name} result={repr result} calculation_ns={finish - start}"
-              return 0
+  | ["controlled", operation, name] => measure true operation name
+  | [operation, name] => measure false operation name
   | _ =>
-      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | <mentsu|overall|seven|orphans> <case>"
+      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | [controlled] <mentsu|overall|seven|orphans> <case>"
       return 1
 
 end ShantenBench

@@ -12,6 +12,18 @@ import tempfile
 import time
 
 
+def limit_memory(max_memory_mib):
+    limit = max_memory_mib * 1024 * 1024
+    resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+
+def kill_group(pid):
+    try:
+        os.killpg(pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--timeout", type=float, required=True, help="timeout in seconds")
@@ -30,22 +42,12 @@ def main():
     if not args.command:
         parser.error("a command is required after --")
 
-    def limit_memory():
-        limit = args.max_memory_mib * 1024 * 1024
-        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
-
-    def kill_group(pid):
-        try:
-            os.killpg(pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-
     with tempfile.TemporaryFile(mode="w+t") as output, tempfile.TemporaryFile(mode="w+t") as errors:
         start = time.monotonic()
         try:
             process = subprocess.Popen(
                 args.command, stdout=output, stderr=errors, start_new_session=True,
-                preexec_fn=limit_memory,
+                preexec_fn=lambda: limit_memory(args.max_memory_mib),
             )
         except OSError as error:
             print(f"failed to start {args.command[0]}: {error}", file=sys.stderr)

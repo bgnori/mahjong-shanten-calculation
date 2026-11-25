@@ -3,8 +3,9 @@
 このディレクトリは、容量付きモデルの計算を手牌ごとに実行し、
 時間切れや失敗も含めて記録するためのもの。性能の基準値や目標を定めたものではない。
 計算の正しさは既存の一般定理と回帰例で保証・検査し、測定値をその代わりにしない。
-初回測定の条件と集計は[進捗台帳](../docs/project/SHANTEN_LEAN4_PROGRESS.md#性能測定の初回結果2026-11-25)、
+旧方式の初回測定の条件と集計は[進捗台帳](../docs/project/SHANTEN_LEAN4_PROGRESS.md#性能測定の初回結果2026-11-25)、
 各実行の出力は[生データ](./baseline-2026-11-25.jsonl) を参照する。
+旧方式の時間切れには起動時間が含まれるため、計算時間の下限や新方式との比較に使わない。
 
 ## 対象と入力
 
@@ -42,8 +43,9 @@
 ```sh
 export LEAN_NUM_THREADS=2
 lake env lean --run benchmarks/ShantenBench.lean list
-python3 benchmarks/measure.py --timeout 120 --max-memory-mib 16384 -- \
-  lake env lean --run benchmarks/ShantenBench.lean mentsu ready-four-13
+python3 benchmarks/measure_calculation.py \
+  --startup-timeout 60 --calculation-timeout 120 --max-memory-mib 16384 -- \
+  lake env lean --run benchmarks/ShantenBench.lean controlled mentsu ready-four-13
 ```
 
 `list` は全ケース名、固定面子数、手元牌数と有効性を表示し、
@@ -52,6 +54,11 @@ python3 benchmarks/measure.py --timeout 120 --max-memory-mib 16384 -- \
 `orphans` のいずれか。ケースを1つずつ、同じ設定で反復し、出力を保存する。
 計算が重い可能性があるため、共有環境では並列実行せず、資源状況を確認する。
 未知の操作やケース、無効な入力は明示的に失敗する。
+
+`controlled` モードはLeanの起動と入力検査の後に `SHANTEN_READY` を出力して待機する。
+測定器はこの通知を受け取って `RUN` を送り、その時点から計算用の制限時間を監視する。
+Leanは指示を受け取った後に計算の開始・終了時刻を測り、結果を通知する。
+起動の時間切れ、計算の時間切れ、結果通知後の終了時間切れ、実行失敗は別々に記録する。
 
 計算時間とビルド時間を分けるため、ビルドは別コマンドとして測定する。
 これは既存のビルド成果物を利用した**増分ビルド**であり、クリーンビルドではない。
@@ -64,13 +71,20 @@ python3 benchmarks/measure.py --timeout 600 --max-memory-mib 16384 -- lake build
 
 - Lean側の `calculation_ns` は入力検査後、選択した計算の開始から結果を得るまでの
   単調時計による経過時間。Leanの読み込み・ソース処理と結果の表示は含まない。
-- `measure.py` のJSONはコマンド全体の経過秒数、Linux `wait4` の最大RSS（KiB）、
+- `measure_calculation.py` の `startup_elapsed_seconds` はプロセス起動から
+  準備完了通知まで、`calculation_wall_seconds` は開始指示から結果通知までの時間。
+  後者にはプロセス間通信・結果通知の遅延が含まれるため、計算自体の時間としては
+  `calculation_ns` を使う。計算の時間切れは後者に基づく近似的な制限であり、
+  通信やスケジューリングの遅延を含む。時間切れ時に `calculation_ns` は得られない。
+- `measure.py` はビルドなどコマンド全体を測るための別の測定器で、計算の制限時間には使わない。
+  そのJSONはコマンド全体の経過秒数、Linux `wait4` の最大RSS（KiB）、
   終了コード、制限値と時間切れの有無を含む。コマンドの標準出力・標準エラーもそのまま表示する。
-  時間切れはプロセスグループを停止し、記録したうえで終了コード124を返す。
+  どちらの測定器も時間切れにはプロセスグループを停止し、終了コード124を返す。
   その他の失敗も成功として扱わない。
 - 最大RSSは `wait4` が返す単一プロセスと回収された子の最大値であり、
   並列に動くプロセス群のRSS合計のピークではない。Leanの起動・読込みも含み、
-  計算部分だけのメモリではない。`lake build` のメモリ使用量全体とも解釈しない。
+  計算部分だけのメモリではない。時間切れ時には子を回収できず過小になることもある。
+  `lake build` のメモリ使用量全体とも解釈しない。
 - メモリ制限はLinuxの `RLIMIT_AS` による**各プロセスの仮想アドレス空間**の制限で、
   RSSやプロセス群のメモリ合計の上限ではない。Leanは大きなファイルをマップするため、
   RSSより大きな制限が必要になる場合がある。制限による失敗も失敗として記録する。
@@ -81,6 +95,7 @@ python3 benchmarks/measure.py --timeout 600 --max-memory-mib 16384 -- lake build
 Lean・Mathlibの版、OS・CPU・メモリ、並列度、キャッシュ状態、実行順・反復回数、
 時間・メモリ制限を残す。時間切れや資源不足も除外せず記録する。
 異なる設定や負荷の測定値を同一条件の比較として扱わない。
+特に旧方式の時間切れと新方式の計算時間切れは区別する。
 
 測定器自体の検査は次で実行できる。
 
