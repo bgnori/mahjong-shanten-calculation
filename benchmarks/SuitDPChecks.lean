@@ -1,5 +1,6 @@
 import Shanten.Experimental.SuitDP
 import Shanten.Experimental.PrunedSuitDP
+import Shanten.Experimental.IncrementalSuitDP
 
 open MahjongDomain Shanten
 open Shanten.Experimental.SuitDP
@@ -38,9 +39,11 @@ def checkLocal (tiles held fixed : List Tile) (sequences : Bool) : IO Bool := do
   let hand : Shanten.Hand :=
     { fixedMelds := 0, counts := fun tile => held.count tile }
   let actual := localCosts hand (Multiset.ofList fixed) tiles sequences 4
+  let mut expectedCosts : Array (Option Nat) := Array.replicate 10 none
   for melds in [:5] do
     for pair in [:2] do
       let expected := bruteCost tiles held fixed sequences melds pair
+      expectedCosts := expectedCosts.set! (melds * 2 + pair) expected
       let got := actual[melds * 2 + pair]!
       if expected != got then
         IO.eprintln s!"local DP mismatch: melds={melds} pair={pair}, expected {repr expected}, got {repr got}"
@@ -52,6 +55,16 @@ def checkLocal (tiles held fixed : List Tile) (sequences : Bool) : IO Bool := do
         if bounded[melds * 2 + pair]! != expectedBounded then
           IO.eprintln s!"bounded local mismatch: melds={melds} pair={pair} budget={budget}, expected {repr expectedBounded}, got {repr bounded[melds * 2 + pair]!}"
           return false
+  let mut region := Shanten.Experimental.IncrementalSuitDP.initRegion hand
+    (Multiset.ofList fixed) tiles sequences
+  for budget in [0, 1, 2, 5, 10, 14] do
+    region := Shanten.Experimental.IncrementalSuitDP.advance region 4 budget
+    let costs := Shanten.Experimental.IncrementalSuitDP.localCosts region 4 budget
+    for index in [:10] do
+      let expected := expectedCosts[index]!.filter (· ≤ budget)
+      if costs[index]! != expected then
+        IO.eprintln s!"incremental local mismatch: index={index} budget={budget}, expected {repr expected}, got {repr costs[index]!}"
+        return false
   return true
 
 def main : IO UInt32 := do

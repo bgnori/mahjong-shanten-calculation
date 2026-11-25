@@ -1,6 +1,7 @@
 import Shanten.Capacity.Examples
 import Shanten.Experimental.TileDP
 import Shanten.Experimental.PrunedSuitDP
+import Shanten.Experimental.IncrementalSuitDP
 
 open MahjongDomain Shanten Shanten.Capacity
 open Shanten.Capacity.Examples
@@ -121,6 +122,16 @@ def runSearch (operation : String) (c : Case) : Except String (Option Int) :=
           .ok (minOption (some value)
             (minOption (sevenPairsSearch c.hand) (thirteenOrphansSearch c.hand)))
       | none => .error s!"pruned suit search returned no result for valid case: {c.name}"
+  | "incremental-suit" =>
+      match Shanten.Experimental.IncrementalSuitDP.minimumSearch c.fixed c.hand with
+      | some value => .ok (some value)
+      | none => .error s!"incremental suit search returned no result for valid case: {c.name}"
+  | "incremental-overall" =>
+      match Shanten.Experimental.IncrementalSuitDP.minimumSearch c.fixed c.hand with
+      | some value =>
+          .ok (minOption (some value)
+            (minOption (sevenPairsSearch c.hand) (thirteenOrphansSearch c.hand)))
+      | none => .error s!"incremental suit search returned no result for valid case: {c.name}"
   | "seven" => .ok (sevenPairsSearch c.hand)
   | "orphans" => .ok (thirteenOrphansSearch c.hand)
   | _ => .error s!"unknown operation: {operation}"
@@ -193,16 +204,28 @@ def check : IO UInt32 := do
     if pruned != expected then
       IO.eprintln s!"pruned suit search disagrees with suit DP on {c.name}: expected {repr expected}, got {repr pruned}"
       return 1
+    let incremental := Shanten.Experimental.IncrementalSuitDP.minimumSearch c.fixed c.hand
+    if incremental != expected then
+      IO.eprintln s!"incremental suit search disagrees with suit DP on {c.name}: expected {repr expected}, got {repr incremental}"
+      return 1
     let regions := (Suit.all.map fun suit =>
       (List.ofFn (fun rank : Rank => Tile.suited suit rank), true)) ++
       [(List.ofFn (fun rank : Honor => Tile.honor rank), false)]
-    for budget in [:11] do
+    let mut incrementalRegions :=
+      Shanten.Experimental.IncrementalSuitDP.initRegions c.hand (fixedTiles c.fixed) regions
+    for budget in [:15] do
       let actual := Shanten.Experimental.PrunedSuitDP.searchWithin c.hand (fixedTiles c.fixed)
         regions (4 - c.hand.fixedMelds) budget
       let expectedMissing := expected.bind fun value =>
         if value + 1 ≤ (budget : Int) then some (value + 1).toNat else none
       if actual != expectedMissing then
         IO.eprintln s!"bounded search disagrees on {c.name} at budget {budget}: expected {repr expectedMissing}, got {repr actual}"
+        return 1
+      let (updated, incrementalResult) := Shanten.Experimental.IncrementalSuitDP.searchWithin
+        incrementalRegions (4 - c.hand.fixedMelds) budget
+      incrementalRegions := updated
+      if incrementalResult != expectedMissing then
+        IO.eprintln s!"incremental search disagrees on {c.name} at budget {budget}: expected {repr expectedMissing}, got {repr incrementalResult}"
         return 1
   IO.println "benchmark smoke checks passed"
   return 0
@@ -217,7 +240,8 @@ def measure (controlled : Bool) (operation name : String) (iterations : Nat) : I
         IO.eprintln s!"invalid benchmark case: {name}"
         return 1
       if !["mentsu", "overall", "suit-dp", "suit-overall", "tile-dp", "tile-overall",
-          "pruned-suit", "pruned-overall", "seven", "orphans"].contains operation then
+          "pruned-suit", "pruned-overall", "incremental-suit", "incremental-overall",
+          "seven", "orphans"].contains operation then
         IO.eprintln s!"unknown operation: {operation}"
         return 1
       let caseRef ← IO.mkRef c
@@ -253,7 +277,8 @@ def measure (controlled : Bool) (operation name : String) (iterations : Nat) : I
           let applicable := operation == "mentsu" || operation == "overall" ||
             operation == "suit-dp" || operation == "suit-overall" ||
             operation == "tile-dp" || operation == "tile-overall" ||
-            operation == "pruned-suit" || operation == "pruned-overall" || c.fixed.isEmpty
+            operation == "pruned-suit" || operation == "pruned-overall" ||
+            operation == "incremental-suit" || operation == "incremental-overall" || c.fixed.isEmpty
           if result.isSome != applicable then
             IO.eprintln s!"unexpected applicability: {operation} {name} returned {repr result}"
             return 1
@@ -287,7 +312,7 @@ def run (args : List String) : IO UInt32 := do
   | [operation, name, count] => measureRepeated false operation name count
   | [operation, name] => measure false operation name 1
   | _ =>
-      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | [controlled] <mentsu|overall|suit-dp|suit-overall|tile-dp|tile-overall|pruned-suit|pruned-overall|seven|orphans> <case> [iterations]"
+      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | [controlled] <mentsu|overall|suit-dp|suit-overall|tile-dp|tile-overall|pruned-suit|pruned-overall|incremental-suit|incremental-overall|seven|orphans> <case> [iterations]"
       return 1
 
 end ShantenBench
