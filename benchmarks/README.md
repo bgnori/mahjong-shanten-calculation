@@ -17,6 +17,8 @@
 [生データ](./tile-dp-2026-11-25.jsonl)を参照する。
 枝刈り付き色別DPとの比較は[測定記録](../docs/project/SHANTEN_LEAN4_PERFORMANCE.md#色別dpと上限下界による枝刈りの組合せ2026-11-25)と
 [生データ](./pruned-suit-2026-11-25.jsonl)を参照する。
+局所探索を再利用する増分版との比較は[測定記録](../docs/project/SHANTEN_LEAN4_PERFORMANCE.md#局所探索を再利用するcの比較2026-11-25)と
+[生データ](./incremental-suit-2026-11-25.jsonl)を参照する。
 
 ## 対象と入力
 
