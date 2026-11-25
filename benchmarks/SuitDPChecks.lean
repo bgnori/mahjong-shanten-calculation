@@ -1,4 +1,5 @@
 import Shanten.Experimental.SuitDP
+import Shanten.Experimental.PrunedSuitDP
 
 open MahjongDomain Shanten
 open Shanten.Experimental.SuitDP
@@ -44,6 +45,13 @@ def checkLocal (tiles held fixed : List Tile) (sequences : Bool) : IO Bool := do
       if expected != got then
         IO.eprintln s!"local DP mismatch: melds={melds} pair={pair}, expected {repr expected}, got {repr got}"
         return false
+      for budget in [:6] do
+        let bounded := Shanten.Experimental.PrunedSuitDP.localCosts hand
+          (Multiset.ofList fixed) tiles sequences 4 budget
+        let expectedBounded := expected.filter (· ≤ budget)
+        if bounded[melds * 2 + pair]! != expectedBounded then
+          IO.eprintln s!"bounded local mismatch: melds={melds} pair={pair} budget={budget}, expected {repr expectedBounded}, got {repr bounded[melds * 2 + pair]!}"
+          return false
   return true
 
 def main : IO UInt32 := do

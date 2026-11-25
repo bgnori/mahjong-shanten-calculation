@@ -102,7 +102,7 @@ def main():
                 )
                 calculation_wall = time.monotonic() - calculation_start
                 match = re.fullmatch(
-                    r"SHANTEN_RESULT operation=(?:mentsu|overall|suit-dp|suit-overall|tile-dp|tile-overall|seven|orphans) "
+                    r"SHANTEN_RESULT operation=(?:mentsu|overall|suit-dp|suit-overall|tile-dp|tile-overall|pruned-suit|pruned-overall|seven|orphans) "
                     r"case=[a-z0-9-]+ result=(?:none|some \(-\d+\)|some \d+) "
                     r"calculation_ns=(\d+)(?: iterations=(\d+))?", result_line,
                 )

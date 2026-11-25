@@ -64,6 +64,17 @@ class CalculationMeasureTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(json.loads(result.stdout)["iterations"], 100)
 
+    def test_pruned_suit_results_are_accepted(self):
+        for operation in ("pruned-suit", "pruned-overall"):
+            with self.subTest(operation=operation):
+                batch_result = RESULT.replace("operation=mentsu", f"operation={operation}") + " iterations=100"
+                result = self.run_measure(
+                    3, 3, "print('SHANTEN_READY', flush=True); "
+                    f"assert input() == 'RUN'; print({batch_result!r}, flush=True)",
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads(result.stdout)["iterations"], 100)
+
     def test_zero_iterations_is_invalid(self):
         invalid_result = RESULT + " iterations=0"
         result = self.run_measure(
