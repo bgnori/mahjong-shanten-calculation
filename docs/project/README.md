@@ -6,6 +6,7 @@
 ## 計画・進捗
 
 - [Lean証明計画](./SHANTEN_LEAN4_PLAN.md)：作業範囲・目標・完了条件。
+- [Leanシャンテン計算の高速化方針](./SHANTEN_LEAN4_ALGORITHM_DESIGN.md)：色別・牌種順DPの設計と証明方針。
 - [Lean証明進捗台帳](./SHANTEN_LEAN4_PROGRESS.md)：現在の成果と未解決条件。
 - [Lean証明の検証記録](./SHANTEN_LEAN4_VERIFICATION.md)：検証コマンドと結果の履歴。
 - [Leanシャンテン計算の性能測定記録](./SHANTEN_LEAN4_PERFORMANCE.md)：測定方式・結果と制約。
