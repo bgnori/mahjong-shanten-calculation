@@ -4,6 +4,7 @@
 *.ilean
 *.olean.lock
 *.trace
+benchmarks/__pycache__/
 
 # Go build and test artifacts
 /bin/

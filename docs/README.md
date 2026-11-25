@@ -13,3 +13,4 @@
 ## Leanモデル
 
 - [ソース構成](./SHANTEN_LEAN_STRUCTURE.md): 現在のモジュール、責務、依存関係。
+- [性能測定の準備](../benchmarks/README.md): 代表入力とLeanの時間・メモリ測定手順。
