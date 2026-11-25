@@ -37,6 +37,7 @@
 実行方法は[測定手順](../../benchmarks/README.md)に分離した。
 起動を除いた100回反復の測定を実施したが、一部は計算時間切れで完了時間が未測定。
 色別DPの試験測定は代表22ケースで完了したが、固定面子0〜3組の例は1msを超えた。
+全牌種DPも26ケースで測定し、固定面子0〜3組の例は1msを超えた。詳細は性能測定記録を参照。
 
 公開入口は [MentsuHand.lean](../../Shanten/MentsuHand.lean)、
 [SevenPairs.lean](../../Shanten/SevenPairs.lean) と

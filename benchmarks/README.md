@@ -12,6 +12,8 @@
 各実行の出力は[生データ](./baseline-2026-11-25-repeat100.jsonl)を参照する。
 色別DPと基準探索の比較は[測定記録](../docs/project/SHANTEN_LEAN4_PERFORMANCE.md#色別dpの実験的実装と測定2026-11-25)と
 [生データ](./suit-dp-2026-11-25.jsonl)を参照する。
+全牌種DPと色別DPの比較は[測定記録](../docs/project/SHANTEN_LEAN4_PERFORMANCE.md#全牌種dpbと色別dpaの比較2026-11-25)と
+[生データ](./tile-dp-2026-11-25.jsonl)を参照する。
 
 ## 対象と入力
 
