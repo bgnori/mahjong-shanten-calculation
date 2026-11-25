@@ -30,8 +30,8 @@ def minInsert (table : Array (Option Nat)) (index value : Nat) :
   | none => table.set! index (some value)
   | some old => table.set! index (some (min old value))
 
-def localCosts (hand : Hand) (occupied : Multiset Tile)
-    (tiles : List Tile) (sequences : Bool) (maxMelds : Nat) :
+def scanCosts (hand : Hand) (occupied : Multiset Tile)
+    (tiles : List Tile) (canStart : Nat → Tile → Bool) (maxMelds : Nat) :
     Array (Option Nat) := Id.run do
   let mut states : Array (Option Nat) := Array.replicate 250 none
   states := states.set! (stateIndex 0 0 0 0) (some 0)
@@ -49,7 +49,7 @@ def localCosts (hand : Hand) (occupied : Multiset Tile)
           let carried := key.previous + key.older + fixed
           if carried ≤ copiesPerTile then
             let available := copiesPerTile - carried
-            let startsMax := if sequences && position + 2 < tiles.length then
+            let startsMax := if canStart position tile then
               min available (maxMelds - key.melds) else 0
             for starts in [:startsMax + 1] do
               let triplets := if available - starts ≥ 3 && key.melds + starts < maxMelds
@@ -74,6 +74,12 @@ def localCosts (hand : Hand) (occupied : Multiset Tile)
     for pair in [:2] do
       result := result.set! (melds * 2 + pair) states[stateIndex melds pair 0 0]!
   return result
+
+def localCosts (hand : Hand) (occupied : Multiset Tile)
+    (tiles : List Tile) (sequences : Bool) (maxMelds : Nat) :
+    Array (Option Nat) :=
+  scanCosts hand occupied tiles
+    (fun position _ => sequences && position + 2 < tiles.length) maxMelds
 
 def combine (left right : Array (Option Nat)) (maxMelds : Nat) :
     Array (Option Nat) := Id.run do

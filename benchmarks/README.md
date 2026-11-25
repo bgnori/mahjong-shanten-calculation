@@ -4,7 +4,7 @@
 時間切れや失敗も含めて記録するためのもの。利用想定と性能目標は
 [現行計画](../docs/project/SHANTEN_LEAN4_PLAN.md#利用想定と性能目標)を参照する。
 既存計算は一般定理と回帰例で保証・検査し、測定値をその代わりにしない。
-実験的な色別DPは回帰検査を行うが、一般の仕様一致は未証明である。
+実験的な色別DP・全牌種DPは回帰検査を行うが、一般の仕様一致は未証明である。
 旧方式の初回測定の条件と集計は[性能測定記録](../docs/project/SHANTEN_LEAN4_PERFORMANCE.md#性能測定の初回結果2026-11-25)、
 各実行の出力は[生データ](./baseline-2026-11-25.jsonl) を参照する。
 旧方式の時間切れには起動時間が含まれるため、計算時間の下限や新方式との比較に使わない。
@@ -36,6 +36,8 @@
 | `kan-four-13` | 槓を含む固定面子4組 |
 | `repeated-sequences-13`, `repeated-sequences-14` | 同じ123萬を4組使うテンパイ・完成 |
 | `two-fixed-sequences-13`, `two-fixed-sequences-14` | 槓を含む固定面子2組と順子、テンパイ・完成 |
+| `suit-boundary-13`, `pin-sou-boundary-13`, `sou-honor-boundary-13` | 色・字牌の境界をまたいだ順子を排除 |
+| `suit-end-sequence-13` | 色の末尾789の順子 |
 
 具体的な牌は定義を正とする。A/Bと14枚相当の値などは
 [既存の回帰例](../Shanten/Capacity/Examples.lean) で確認できる。
@@ -50,7 +52,7 @@
 
 ```sh
 export LEAN_NUM_THREADS=2
-lake build Shanten.Experimental.SuitDP
+lake build Shanten.Experimental.TileDP
 lake env lean --run benchmarks/ShantenBench.lean list
 python3 benchmarks/measure_calculation.py \
   --startup-timeout 60 --calculation-timeout 120 --max-memory-mib 16384 -- \
@@ -59,9 +61,12 @@ python3 benchmarks/measure_calculation.py \
 
 `list` は全ケース名、固定面子数、手元牌数と有効性を表示し、
 いずれかが無効なら非ゼロ終了する。`check` は全入力の有効性と、既存の証明済み回帰例の
-一部の結果を実際に計算して検査し、固定面子3・4組のケースは基準探索と色別DPを比較する。
+一部の結果を実際に計算して検査し、固定面子3・4組のケースは基準探索と両DPを比較する。
+全ケースで両DPを比較するが、両者は遷移実装を共有する。
 `mentsu`・`overall` は既存探索、`suit-dp` は実験的な面子手DP、
 `suit-overall` はDPと既存の七対子・国士無双計算の最小値を返す。
+`tile-dp` は全牌種を一体で走査する実験的な面子手DP、
+`tile-overall` はその結果と既存の特殊形計算の最小値を返す。
 `seven`・`orphans` は既存の特殊形計算。最後の数値は同一ケースの計算回数で、省略時は1回。
 短時間の計算は100回の合計を測って1回あたりに換算することを基本とし、
 ケースを1つずつ同じ設定で測定して出力を保存する。

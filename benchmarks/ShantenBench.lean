@@ -1,5 +1,5 @@
 import Shanten.Capacity.Examples
-import Shanten.Experimental.SuitDP
+import Shanten.Experimental.TileDP
 
 open MahjongDomain Shanten Shanten.Capacity
 open Shanten.Capacity.Examples
@@ -44,6 +44,12 @@ def twoFixedSequences (whiteCount : Nat) : Shanten.Hand :=
       | .suited .sou rank => if 6 ≤ rank.val then 1 else 0
       | _ => 0 }
 
+def boundaryHand (first : Tile) (second : Tile) (third : Tile) : Shanten.Hand :=
+  { fixedMelds := 3
+    counts := fun tile =>
+      (if tile = first then 1 else 0) + (if tile = second then 1 else 0) +
+        (if tile = third then 1 else 0) + (if tile = white then 1 else 0) }
+
 def cases : List Case :=
   [ ⟨"closed-seven-ready-13", [], sevenPairsReady⟩
   , ⟨"closed-seven-quads-13", [], sevenPairsQuads⟩
@@ -66,7 +72,11 @@ def cases : List Case :=
   , ⟨"repeated-sequences-13", [], repeatedSequences 1⟩
   , ⟨"repeated-sequences-14", [], repeatedSequences 2⟩
   , ⟨"two-fixed-sequences-13", fixedTwo, twoFixedSequences 1⟩
-  , ⟨"two-fixed-sequences-14", fixedTwo, twoFixedSequences 2⟩ ]
+  , ⟨"two-fixed-sequences-14", fixedTwo, twoFixedSequences 2⟩
+  , ⟨"suit-boundary-13", fixedThree, boundaryHand m8 m9 p1⟩
+  , ⟨"pin-sou-boundary-13", fixedThree, boundaryHand p8 p9 s1⟩
+  , ⟨"sou-honor-boundary-13", fixedThree, boundaryHand s8 s9 z3⟩
+  , ⟨"suit-end-sequence-13", fixedThree, boundaryHand m7 m8 m9⟩ ]
 
 def validCase (c : Case) : Bool := by
   letI : Decidable (IsThirteenTileEquivalentHand c.fixed c.hand ∨
@@ -90,6 +100,16 @@ def runSearch (operation : String) (c : Case) : Except String (Option Int) :=
           .ok (minOption (some value)
             (minOption (sevenPairsSearch c.hand) (thirteenOrphansSearch c.hand)))
       | none => .error s!"suit DP returned no result for valid case: {c.name}"
+  | "tile-dp" =>
+      match Shanten.Experimental.TileDP.minimumSearch c.fixed c.hand with
+      | some value => .ok (some value)
+      | none => .error s!"tile DP returned no result for valid case: {c.name}"
+  | "tile-overall" =>
+      match Shanten.Experimental.TileDP.minimumSearch c.fixed c.hand with
+      | some value =>
+          .ok (minOption (some value)
+            (minOption (sevenPairsSearch c.hand) (thirteenOrphansSearch c.hand)))
+      | none => .error s!"tile DP returned no result for valid case: {c.name}"
   | "seven" => .ok (sevenPairsSearch c.hand)
   | "orphans" => .ok (thirteenOrphansSearch c.hand)
   | _ => .error s!"unknown operation: {operation}"
@@ -112,6 +132,10 @@ def check : IO UInt32 := do
     , ("suit-dp", "repeated-sequences-14", some (-1))
     , ("suit-dp", "two-fixed-sequences-13", some 0)
     , ("suit-dp", "two-fixed-sequences-14", some (-1))
+    , ("tile-dp", "suit-boundary-13", some 1)
+    , ("tile-dp", "pin-sou-boundary-13", some 1)
+    , ("tile-dp", "sou-honor-boundary-13", some 1)
+    , ("tile-dp", "suit-end-sequence-13", some 0)
     , ("suit-overall", "closed-seven-ready-13", some 0)
     , ("suit-overall", "closed-orphans-complete-14", some (-1))
     , ("seven", "closed-seven-ready-13", some 0)
@@ -144,6 +168,16 @@ def check : IO UInt32 := do
     if actual != expected then
       IO.eprintln s!"suit DP disagrees with baseline on {c.name}: expected {repr expected}, got {repr actual}"
       return 1
+    let tileResult := Shanten.Experimental.TileDP.minimumSearch c.fixed c.hand
+    if tileResult != expected then
+      IO.eprintln s!"tile DP disagrees with baseline on {c.name}: expected {repr expected}, got {repr tileResult}"
+      return 1
+  for c in cases do
+    let expected := Shanten.Experimental.SuitDP.minimumSearch c.fixed c.hand
+    let actual := Shanten.Experimental.TileDP.minimumSearch c.fixed c.hand
+    if actual != expected then
+      IO.eprintln s!"tile DP disagrees with suit DP on {c.name}: expected {repr expected}, got {repr actual}"
+      return 1
   IO.println "benchmark smoke checks passed"
   return 0
 
@@ -156,7 +190,8 @@ def measure (controlled : Bool) (operation name : String) (iterations : Nat) : I
       if !validCase c then
         IO.eprintln s!"invalid benchmark case: {name}"
         return 1
-      if !["mentsu", "overall", "suit-dp", "suit-overall", "seven", "orphans"].contains operation then
+      if !["mentsu", "overall", "suit-dp", "suit-overall", "tile-dp", "tile-overall",
+          "seven", "orphans"].contains operation then
         IO.eprintln s!"unknown operation: {operation}"
         return 1
       let caseRef ← IO.mkRef c
@@ -190,7 +225,8 @@ def measure (controlled : Bool) (operation name : String) (iterations : Nat) : I
           return 1
       | some result =>
           let applicable := operation == "mentsu" || operation == "overall" ||
-            operation == "suit-dp" || operation == "suit-overall" || c.fixed.isEmpty
+            operation == "suit-dp" || operation == "suit-overall" ||
+            operation == "tile-dp" || operation == "tile-overall" || c.fixed.isEmpty
           if result.isSome != applicable then
             IO.eprintln s!"unexpected applicability: {operation} {name} returned {repr result}"
             return 1
@@ -224,7 +260,7 @@ def run (args : List String) : IO UInt32 := do
   | [operation, name, count] => measureRepeated false operation name count
   | [operation, name] => measure false operation name 1
   | _ =>
-      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | [controlled] <mentsu|overall|suit-dp|suit-overall|seven|orphans> <case> [iterations]"
+      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | [controlled] <mentsu|overall|suit-dp|suit-overall|tile-dp|tile-overall|seven|orphans> <case> [iterations]"
       return 1
 
 end ShantenBench
