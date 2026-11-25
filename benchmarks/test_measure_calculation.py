@@ -29,6 +29,31 @@ class CalculationMeasureTests(unittest.TestCase):
         self.assertEqual(metrics["status"], "success")
         self.assertGreater(metrics["startup_elapsed_seconds"], 0.3)
         self.assertEqual(metrics["calculation_ns"], 1_000_000)
+        self.assertEqual(metrics["iterations"], 1)
+        self.assertEqual(metrics["calculation_ns_per_iteration"], 1_000_000)
+
+    def test_batch_total_is_divided_by_iteration_count(self):
+        batch_result = RESULT + " iterations=100"
+        result = self.run_measure(
+            3, 3, "print('SHANTEN_READY', flush=True); "
+            f"assert input() == 'RUN'; print({batch_result!r}, flush=True)",
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        metrics = json.loads(result.stdout)
+        self.assertEqual(metrics["calculation_ns"], 1_000_000)
+        self.assertEqual(metrics["iterations"], 100)
+        self.assertEqual(metrics["calculation_ns_per_iteration"], 10_000)
+
+    def test_zero_iterations_is_invalid(self):
+        invalid_result = RESULT + " iterations=0"
+        result = self.run_measure(
+            3, 3, "print('SHANTEN_READY', flush=True); "
+            f"assert input() == 'RUN'; print({invalid_result!r}, flush=True)",
+        )
+        self.assertEqual(result.returncode, 1)
+        metrics = json.loads(result.stdout)
+        self.assertEqual(metrics["status"], "invalid_result")
+        self.assertIsNone(metrics["calculation_ns_per_iteration"])
 
     def test_calculation_timeout_starts_after_handshake(self):
         result = self.run_measure(
@@ -76,13 +101,15 @@ class CalculationMeasureTests(unittest.TestCase):
         self.assertEqual(metrics["exit_code"], 7)
 
     def test_reported_calculation_cannot_exceed_limit_on_success(self):
-        slow_result = RESULT.replace("1000000", "3000000000")
+        slow_result = RESULT.replace("1000000", "3000000000") + " iterations=100"
         result = self.run_measure(
             3, 0.5, "print('SHANTEN_READY', flush=True); "
             f"assert input() == 'RUN'; print({slow_result!r}, flush=True)",
         )
         self.assertEqual(result.returncode, 124)
-        self.assertEqual(json.loads(result.stdout)["status"], "calculation_timeout")
+        metrics = json.loads(result.stdout)
+        self.assertEqual(metrics["status"], "calculation_timeout")
+        self.assertIsNone(metrics["calculation_ns_per_iteration"])
 
 
 if __name__ == "__main__":

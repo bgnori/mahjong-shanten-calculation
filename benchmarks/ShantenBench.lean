@@ -96,7 +96,7 @@ def check : IO UInt32 := do
   IO.println "benchmark smoke checks passed"
   return 0
 
-def measure (controlled : Bool) (operation name : String) : IO UInt32 := do
+def measure (controlled : Bool) (operation name : String) (iterations : Nat) : IO UInt32 := do
   match cases.find? (fun c => c.name == name) with
   | none =>
       IO.eprintln s!"unknown case: {name}"
@@ -108,6 +108,7 @@ def measure (controlled : Bool) (operation name : String) : IO UInt32 := do
       if !["mentsu", "overall", "seven", "orphans"].contains operation then
         IO.eprintln s!"unknown operation: {operation}"
         return 1
+      let caseRef ← IO.mkRef c
       if controlled then
         let stdout ← IO.getStdout
         stdout.putStr "SHANTEN_READY\n"
@@ -117,21 +118,47 @@ def measure (controlled : Bool) (operation name : String) : IO UInt32 := do
           IO.eprintln "expected RUN after SHANTEN_READY"
           return 1
       let start ← IO.monoNanosNow
-      match runSearch operation c with
-      | .error message =>
-          IO.eprintln message
+      let mut previous : Option (Option Int) := none
+      for _ in [:iterations] do
+        -- An IO read prevents the pure search from being lifted out of the loop.
+        let current ← caseRef.get
+        match runSearch operation current with
+        | .error message =>
+            IO.eprintln message
+            return 1
+        | .ok result =>
+            if let some expected := previous then
+              if result != expected then
+                IO.eprintln s!"inconsistent result: {operation} {name} returned {repr result}, expected {repr expected}"
+                return 1
+            previous := some result
+      let finish ← IO.monoNanosNow
+      match previous with
+      | none =>
+          IO.eprintln "iterations must be positive"
           return 1
-      | .ok result =>
-          let finish ← IO.monoNanosNow
+      | some result =>
           let applicable := operation == "mentsu" || operation == "overall" || c.fixed.isEmpty
           if result.isSome != applicable then
             IO.eprintln s!"unexpected applicability: {operation} {name} returned {repr result}"
             return 1
           let marker := if controlled then "SHANTEN_RESULT " else ""
-          IO.println s!"{marker}operation={operation} case={name} result={repr result} calculation_ns={finish - start}"
+          IO.println s!"{marker}operation={operation} case={name} result={repr result} calculation_ns={finish - start} iterations={iterations}"
           if controlled then
             (← IO.getStdout).flush
           return 0
+
+def measureRepeated (controlled : Bool) (operation name count : String) : IO UInt32 := do
+  match count.toNat? with
+  | some iterations =>
+      if iterations > 0 then
+        measure controlled operation name iterations
+      else
+        IO.eprintln "iterations must be a positive integer"
+        return 1
+  | none =>
+      IO.eprintln "iterations must be a positive integer"
+      return 1
 
 def run (args : List String) : IO UInt32 := do
   match args with
@@ -140,10 +167,12 @@ def run (args : List String) : IO UInt32 := do
         IO.println s!"{c.name}\tfixed={c.fixed.length}\tstanding={tileCount c.hand}\tvalid={validCase c}"
       if cases.all validCase then return 0 else return 1
   | ["check"] => check
-  | ["controlled", operation, name] => measure true operation name
-  | [operation, name] => measure false operation name
+  | ["controlled", operation, name, count] => measureRepeated true operation name count
+  | ["controlled", operation, name] => measure true operation name 1
+  | [operation, name, count] => measureRepeated false operation name count
+  | [operation, name] => measure false operation name 1
   | _ =>
-      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | [controlled] <mentsu|overall|seven|orphans> <case>"
+      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | [controlled] <mentsu|overall|seven|orphans> <case> [iterations]"
       return 1
 
 end ShantenBench

@@ -46,15 +46,17 @@ export LEAN_NUM_THREADS=2
 lake env lean --run benchmarks/ShantenBench.lean list
 python3 benchmarks/measure_calculation.py \
   --startup-timeout 60 --calculation-timeout 120 --max-memory-mib 16384 -- \
-  lake env lean --run benchmarks/ShantenBench.lean controlled mentsu ready-four-13
+  lake env lean --run benchmarks/ShantenBench.lean controlled mentsu ready-four-13 100
 ```
 
 `list` は全ケース名、固定面子数、手元牌数と有効性を表示し、
 いずれかが無効なら非ゼロ終了する。`check` は全入力の有効性と、既存の証明済み回帰例の
 一部の結果を実際に計算して検査する。操作は `mentsu`、`overall`、`seven`、
-`orphans` のいずれか。ケースを1つずつ、同じ設定で反復し、出力を保存する。
+`orphans` のいずれか。最後の数値は同一ケースの計算回数で、省略時は1回。
+短時間の計算は100回の合計を測って1回あたりに換算することを基本とし、
+ケースを1つずつ同じ設定で測定して出力を保存する。
 計算が重い可能性があるため、共有環境では並列実行せず、資源状況を確認する。
-未知の操作やケース、無効な入力は明示的に失敗する。
+未知の操作やケース、無効な入力、0回や不正な回数は明示的に失敗する。
 
 `controlled` モードはLeanの起動と入力検査の後に `SHANTEN_READY` を出力して待機する。
 測定器はこの通知を受け取って `RUN` を送り、その時点から計算用の制限時間を監視する。
@@ -71,12 +73,19 @@ python3 benchmarks/measure.py --timeout 600 --max-memory-mib 16384 -- lake build
 ## 出力の意味と制限
 
 - Lean側の `calculation_ns` は入力検査後、選択した計算の開始から結果を得るまでの
-  単調時計による経過時間。Leanの読み込み・ソース処理と結果の表示は含まない。
+  単調時計による**全反復の合計**経過時間。Leanの読み込み・ソース処理と結果の表示は
+  含まない。反復ループ、毎回の入力参照と結果の一致検査は含む。
+- `iterations` は計算回数、`calculation_ns_per_iteration` は合計を回数で割った値。
+  全反復が完了し、結果が一致した場合のみ得られる。同一入力の反復平均であり、
+  手牌の分布に基づく牌譜全体の平均とは区別する。
 - `measure_calculation.py` の `startup_elapsed_seconds` はプロセス起動から
   準備完了通知まで、`calculation_wall_seconds` は開始指示から結果通知までの時間。
   後者にはプロセス間通信・結果通知の遅延が含まれるため、計算自体の時間としては
   `calculation_ns` を使う。計算の時間切れは後者に基づく近似的な制限であり、
-  通信やスケジューリングの遅延を含む。時間切れ時に `calculation_ns` は得られない。
+  通信やスケジューリングの遅延を含む。時間制限は1回ごとではなく全反復に対するもの。
+  計算中に時間切れになった場合、完了回数と `calculation_ns` は得られない。
+  結果通知を受け取った後に時間超過と判定した場合を含め、時間切れ時は平均を算出しない。
+  重いケースは回数を減らした測定も別途記録し、100回の結果と混同しない。
 - `measure.py` はビルドなどコマンド全体を測るための別の測定器で、計算の制限時間には使わない。
   そのJSONはコマンド全体の経過秒数、Linux `wait4` の最大RSS（KiB）、
   終了コード、制限値と時間切れの有無を含む。コマンドの標準出力・標準エラーもそのまま表示する。

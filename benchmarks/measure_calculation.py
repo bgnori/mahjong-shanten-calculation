@@ -84,6 +84,8 @@ def main():
         calculation_wall = None
         result_line = None
         calculation_ns = None
+        iterations = None
+        calculation_ns_per_iteration = None
         status = "success"
         try:
             try:
@@ -102,15 +104,18 @@ def main():
                 match = re.fullmatch(
                     r"SHANTEN_RESULT operation=(?:mentsu|overall|seven|orphans) "
                     r"case=[a-z0-9-]+ result=(?:none|some \(-\d+\)|some \d+) "
-                    r"calculation_ns=(\d+)", result_line,
+                    r"calculation_ns=(\d+)(?: iterations=(\d+))?", result_line,
                 )
-                if not match:
+                if not match or (match.group(2) is not None and int(match.group(2)) == 0):
                     status = "invalid_result"
                 else:
                     calculation_ns = int(match.group(1))
+                    iterations = int(match.group(2)) if match.group(2) is not None else 1
                     if (calculation_wall > args.calculation_timeout or
                             calculation_ns > args.calculation_timeout * 1_000_000_000):
                         status = "calculation_timeout"
+                    else:
+                        calculation_ns_per_iteration = calculation_ns / iterations
                 phase = "shutdown"
                 child_status, usage = wait_child(
                     process.pid, time.monotonic() + args.shutdown_timeout
@@ -147,6 +152,8 @@ def main():
             "startup_elapsed_seconds": startup_elapsed,
             "calculation_wall_seconds": calculation_wall,
             "calculation_ns": calculation_ns,
+            "iterations": iterations,
+            "calculation_ns_per_iteration": calculation_ns_per_iteration,
             "result": result_line,
             "stdout_lines": reader.lines,
             "max_rss_kib": usage.ru_maxrss,
