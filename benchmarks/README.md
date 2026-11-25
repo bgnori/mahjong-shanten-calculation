@@ -3,7 +3,8 @@
 このディレクトリは、容量付きモデルの計算を手牌ごとに実行し、
 時間切れや失敗も含めて記録するためのもの。利用想定と性能目標は
 [現行計画](../docs/project/SHANTEN_LEAN4_PLAN.md#利用想定と性能目標)を参照する。
-計算の正しさは既存の一般定理と回帰例で保証・検査し、測定値をその代わりにしない。
+既存計算は一般定理と回帰例で保証・検査し、測定値をその代わりにしない。
+実験的な色別DPは回帰検査を行うが、一般の仕様一致は未証明である。
 旧方式の初回測定の条件と集計は[性能測定記録](../docs/project/SHANTEN_LEAN4_PERFORMANCE.md#性能測定の初回結果2026-11-25)、
 各実行の出力は[生データ](./baseline-2026-11-25.jsonl) を参照する。
 旧方式の時間切れには起動時間が含まれるため、計算時間の下限や新方式との比較に使わない。
@@ -12,7 +13,7 @@
 
 ## 対象と入力
 
-`ShantenBench.lean` は既存の `Capacity` 計算を呼び出す。
+`ShantenBench.lean` は既存の `Capacity` 計算と実験的な色別DPを呼び出す。
 全ケースは実行時に既存の13枚相当・14枚相当の有効性述語で検査し、
 無効なら計算せず失敗する。次の分類には重なりがある。
 
@@ -31,6 +32,8 @@
 | `blocked-four-13`, `ready-four-13` | 固定牌の容量が異なる既存のA/B例 |
 | `complete-four-14`, `blocked-four-14` | 面子手完成と、容量により値1となる未完成手 |
 | `kan-four-13` | 槓を含む固定面子4組 |
+| `repeated-sequences-13`, `repeated-sequences-14` | 同じ123萬を4組使うテンパイ・完成 |
+| `two-fixed-sequences-13`, `two-fixed-sequences-14` | 槓を含む固定面子2組と順子、テンパイ・完成 |
 
 具体的な牌は定義を正とする。A/Bと14枚相当の値などは
 [既存の回帰例](../Shanten/Capacity/Examples.lean) で確認できる。
@@ -45,6 +48,7 @@
 
 ```sh
 export LEAN_NUM_THREADS=2
+lake build Shanten.Experimental.SuitDP
 lake env lean --run benchmarks/ShantenBench.lean list
 python3 benchmarks/measure_calculation.py \
   --startup-timeout 60 --calculation-timeout 120 --max-memory-mib 16384 -- \
@@ -53,8 +57,10 @@ python3 benchmarks/measure_calculation.py \
 
 `list` は全ケース名、固定面子数、手元牌数と有効性を表示し、
 いずれかが無効なら非ゼロ終了する。`check` は全入力の有効性と、既存の証明済み回帰例の
-一部の結果を実際に計算して検査する。操作は `mentsu`、`overall`、`seven`、
-`orphans` のいずれか。最後の数値は同一ケースの計算回数で、省略時は1回。
+一部の結果を実際に計算して検査し、固定面子3・4組のケースは基準探索と色別DPを比較する。
+`mentsu`・`overall` は既存探索、`suit-dp` は実験的な面子手DP、
+`suit-overall` はDPと既存の七対子・国士無双計算の最小値を返す。
+`seven`・`orphans` は既存の特殊形計算。最後の数値は同一ケースの計算回数で、省略時は1回。
 短時間の計算は100回の合計を測って1回あたりに換算することを基本とし、
 ケースを1つずつ同じ設定で測定して出力を保存する。
 計算が重い可能性があるため、共有環境では並列実行せず、資源状況を確認する。
@@ -114,4 +120,5 @@ Lean・Mathlibの版、OS・CPU・メモリ、並列度、キャッシュ状態�
 ```sh
 python3 -m unittest discover -s benchmarks -p 'test_*.py'
 lake env lean --run benchmarks/ShantenBench.lean check
+lake env lean --run benchmarks/SuitDPChecks.lean
 ```

@@ -1,4 +1,5 @@
 import Shanten.Capacity.Examples
+import Shanten.Experimental.SuitDP
 
 open MahjongDomain Shanten Shanten.Capacity
 open Shanten.Capacity.Examples
@@ -26,6 +27,23 @@ def honors (fixedCount whiteCount greenCount redCount : Nat) : Shanten.Hand :=
       else if tile = red then redCount
       else 0 }
 
+def repeatedSequences (lastCount : Nat) : Shanten.Hand :=
+  { fixedMelds := 0
+    counts := fun tile =>
+      match tile with
+      | .suited .man rank =>
+          if rank.val < 3 then 4 else if rank.val = 3 then lastCount else 0
+      | _ => 0 }
+
+def twoFixedSequences (whiteCount : Nat) : Shanten.Hand :=
+  { fixedMelds := 2
+    counts := fun tile =>
+      if tile = white then whiteCount
+      else match tile with
+      | .suited .pin rank => if rank.val < 3 then 1 else 0
+      | .suited .sou rank => if 6 ≤ rank.val then 1 else 0
+      | _ => 0 }
+
 def cases : List Case :=
   [ ⟨"closed-seven-ready-13", [], sevenPairsReady⟩
   , ⟨"closed-seven-quads-13", [], sevenPairsQuads⟩
@@ -44,7 +62,11 @@ def cases : List Case :=
   , ⟨"ready-four-13", fixedB, standing⟩
   , ⟨"complete-four-14", fixedB, drawHand standing east⟩
   , ⟨"blocked-four-14", blockedFixed, drawHand standing south⟩
-  , ⟨"kan-four-13", fixedKan, honors 4 1 0 0⟩ ]
+  , ⟨"kan-four-13", fixedKan, honors 4 1 0 0⟩
+  , ⟨"repeated-sequences-13", [], repeatedSequences 1⟩
+  , ⟨"repeated-sequences-14", [], repeatedSequences 2⟩
+  , ⟨"two-fixed-sequences-13", fixedTwo, twoFixedSequences 1⟩
+  , ⟨"two-fixed-sequences-14", fixedTwo, twoFixedSequences 2⟩ ]
 
 def validCase (c : Case) : Bool := by
   letI : Decidable (IsThirteenTileEquivalentHand c.fixed c.hand ∨
@@ -58,6 +80,16 @@ def runSearch (operation : String) (c : Case) : Except String (Option Int) :=
   match operation with
   | "mentsu" => .ok (generalMentsuHandMinimumSearch c.fixed c.hand)
   | "overall" => .ok (overallMinimumSearch c.fixed c.hand)
+  | "suit-dp" =>
+      match Shanten.Experimental.SuitDP.minimumSearch c.fixed c.hand with
+      | some value => .ok (some value)
+      | none => .error s!"suit DP returned no result for valid case: {c.name}"
+  | "suit-overall" =>
+      match Shanten.Experimental.SuitDP.minimumSearch c.fixed c.hand with
+      | some value =>
+          .ok (minOption (some value)
+            (minOption (sevenPairsSearch c.hand) (thirteenOrphansSearch c.hand)))
+      | none => .error s!"suit DP returned no result for valid case: {c.name}"
   | "seven" => .ok (sevenPairsSearch c.hand)
   | "orphans" => .ok (thirteenOrphansSearch c.hand)
   | _ => .error s!"unknown operation: {operation}"
@@ -69,6 +101,19 @@ def check : IO UInt32 := do
     , ("mentsu", "complete-four-14", some (-1))
     , ("mentsu", "blocked-four-14", some 1)
     , ("overall", "blocked-four-13", some 1)
+    , ("suit-dp", "blocked-four-13", some 1)
+    , ("suit-dp", "ready-four-13", some 0)
+    , ("suit-dp", "complete-four-14", some (-1))
+    , ("suit-dp", "blocked-four-14", some 1)
+    , ("suit-dp", "kan-three-13", some 0)
+    , ("suit-dp", "kan-three-14", some (-1))
+    , ("suit-dp", "closed-mentsu-complete-14", some (-1))
+    , ("suit-dp", "repeated-sequences-13", some 0)
+    , ("suit-dp", "repeated-sequences-14", some (-1))
+    , ("suit-dp", "two-fixed-sequences-13", some 0)
+    , ("suit-dp", "two-fixed-sequences-14", some (-1))
+    , ("suit-overall", "closed-seven-ready-13", some 0)
+    , ("suit-overall", "closed-orphans-complete-14", some (-1))
     , ("seven", "closed-seven-ready-13", some 0)
     , ("seven", "closed-seven-quads-13", some 6)
     , ("seven", "closed-seven-complete-14", some (-1))
@@ -93,6 +138,12 @@ def check : IO UInt32 := do
             if result != expected then
               IO.eprintln s!"{operation} {name}: expected {repr expected}, got {repr result}"
               return 1
+  for c in cases.filter (fun c => c.fixed.length ≥ 3) do
+    let expected := generalMentsuHandMinimumSearch c.fixed c.hand
+    let actual := Shanten.Experimental.SuitDP.minimumSearch c.fixed c.hand
+    if actual != expected then
+      IO.eprintln s!"suit DP disagrees with baseline on {c.name}: expected {repr expected}, got {repr actual}"
+      return 1
   IO.println "benchmark smoke checks passed"
   return 0
 
@@ -105,7 +156,7 @@ def measure (controlled : Bool) (operation name : String) (iterations : Nat) : I
       if !validCase c then
         IO.eprintln s!"invalid benchmark case: {name}"
         return 1
-      if !["mentsu", "overall", "seven", "orphans"].contains operation then
+      if !["mentsu", "overall", "suit-dp", "suit-overall", "seven", "orphans"].contains operation then
         IO.eprintln s!"unknown operation: {operation}"
         return 1
       let caseRef ← IO.mkRef c
@@ -138,7 +189,8 @@ def measure (controlled : Bool) (operation name : String) (iterations : Nat) : I
           IO.eprintln "iterations must be positive"
           return 1
       | some result =>
-          let applicable := operation == "mentsu" || operation == "overall" || c.fixed.isEmpty
+          let applicable := operation == "mentsu" || operation == "overall" ||
+            operation == "suit-dp" || operation == "suit-overall" || c.fixed.isEmpty
           if result.isSome != applicable then
             IO.eprintln s!"unexpected applicability: {operation} {name} returned {repr result}"
             return 1
@@ -172,7 +224,7 @@ def run (args : List String) : IO UInt32 := do
   | [operation, name, count] => measureRepeated false operation name count
   | [operation, name] => measure false operation name 1
   | _ =>
-      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | [controlled] <mentsu|overall|seven|orphans> <case> [iterations]"
+      IO.eprintln "usage: lean --run benchmarks/ShantenBench.lean list | check | [controlled] <mentsu|overall|suit-dp|suit-overall|seven|orphans> <case> [iterations]"
       return 1
 
 end ShantenBench
