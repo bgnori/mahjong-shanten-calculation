@@ -21,6 +21,12 @@ melds. Each meld includes its kind and all its tiles, including all four tiles
 of a kan. An ankan is a fixed meld even though it preserves menzen status.
 Call source, called-tile position, discards, and visible tiles are not inputs.
 
+Lean's `Shanten.Capacity.ofHandSnapshot` projects the shared normalized
+`MahjongDomain.HandSnapshot` into the capacity-aware model, retaining standing
+counts and fixed-meld occupancy while forgetting call details. This projection
+does not validate the input; callers must check the capacity and size
+conditions. It does not reconstruct the red-five-aware Go input.
+
 `Counts37` is a fixed `[37]int`; invalid lengths are unrepresentable.
 Its indices and capacities are:
 
