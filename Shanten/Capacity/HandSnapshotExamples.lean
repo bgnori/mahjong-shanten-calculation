@@ -20,11 +20,12 @@ def melds : List MahjongDomain.FixedMeld :=
 example :
     (melds.all fun meld =>
       Tile.all.all fun tile =>
-        meld.occupiedCounts tile == (fixedMeldOfSnapshot meld).tiles.count tile) = true := by
+        meld.occupiedCounts.normalized tile ==
+          (fixedMeldOfSnapshot meld).tiles.count tile) = true := by
   native_decide
 
 def sample : HandSnapshot :=
-  { standing := TileCounts.ofList [.honor Honor.east]
+  { standing := Tile37Counts.ofNormalizedList [.honor Honor.east]
     fixedMelds :=
       [ .pon (.honor Honor.east) .kamicha
       , .chi ⟨.man, ⟨0, by decide⟩⟩ ⟨0, by decide⟩
@@ -39,7 +40,8 @@ example :
 
 example :
     let (_, hand) := ofHandSnapshot sample
-    (Tile.all.all fun tile => hand.counts tile == sample.standing tile) = true := by
+    (Tile.all.all fun tile =>
+      hand.counts tile == sample.normalizedStanding tile) = true := by
   native_decide
 
 example :
@@ -48,7 +50,7 @@ example :
   native_decide
 
 def kanSample : HandSnapshot :=
-  { standing := TileCounts.ofList [.honor Honor.white]
+  { standing := Tile37Counts.ofNormalizedList [.honor Honor.white]
     fixedMelds :=
       [ .ankan (.honor Honor.east)
       , .chi ⟨.man, ⟨0, by decide⟩⟩ ⟨0, by decide⟩
@@ -62,14 +64,16 @@ example :
 
 example :
     let complete : HandSnapshot :=
-      { kanSample with standing := TileCounts.ofList [.honor Honor.white, .honor Honor.white] }
+      { kanSample with
+        standing := Tile37Counts.ofNormalizedList
+          [.honor Honor.white, .honor Honor.white] }
     let (fixed, hand) := ofHandSnapshot complete
     overallMinimumSearch fixed hand = some (-1) := by
   native_decide
 
 example :
     let invalid : HandSnapshot :=
-      { standing := TileCounts.ofList [.honor Honor.east, .honor Honor.east]
+      { standing := Tile37Counts.ofNormalizedList [.honor Honor.east, .honor Honor.east]
         fixedMelds := sample.fixedMelds }
     let (fixed, hand) := ofHandSnapshot invalid
     ¬ ValidHand fixed hand := by
